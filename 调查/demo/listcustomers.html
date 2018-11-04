@@ -1,0 +1,61 @@
+
+<html>
+<head>    
+<link rel="stylesheet" type="text/css" href="./jquery.dataTables.css">
+
+<!-- jQuery -->
+<script type="text/javascript" language="javascript" charset="utf8" src="./jquery.js"></script>
+
+<!-- DataTables -->
+<script type="text/javascript" language="javascript" charset="utf8" src="./jquery.dataTables.js"></script>
+
+
+<script>
+<!--第三步：初始化Datatables-->
+/*
+$(document).ready( function () {
+    $('#table_id_example').DataTable(
+            {
+                ajax: 
+                {
+                    url: '/helloworld/customers',
+                    dataSrc:'data'    
+                    //dataSrc:''
+                },
+                columns: [ 
+                    { data:  "id" },
+                    { data:  "name" },
+                    { data:  "city" },
+                ]
+            });
+} );
+*/
+</script>
+</head>
+<body>
+    
+    <div style="width:10%;padding:0;margin:0;float:right;box-sizing:border-box;">
+        <a href="index_1.html?function=add">
+        <input type="button" value="添加" name="addnew" id="addnew" >
+        </a>
+    </div> 
+    <br>
+    <br>
+    <table id="table_id_example" class="display">
+          <thead>
+            <tr>
+                <th>id</th>
+                <th>name</th>
+                <th>city</th>
+            </tr>
+        </thead>  
+        <tfoot>
+            <tr>
+                <th>id</th>
+                <th>name</th>
+                <th>city</th>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>
