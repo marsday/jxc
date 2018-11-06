@@ -18,9 +18,9 @@ public class DBHelper {
         {
             try {
                 String driver = "com.mysql.jdbc.Driver"; // 数据库驱动
-                String url = "jdbc:MySQL://127.0.0.1:3306/jxc?useUnicode=true&characterEncoding=UTF-8";// 数据库
+                String url = "jdbc:MySQL://127.0.0.1:3306/marsday_jxc?useUnicode=true&characterEncoding=UTF-8";// 数据库
                 String user = "root"; // 用户名
-                String password = "jxc123456"; // 密码
+                String password = "123456"; // 密码
                 Class.forName(driver); // 加载数据库驱动
                 
                 conn = DriverManager.getConnection(url, user, password);

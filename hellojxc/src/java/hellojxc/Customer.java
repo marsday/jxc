@@ -3,16 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package start;
+package hellojxc;
 
 /**
  *
  * @author liqiang
  */
 public class Customer {
-    private int id;
-    private String name;
-    private String city;
+    private int id;         // not null
+    private String name;    // not null
+    private String mobile;
+    private String location;
+    private int type; // 0: 买家  1：卖家 2： 买家&卖家
 
     public int getId() {
         return id;
@@ -26,10 +28,24 @@ public class Customer {
     public void setName(String name) {
         this.name = name;
     }
-    public String getCity() {
-        return city;
+    public String getMobile() {
+        return mobile;
     }
-    public void setCity(String city) {
-        this.city = city;
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+    public void setLocation(String location) {
+        this.location = location;
+    }
+    
+    public int getType() {
+        return type;
+    }
+    public void setType(int type) {
+        this.type = type;
     }
 }
