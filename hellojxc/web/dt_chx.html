@@ -1,27 +1,34 @@
-
+<!DOCTYPE html>
 <html>
-<head>    
+<head>
+	<meta charset="utf-8">
+
 <link rel="stylesheet" type="text/css" href="datatable/jquery.dataTables.css">
 <link rel="stylesheet" type="text/css" href="datatable/select.dataTables.min.css">
-<!-- jQuery
 <script type="text/javascript" language="javascript" charset="utf8" src="datatable/jquery.js"></script>
- -->
-<!-- DataTables -->
 <script type="text/javascript" language="javascript" charset="utf8" src="datatable/jquery.dataTables.js"></script>
 <script type="text/javascript" language="javascript" src="datatable/dataTables.select.min.js"></script>
+<!--
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.2.7/css/select.dataTables.min.css">
 
+<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/select/1.2.7/js/dataTables.select.min.js"></script>
+-->
 <script type="text/javascript" class="init">
 $(document).ready(function (){
    var table = $('#example').DataTable({
 	   searching: false,
       'ajax': {
-         'url': '/hellojxc/listcustomers'
+         //'url': 'https://www.gyrocode.com/lab/articles/jquery-datatables-how-to-add-a-checkbox-column/ids-arrays.txt'
+		 'url': 'ids-arrays.txt'
       },
       'columnDefs': [{
          'targets': 0,
          'searchable': false,
          'orderable': false,
-         'className': 'dt-body-left',
+         'className': 'dt-body-center',
          'render': function (data, type, full, meta){
              return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
          }
@@ -53,7 +60,6 @@ $(document).ready(function (){
 
    // Handle form submission event
    $('#frm-example').on('submit', function(e){
-      //alert("test");
       var form = this;
 
       // Iterate over all checkboxes in the table
@@ -69,8 +75,6 @@ $(document).ready(function (){
                      .attr('name', this.name)
                      .val(this.value)
                );
-               //alert("name: "+ this.name + " value:   "+ this.value);
-               alert("test");
             }
          }
       });
@@ -78,46 +82,38 @@ $(document).ready(function (){
 
 });
 </script>
-
 </head>
 <body>
-    <!--
     <div style="width:10%;padding:0;margin:0;float:right;box-sizing:border-box;">
         <a href="index.html?function=addcustomer">
-        <button type="button" class="btn btn-primary" name="addnew" id="addnew" stytle="float:left">添加</button>
-        </a>
-        
-        <a href="index.html?function=delcustomer">
-        <button type="button" class="btn btn-primary" name="addnew" id="remove"stytle="float:right">删除</button>
+        <!--<input type="button" value="添加" name="addnew" id="addnew" >-->
+        <button type="button" class="btn btn-primary" name="addnew" id="addnew">添加</button>
         </a>
     </div> 
-    -->
-    <form id="frm-example" action="/hellojxc/delcustomer" method="POST">
-        <div class="container">
-            <a class="btn btn-primary" href="index.html?function=addcustomer#" role="button">添加</a> 
-            <button  type="submit" class="btn btn-primary">删除</button>
-        </div>
-    <br>
-        <table id="example" class="display select" width="100%" cellspacing="0">
-        <thead>
-           <tr>
-             <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>
-             <th>name</th>
-             <th>mobile</th>
-             <th>location</th>
-             <th>type</th>
-           </tr>
-        </thead>
-        <tfoot>
-           <tr>
-             <th></th>
-             <th>name</th>
-             <th>mobile</th>
-             <th>location</th>
-             <th>type</th>
-           </tr>
-        </tfoot>
-         </table>
-    </form>
+	
+<table id="example" class="display select" width="100%" cellspacing="0">
+   <thead>
+      <tr>
+         <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>
+         <th>Name</th>
+         <th>Position</th>
+         <th>Office</th>
+         <th>Extn.</th>
+         <th>Start date</th>
+         <th>Salary</th>
+      </tr>
+   </thead>
+   <tfoot>
+      <tr>
+         <th></th>
+         <th>Name</th>
+         <th>Position</th>
+         <th>Office</th>
+         <th>Extn.</th>
+         <th>Start date</th>
+         <th>Salary</th>
+      </tr>
+   </tfoot>
+</table>
 </body>
 </html>

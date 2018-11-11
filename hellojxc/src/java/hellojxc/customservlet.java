@@ -26,14 +26,16 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
+import javax.json.JsonArrayBuilder;
 /**
  *
  * @author liqiang
  */
-@WebServlet(name = "customservlet", urlPatterns = {"/listcustomers","/addcustomer"})
+@WebServlet(name = "customservlet", urlPatterns = {"/listcustomers","/delcustomer","/addcustomer"})
 public class customservlet extends HttpServlet {
     private List<Customer> customers = new ArrayList<Customer>();   
     
@@ -75,7 +77,34 @@ public class customservlet extends HttpServlet {
             out.println("</html>");
         }
     }
-    
+    private void delcustomer(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String[] names = request.getParameterValues("id");
+        if(names.length > 0)
+        {
+            String sql = "update jxc_customer set del_flag = 1 where id in (";
+            int index = 0;
+            for(String obj:names)
+            {
+                 String name = new String(obj.getBytes("ISO-8859-1"), "UTF-8");
+                 if(index!=0)
+                     sql += ",";
+                 sql += name;
+                 index++;
+
+            }
+            sql += ")";
+
+            try{
+             DBHelper.getDbHelper().executeUpdate(sql);
+            }catch(Exception err)
+            {
+                err.printStackTrace();
+            }      
+        }
+       // response.sendRedirect("index.html");
+    }    
     private void addcustomer(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
@@ -92,9 +121,12 @@ public class customservlet extends HttpServlet {
                 +  type 
                 + ")";
 
-        DBHelper.executeNonQuery(sql);
-
-        
+       try{
+         DBHelper.getDbHelper().executeUpdate(sql);
+       }catch(Exception err)
+       {
+            err.printStackTrace();
+       }
         //request.getRequestDispatcher("/index_1.html").forward(request,response);
         response.sendRedirect("index.html");
         
@@ -103,29 +135,25 @@ public class customservlet extends HttpServlet {
             throws IOException, ServletException {
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
-        /*
-        {
-            "data": 
-            [
-               ["1","Liqiang","Shanghai"],
-               ["2","ZLY","FuJian"]
-            ]
-        }
-        */
+
         String json = "{\"data\":[";
      
-        String sql = "select name, mobile,location,type from jxc_customer where del_flag=0";
-        ResultSet result = DBHelper.executeQuery(sql);
-        int index = 0;
-        try {
+        String sql = "select id, name, mobile,location,type from jxc_customer where del_flag=0";
+        ResultSet result = null;
+        try{
+            result = DBHelper.getDbHelper().executeQuery(sql);
+            int index = 0;
             while(result.next())
             {
+                String id = result.getString("id");
                 String name = result.getString("name");
                 String mobile = result.getString("mobile");
                 String location = result.getString("location");
                 String type = result.getString("type");
-                
+                /*
+                //name-value json
                 JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+                jsonBuilder.add("id", id);
                 jsonBuilder.add("name", name);
                 jsonBuilder.add("mobile", mobile);
                 jsonBuilder.add("location", location);
@@ -137,7 +165,21 @@ public class customservlet extends HttpServlet {
                 
                 jsonWtr.writeObject(empObj);
                 jsonWtr.close();
+                */
+                // value array json
+                JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+                arrayBuilder.add(id);
+                arrayBuilder.add(name);
+                arrayBuilder.add(mobile);
+                arrayBuilder.add(location);
+                arrayBuilder.add(type);
+                JsonArray empArray = arrayBuilder.build();
                 
+                StringWriter strWtr = new StringWriter();
+                JsonWriter jsonWtr = Json.createWriter(strWtr);
+                
+                jsonWtr.writeArray(empArray);
+                jsonWtr.close();
                 if(index !=0)
                     json+=",";
                 
@@ -145,14 +187,11 @@ public class customservlet extends HttpServlet {
                             
                 index++;
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(customservlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
             if(result != null)
                 result.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(customservlet.class.getName()).log(Level.SEVERE, null, ex);
+        }catch(Exception err)
+        {
+            err.printStackTrace();
         }
         json += "]}";
         //String json = "{\"data\": [[\"1\",\"Liqiang\",\"Shanghai\"],[\"2\",\"ZLY\",\"FuJian\"]]}";
@@ -196,6 +235,8 @@ public class customservlet extends HttpServlet {
         String uri = request.getRequestURI();
         if (uri.endsWith("/addcustomer")) {
             addcustomer(request,response);
+        }else if(uri.endsWith("/delcustomer")) {
+            delcustomer(request,response);
         }
         else
             processRequest(request, response);

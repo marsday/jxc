@@ -4,278 +4,155 @@
  * and open the template in the editor.
  */
 package hellojxc;
-import java.sql.*;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 /**
+ * 数据库工具类，负责完成打开、关闭数据库，执行查询或更新
+ * @author MKing
  *
- * @author marsday
  */
 public class DBHelper {
-    static Connection conn;
+    /**
+     * 数据库URL
+     */
+    private static final String URL =  "jdbc:MySQL://127.0.0.1:3306/marsday_jxc?useUnicode=true&characterEncoding=UTF-8";
+    /**
+     * 登录用户名
+     */
+    private static final String USER = "root";
+    /**
+     * 登录密码
+     */
+    private static final String PASSWORD = "123456";
     
-    // 此方法为获取数据库连接
-    public static Connection getConnection() {
-        if(null == conn)
-        {
-            try {
-                String driver = "com.mysql.jdbc.Driver"; // 数据库驱动
-                String url = "jdbc:MySQL://127.0.0.1:3306/marsday_jxc?useUnicode=true&characterEncoding=UTF-8";// 数据库
-                String user = "root"; // 用户名
-                String password = "123456"; // 密码
-                Class.forName(driver); // 加载数据库驱动
-                
-                conn = DriverManager.getConnection(url, user, password);
+    private static Connection connection = null;
+    private static Statement statement = null;
 
-            } catch (ClassNotFoundException e) {
-                System.out.println("Sorry,can't find the Driver!");
-                e.printStackTrace();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return conn;
-    }
-  /**
-     * 增删改【Add、Del、Update】
-     *
-     * @param sql
-     * @return int
-     */
-    public static int executeNonQuery(String sql) {
-        int result = 0;
-        Connection conn = null;
-        Statement stmt = null;
-        try {
-            conn = getConnection();
-            stmt = conn.createStatement();
-            result = stmt.executeUpdate(sql);
-        } catch (SQLException err) {
-            err.printStackTrace();
-            free(null, stmt, conn);
+    private static DBHelper helper = null;
 
-        } finally {
-            free(null, stmt, conn);
-        }
-        return result;
-    }
-
-    /**
-     * 增删改【Add、Delete、Update】
-     * @param sql
-     * @param obj
-     * @return int
-     */
-    public static int executeNonQuery(String sql, Object... obj) {
-       int result = 0;
-        Connection conn = null;
-        PreparedStatement pstmt = null;
+    static {
         try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
-            for (int i = 0; i < obj.length; i++) {
-                pstmt.setObject(i + 1, obj[i]);
-
-            }
-            result = pstmt.executeUpdate();
-        } catch (SQLException err) {
-           err.printStackTrace();
-            free(null, pstmt, conn);
-        } finally {
-            free(null, pstmt, conn);
-        }
-        return result;
-    }
-    /**
-     * 查【Query】
-     *
-     * @param sql
-     * @return ResultSet
-     */
-    public static ResultSet executeQuery(String sql) {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql);
-        } catch (SQLException err) {
-            err.printStackTrace();
-            free(rs, stmt, conn);
-        }
-       return rs;
-    }
-    /**
-     * 查【Query】
-     *
-     * @param sql
-     * @param obj
-     * @return ResultSet
-     */
-    public static ResultSet executeQuery(String sql, Object... obj) {
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            pstmt = conn.prepareStatement(sql);
-            for (int i = 0; i < obj.length; i++) {
-               pstmt.setObject(i + 1, obj[i]);
-            }
-            rs = pstmt.executeQuery();
-        } catch (SQLException err) {
-            err.printStackTrace();
-            free(rs, pstmt, conn);
-        }
-       return rs;
-    }
-    /**
-     * 判断记录是否存在
-     *
-     * @param sql
-     * @return Boolean
-     */
-    public static Boolean isExist(String sql) {
-        ResultSet rs = null;
-        try {
-            rs = executeQuery(sql);
-            rs.last();
-            int count = rs.getRow();
-            if (count > 0) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (SQLException err) {
-            err.printStackTrace();
-            free(rs);
-            return false;
-        } finally {
-            free(rs);
-        }
-    }
-    /**
-     * 判断记录是否存在
-     *
-     * @param sql
-     * @return Boolean
-     */
-    public static Boolean isExist(String sql, Object... obj) {
-        ResultSet rs = null;
-        try {
-            rs = executeQuery(sql, obj);
-            rs.last();
-            int count = rs.getRow();
-            if (count > 0) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (SQLException err) {
-            err.printStackTrace();
-            free(rs);
-            return false;
-        } finally {
-            free(rs);
-        }
-    }
-    /**
-     * 获取查询记录的总行数
-     *
-     * @param sql
-     * @return int
-     */
-    public static int getCount(String sql) {
-        int result = 0;
-        ResultSet rs = null;
-        try {
-            rs = executeQuery(sql);
-            rs.last();
-            result = rs.getRow();
-        } catch (SQLException err) {
-            //free(rs);
-            err.printStackTrace();
-        } finally {
-            free(rs);
-        }
-        return result;
-    }
-    /**
-     * 获取查询记录的总行数
-     *
-     * @param sql
-     * @param obj
-     * @return int
-     */
-    public static int getCount(String sql, Object... obj) {
-        int result = 0;
-        ResultSet rs = null;
-        try {
-            rs = executeQuery(sql, obj);
-            rs.last();
-            result = rs.getRow();
-        } catch (SQLException err) {
-            err.printStackTrace();
-        } finally {
-            free(rs);
-        }
-        return result;
-    }
-    /**
-     * 释放【ResultSet】资源
-     *
-     * @param rs
-     */
-    public static void free(ResultSet rs) {
-        try {
-            if (rs != null) {
-                rs.close();
-            }
-        } catch (SQLException err) {
-            err.printStackTrace();
-        }
-    }
-    /**
-     * 释放【Statement】资源
-     *
-     * @param st
-     */
-    public static void free(Statement st) {
-        try {
-            if (st != null) {
-                st.close();
-            }
-        } catch (SQLException err) {
-            err.printStackTrace();
-        }
-    }
-    /**
-     * 释放【Connection】资源
-     *
-     * @param conn
-     */
-    public static void free(Connection conn) {
-        try {
-            if (conn != null) {
-                conn.close();
-            }
-        } catch (SQLException err) {
-            err.printStackTrace();
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 
-    /**
-     * 释放所有数据资源
-     *
-     * @param rs
-     * @param st
-     * @param conn
-     */
-    public static void free(ResultSet rs, Statement st, Connection conn) {
-        free(rs);
-        free(st);
-        free(conn);
+    private DBHelper() throws Exception {
+        connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        statement = connection.createStatement();
     }
- 
+
+    /**
+     * 返回单例模式的数据库辅助对象
+     * 
+     * @return
+     * @throws Exception 
+     */
+    public static DBHelper getDbHelper() throws Exception {
+        if (helper == null || connection == null || connection.isClosed())
+            helper = new DBHelper();
+        return helper;
+    }
+
+    /**
+     * 执行查询
+     * @param sql 要执行的SQL语句
+     * @return  查询的结果集对象
+     * @throws Exception
+     */
+    public ResultSet executeQuery(String sql) throws Exception {
+        if (statement != null) {
+            return statement.executeQuery(sql);
+        }
+
+        throw new Exception("数据库未正常连接");
+    }
+
+    /**
+     * 执行查询
+     * @param sql  要执行的带参数的SQL语句
+     * @param args  SQL语句中的参数值
+     * @return  查询的结果集对象
+     * @throws Exception
+     */
+    public ResultSet executeQuery(String sql, Object...args) throws Exception {
+        if (connection == null || connection.isClosed()) {
+            DBHelper.close();
+            throw new Exception("数据库未正常连接");
+        }
+        PreparedStatement ps = connection.prepareStatement(sql);
+        int index = 1;
+        for (Object arg : args) {
+            ps.setObject(index, arg);
+            index++;
+        }
+        
+        return ps.executeQuery();
+    }
+    
+    /**
+     * 执行更新
+     * @param sql  要执行的SQL语句
+     * @return  受影响的记录条数
+     * @throws Exception
+     */
+    public int executeUpdate(String sql) throws Exception {
+        if (statement != null) {
+            return statement.executeUpdate(sql);
+        }
+        throw new Exception("数据库未正常连接");
+    }
+    
+    /**
+     * 执行更新
+     * @param sql  要执行的SQL语句
+     * @param args  SQL语句中的参数
+     * @return  受影响的记录条数
+     * @throws Exception
+     */
+    public int executeUpdate(String sql, Object...args) throws Exception {
+        if (connection == null || connection.isClosed()) {
+            DBHelper.close();
+            throw new Exception("数据库未正常连接");
+        }
+        PreparedStatement ps = connection.prepareStatement(sql);
+        int index = 1;
+        for (Object arg : args) {
+            ps.setObject(index, arg);
+            index++;
+        }
+        return ps.executeUpdate();
+    }
+    
+    /**
+     * 获取预编译的语句对象
+     * @param sql  预编译的语句
+     * @return  预编译的语句对象
+     * @throws Exception
+     */
+    public PreparedStatement prepareStatement(String sql) throws Exception {
+        return connection.prepareStatement(sql);
+    }
+    
+    /**
+     * 关闭对象，同时将关闭连接
+     */
+    public static void close() {
+        try {
+            if (statement != null)
+                statement.close();
+            if (connection != null) 
+                connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            helper = null;
+        }
+    }
 }
