@@ -80,7 +80,7 @@ public class customservlet extends HttpServlet {
     private void delcustomer(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String[] names = request.getParameterValues("id");
+        String[] names = request.getParameterValues("id[]");
         if(names.length > 0)
         {
             String sql = "update jxc_customer set del_flag = 1 where id in (";
@@ -103,7 +103,7 @@ public class customservlet extends HttpServlet {
                 err.printStackTrace();
             }      
         }
-       // response.sendRedirect("index.html");
+       response.sendRedirect("index.html");
     }    
     private void addcustomer(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
