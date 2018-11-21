@@ -75,27 +75,39 @@ $(document).ready(function (){
          }
       });
    });
-
 });
+</script>
+
+<script  type="text/javascript">
+   function delcustomer()
+   {
+       $("frm-example").attr("action","/hellojxc/delcustomer");
+       $("frm-example").attr("method","POST");
+       $("frm-example").submit();    
+   }
+   
+   function updatecustomer()
+   {
+       $("frm-example").attr("action","/hellojxc/updatecustomer");
+       $("frm-example").attr("method","POST");
+       $("frm-example").submit();         
+   }
 </script>
 
 </head>
 <body>
     <!--
-    <div style="width:10%;padding:0;margin:0;float:right;box-sizing:border-box;">
-        <a href="index.html?function=addcustomer">
-        <button type="button" class="btn btn-primary" name="addnew" id="addnew" stytle="float:left">添加</button>
-        </a>
-        
-        <a href="index.html?function=delcustomer">
-        <button type="button" class="btn btn-primary" name="addnew" id="remove"stytle="float:right">删除</button>
-        </a>
-    </div> 
-    -->
     <form id="frm-example" action="/hellojxc/delcustomer" method="POST">
         <div class="container">
             <a class="btn btn-primary" href="index.html?function=addcustomer" role="button">添加</a> 
             <button  type="submit" class="btn btn-primary">删除</button>
+        </div>
+    -->
+        <form id="frm-example">
+        <div class="container">
+            <a class="btn btn-primary" id="addcustomer" href="index.html?function=addcustomer" role="button">添加</a> 
+            <button  id="delcustomer" role="button" class="btn btn-primary" onclick="delcustomer()">删除</button>
+            <button  id="updatecustomer" role="button" class="btn btn-primary" onclick="updatecustomer()" >更新</button>
         </div>
     <br>
         <table id="example" class="display select" width="100%" cellspacing="0">

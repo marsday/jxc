@@ -23,6 +23,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <link rel="stylesheet" href="AdminLTE-2.4.5/dist/css/skins/skin-blue.min.css">
   
   <link rel="stylesheet" href="bootstrap-select-1.13.3/css/bootstrap-select.min.css">
+  
+  <link rel="stylesheet" type="text/css" href="datatable/jquery.dataTables.css">
+  
+  <link rel="stylesheet" type="text/css" href="datatable/select.dataTables.min.css">
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -406,6 +410,10 @@ desired effect
 
 <script src="bootstrap-select-1.13.3/js/bootstrap-select.js"></script>
 
+<script type="text/javascript" language="javascript" src="datatable/jquery.dataTables.js"></script>
+
+<script type="text/javascript" language="javascript" src="datatable/dataTables.select.min.js"></script>
+
 <script src="jxc.js"></script>
 
 <script type="text/javascript">
@@ -436,8 +444,10 @@ desired effect
             default:
             {
                 clear_target();
-                $("#target").load("listcustomers.html", function(){
-               });     
+                //$("#target").load("listcustomers.html", function(){
+               //});
+                list_addcustomer();
+                break;
             }
                 
         }
