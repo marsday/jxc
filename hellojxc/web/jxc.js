@@ -1,3 +1,66 @@
+function show_updatecustomer(id)
+{
+
+    	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/updatecustomer" method="POST">'+
+		'<input type="hidden" id="id" name="id">' +
+                '<div class="input-group">' + 
+			'<span class="input-group-addon">姓名*</span>' +
+			'<input id="name" name="name" type="text" class="form-control" style="width:30%">' +
+		'</div>' +
+		'<br>' +
+		'<div class="input-group">' +
+			'<span class="input-group-addon">地点</span>' +
+			'<input id="location" name="location" type="text" class="form-control" style="width:30%">' +
+		'</div>' +
+		'<br>' +
+		'<div class="input-group">' +
+			'<span class="input-group-addon">电话</span>' +
+			'<input id="mobile" name="mobile" type="text" class="form-control" style="width:30%" placeholder="130xxxxxxxx">' +
+		'</div>' + 
+		'<br>' +
+		'<div class="input-group">' +	
+			'<span class="input-group-addon">客户类型</span>' +
+			'<select id="slk" name="type" class="selectpicker" data-style="btn-info" ></select>' +
+         '</div>' +      
+		'<br>' +
+		'<button type="submit" class="btn btn-default">提交</button>');  
+           
+    var geturl = "/hellojxc/getcustomer?id=" + id;
+        $.getJSON(geturl,function(result){
+            $.each(result, function(i, field){//就一条json数据，每条json数据里也只有一条记录
+                //alert(field[0].name);//id,name,mobile,location,type
+                $("#id").val(field[0].id);
+                $("#name").val(field[0].name);
+                $("#location").val(field[0].location);
+                $("#mobile").val(field[0].mobile);
+                
+                $('.selectpicker').selectpicker();
+                
+                if(field[0].type === '0')
+                {
+                    $('.selectpicker').append("<option value=\"0\" selected=\"selected\" >买家</option>");
+                    $('.selectpicker').append("<option value=\"1\">卖家</option>");
+                    $('.selectpicker').append("<option value=\"2\">买家兼卖家</option>");
+                }
+                else if(field[0].type === '1')
+                {
+                    $('.selectpicker').append("<option value=\"0\">买家</option>");
+                    $('.selectpicker').append("<option value=\"1\" selected=\"selected\" >卖家</option>");
+                    $('.selectpicker').append("<option value=\"2\">买家兼卖家</option>");                   
+                } else if(field[0].type === '2')
+                {
+                    $('.selectpicker').append("<option value=\"0\">买家</option>");
+                    $('.selectpicker').append("<option value=\"1\">卖家</option>");
+                    $('.selectpicker').append("<option value=\"2\" selected=\"selected\" >买家兼卖家</option>");
+                }
+               $('.selectpicker').selectpicker('refresh');
+               $('.selectpicker').selectpicker('render');
+               
+               return false;
+            });
+         });
+    // alert("show_updatecustomer");
+}
 function show_addcustomer()
 {
 	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/addcustomer" method="POST">'+
@@ -29,7 +92,7 @@ function show_addcustomer()
 	$('.selectpicker').append("<option value=\"2\">买家兼卖家</option>");
 	
 	$('.selectpicker').selectpicker('refresh');
-    $('.selectpicker').selectpicker('render');
+        $('.selectpicker').selectpicker('render');
 }
 function clear_target()
 {

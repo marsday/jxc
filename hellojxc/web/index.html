@@ -443,8 +443,9 @@ desired effect
             }
             case "showcustomer":
             {
-                //show_customer();
-                alert("show_customer");
+                var id = getUrlVars()["id"]; 
+                show_updatecustomer(id);
+               
                 break;
             }
             default:

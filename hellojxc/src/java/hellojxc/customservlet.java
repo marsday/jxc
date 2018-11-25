@@ -35,7 +35,7 @@ import javax.json.JsonArrayBuilder;
  *
  * @author liqiang
  */
-@WebServlet(name = "customservlet", urlPatterns = {"/listcustomers","/showcustomer","/updatecustomer","/delcustomer","/addcustomer"})
+@WebServlet(name = "customservlet", urlPatterns = {"/listcustomers","/getcustomer","/updatecustomer","/delcustomer","/addcustomer"})
 public class customservlet extends HttpServlet {
     private List<Customer> customers = new ArrayList<Customer>();   
     
@@ -105,14 +105,81 @@ public class customservlet extends HttpServlet {
         }
        response.sendRedirect("index.html");
     }    
-     private void showcustomer_AJAX(HttpServletRequest request, HttpServletResponse response)
+     private void getcustomer_AJAX(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //TODO
-        String[] names = request.getParameterValues("id[]");
-        if(names.length > 0)
+         
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+            
+        String[] ids = request.getParameterValues("id");
+        String input;
+        //if(ids.length > 0)
+        //{
+            input = ids[0];
+        //}
+        String sql = "select id, name, mobile,location,type from jxc_customer where id= " + input;
+        String json = "{\"data\":[";
+        ResultSet result = null;
+        try{
+            result = DBHelper.getDbHelper().executeQuery(sql);
+            int index = 0;
+            while(result.next())
+            {
+                String id = result.getString("id");
+                String name = result.getString("name");
+                String mobile = result.getString("mobile");
+                String location = result.getString("location");
+                String type = result.getString("type");
+                
+                //name-value json
+                JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+                jsonBuilder.add("id", id);
+                jsonBuilder.add("name", name);
+                jsonBuilder.add("mobile", mobile);
+                jsonBuilder.add("location", location);
+                jsonBuilder.add("type", type);
+                JsonObject empObj = jsonBuilder.build();
+                
+                StringWriter strWtr = new StringWriter();
+                JsonWriter jsonWtr = Json.createWriter(strWtr);
+                
+                jsonWtr.writeObject(empObj);
+                jsonWtr.close();
+                
+                /*
+                // value array json
+                JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+                arrayBuilder.add(id);
+                arrayBuilder.add(name);
+                arrayBuilder.add(mobile);
+                arrayBuilder.add(location);
+                arrayBuilder.add(type);
+                JsonArray empArray = arrayBuilder.build();
+                
+                StringWriter strWtr = new StringWriter();
+                JsonWriter jsonWtr = Json.createWriter(strWtr);
+                
+                jsonWtr.writeArray(empArray);
+                jsonWtr.close();
+                */
+                if(index !=0)
+                    json+=",";
+                
+                json += strWtr.toString();
+                            
+                index++;
+            }
+            if(result != null)
+                result.close();
+        }catch(Exception err)
         {
-
+            err.printStackTrace();
         }
+        json += "]}";
+        //String json = "{\"data\": [[\"1\",\"Liqiang\",\"Shanghai\"],[\"2\",\"ZLY\",\"FuJian\"]]}";
+        PrintWriter writer = response.getWriter();
+        writer.println(json);
+        writer.flush();
     }
     private void addcustomer(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -150,15 +217,11 @@ public class customservlet extends HttpServlet {
         String mobile = new String(request.getParameter("mobile").getBytes("ISO-8859-1"), "UTF-8");
         String type = new String(request.getParameter("type").getBytes("ISO-8859-1"), "UTF-8");
         
-        String sql = "";
-        /*
-        String sql = "insert into jxc_customer (name,mobile,location,type) values(" 
-                + "'" +  name + "'," 
-                + "'"+ mobile + "',"
-                + "'"+ location + "',"
-                +  type 
-                + ")";
-        */
+        
+        String sql = "update jxc_customer set name = " + "'"+name+"'," + " mobile = " + "'"+ mobile + "',"
+                                                         + " location = "  + "'"+ location+ "'," + " type = " + type 
+                                                        + " where id=" + id; 
+
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
@@ -254,8 +317,8 @@ public class customservlet extends HttpServlet {
         if (uri.endsWith("/listcustomers")) {
             //return JSON
             sendCustomerList_ajax(request,response);
-        }else if(uri.endsWith("/showcustomer")) {
-            showcustomer_AJAX(request,response);
+        }else if(uri.endsWith("/getcustomer")) {
+            getcustomer_AJAX(request,response);
         }
         else
             processRequest(request, response);
