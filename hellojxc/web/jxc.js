@@ -43,7 +43,7 @@ function list_addcustomer()
             '<div class="container">' + 
            '<a class="btn btn-primary" id="addcustomer" href="index.html?function=addcustomer" role="button">添加</a> ' + 
            ' <button  id="del" role="button" class="btn btn-primary">删除</button>' + 
-           ' <button  id="update"role="button" class="btn btn-primary">更新</button>' + 
+           ' <button  id="update" role="button" class="btn btn-primary">更新</button>' + 
         '</div>' + 
     '<br>' + 
        ' <table id="example" class="display select" width="100%" cellspacing="0">' + 
@@ -91,11 +91,38 @@ function list_addcustomer()
         $("#frm-example").attr("method","POST");
         $("#frm-example").submit();
     });
+
     $("#update").on('click', function(){
-      $("#frm-example").attr("action","/hellojxc/updatecustomer");
-      $("#frm-example").attr("method","POST");
-      $("#frm-example").submit(); 
-    });
+      //只获取第一个被选取的，如果没有，则出提示信息
+      var isok = 0;
+      //var form = this;
+      var getparam="index.html?function=showcustomer&&id=";
+      // Iterate over all checkboxes in the table
+      table.$('input[type="checkbox"]').each(function(){
+         // If checkbox doesn't exist in DOM
+        //if(!$.contains(document, this)){ //该判断总是无效，所以去除；原因不明
+            // If checkbox is checked
+            if(this.checked){
+               // Create a hidden element
+               getparam+=this.value;
+               //alert('URL is' + getparam);
+               isok=1;
+               return false;// return false 相当于 break;只要获取第一个即可； return true; = continue;
+            }
+         //}
+      });
+      if(isok == 0)
+      {
+        alert("请选取需要更新的记录");
+        return false;
+     }
+       window.location.href=getparam;
+       //window.location.replace(getparam);
+       event.preventDefault();
+        //return false;//这里必须返回false，否则会触发submit事件；原因不明
+       //$(location).attr('href', getparam);
+  });
+
    // Handle click on "Select all" control
    $('#example-select-all').on('click', function(){
       // Get all rows with search applied
@@ -122,7 +149,7 @@ function list_addcustomer()
    $('#frm-example').on('submit', function(e){
       //alert("test");
       var form = this;
-
+      var anyselected = 0;
       // Iterate over all checkboxes in the table
       table.$('input[type="checkbox"]').each(function(){
          // If checkbox doesn't exist in DOM
@@ -130,17 +157,23 @@ function list_addcustomer()
             // If checkbox is checked
             if(this.checked){
                // Create a hidden element
+               anyselected = 1;
                $(form).append(
                   $('<input>')
                      .attr('type', 'hidden')
                      .attr('name', this.name)
                      .val(this.value)
                );
-               //alert("name: "+ this.name + " value:   "+ this.value);
-               alert("test");
             }
          }
       });
+      
+      if(anyselected == 0)
+      {
+          alert("请选取需要删除的记录");
+          event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+          return false;//返回false，取消submit
+      }
    });
 }
 

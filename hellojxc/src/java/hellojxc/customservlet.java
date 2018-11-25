@@ -35,7 +35,7 @@ import javax.json.JsonArrayBuilder;
  *
  * @author liqiang
  */
-@WebServlet(name = "customservlet", urlPatterns = {"/listcustomers","/delcustomer","/addcustomer"})
+@WebServlet(name = "customservlet", urlPatterns = {"/listcustomers","/showcustomer","/updatecustomer","/delcustomer","/addcustomer"})
 public class customservlet extends HttpServlet {
     private List<Customer> customers = new ArrayList<Customer>();   
     
@@ -105,6 +105,15 @@ public class customservlet extends HttpServlet {
         }
        response.sendRedirect("index.html");
     }    
+     private void showcustomer_AJAX(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        //TODO
+        String[] names = request.getParameterValues("id[]");
+        if(names.length > 0)
+        {
+
+        }
+    }
     private void addcustomer(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
@@ -121,6 +130,35 @@ public class customservlet extends HttpServlet {
                 +  type 
                 + ")";
 
+       try{
+         DBHelper.getDbHelper().executeUpdate(sql);
+       }catch(Exception err)
+       {
+            err.printStackTrace();
+       }
+        //request.getRequestDispatcher("/index_1.html").forward(request,response);
+        response.sendRedirect("index.html");
+        
+    }
+    private void updatecustomer(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
+        //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
+        String id = new String(request.getParameter("id").getBytes("ISO-8859-1"), "UTF-8");
+        String name = new String(request.getParameter("name").getBytes("ISO-8859-1"), "UTF-8");
+        String location = new String(request.getParameter("location").getBytes("ISO-8859-1"), "UTF-8");
+        String mobile = new String(request.getParameter("mobile").getBytes("ISO-8859-1"), "UTF-8");
+        String type = new String(request.getParameter("type").getBytes("ISO-8859-1"), "UTF-8");
+        
+        String sql = "";
+        /*
+        String sql = "insert into jxc_customer (name,mobile,location,type) values(" 
+                + "'" +  name + "'," 
+                + "'"+ mobile + "',"
+                + "'"+ location + "',"
+                +  type 
+                + ")";
+        */
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
@@ -216,6 +254,8 @@ public class customservlet extends HttpServlet {
         if (uri.endsWith("/listcustomers")) {
             //return JSON
             sendCustomerList_ajax(request,response);
+        }else if(uri.endsWith("/showcustomer")) {
+            showcustomer_AJAX(request,response);
         }
         else
             processRequest(request, response);
@@ -237,6 +277,8 @@ public class customservlet extends HttpServlet {
             addcustomer(request,response);
         }else if(uri.endsWith("/delcustomer")) {
             delcustomer(request,response);
+        }else if(uri.endsWith("/updatecustomer")) {
+            updatecustomer(request,response);
         }
         else
             processRequest(request, response);
