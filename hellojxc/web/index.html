@@ -265,7 +265,7 @@ desired effect
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">HEADER</li>
         <!-- Optionally, you can add icons to the links -->
-        <li class="active"><a href="#"><i class="fa fa-link"></i> <span>Link</span></a></li>
+        <!--<li class="active"><a href="#"><i class="fa fa-link"></i> <span>Link</span></a></li>
         <li><a href="#"><i class="fa fa-link"></i> <span>Another Link</span></a></li>
         <li class="treeview">
           <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span>
@@ -276,6 +276,22 @@ desired effect
           <ul class="treeview-menu">
             <li><a href="#">Link in level 2</a></li>
             <li><a href="#">Link in level 2</a></li>
+          </ul>
+        </li>
+        -->
+        <li><a href="index.html"><i class="fa fa-link"></i> <span>客户管理</span></a></li>
+        <li><a href="index.html?function=listgoods"><i class="fa fa-link"></i> <span>货物管理</span></a></li>
+        <li><a href="index.html?function=list_in"><i class="fa fa-link"></i> <span>进货管理</span></a></li>
+        <li><a href="index.html?function=list_out"><i class="fa fa-link"></i> <span>出货管理</span></a></li>
+        <li class="treeview">
+          <a href="#"><i class="fa fa-link"></i> <span>图表统计</span>
+            <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="#">进货统计</a></li>
+            <li><a href="#">出货统计</a></li>
           </ul>
         </li>
       </ul>
@@ -292,10 +308,12 @@ desired effect
         Page Header
         <small>Optional description</small>
       </h1>
-      <ol class="breadcrumb">
+    <!--  
+    <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
         <li class="active">Here</li>
       </ol>
+    -->
     </section>
 
     <!-- Main content -->
@@ -417,9 +435,8 @@ desired effect
 <script src="jxc.js"></script>
 
 <script type="text/javascript">
-    
-    function getUrlVars()  
-    {  
+ function getUrlVars()  
+{  
         var vars = [], hash;  
         var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');  
         for(var i = 0; i < hashes.length; i++)  
@@ -429,28 +446,45 @@ desired effect
             vars[hash[0]] = hash[1];  
         }  
         return vars;  
-    }  
-
-
+}     
     $(document).ready(function() {
         var first = getUrlVars()["function"]; 
         switch(first)
         {
-            case "addcustomer":
+            case "listgoods":
+            {
+                listgoods();
+                break;
+            }
+            case "addgoods":
+            {
+                //alert("addgoods TODO");
+                show_addgoods();
+                break;
+            }
+            case "showgoods":
+            {
+                //alert("showgoods TODO");
+                var id = getUrlVars()["id"]; 
+                show_updategoods(id);
+                break;
+            }
+            case "addcustomer"://添加客户信息
             {
                 show_addcustomer();
                 break;
             }
-            case "showcustomer":
+            case "showcustomer"://显示客户信息，用于修改
             {
                 var id = getUrlVars()["id"]; 
                 show_updatecustomer(id);
                
                 break;
             }
-            default:
+            default://客户信息一览
             {
-                clear_target();
+                //list curstomers
+                //clear_target();
                 //$("#target").load("listcustomers.html", function(){
                //});
                 list_addcustomer();
