@@ -10,12 +10,13 @@ function list_addcustomer()
         );      
       $("#target").html(
              '<form id="frm-example">'+
-                '<div class="container">' + 
-                    '<a class="btn btn-primary" id="add" href="index.html?function=addcustomer" role="button">添加</a> ' + 
-                    '<button  id="del" role="button" class="btn btn-primary">删除</button>' + 
-                    '<button  id="update" role="button" class="btn btn-primary">更新</button>' + 
-                '</div>' + 
+               // '<div class="container">' + 
+                    '<a class="btn btn-primary" id="add" href="index.html?function=addcustomer">添加</a> ' + "\n" + 
+                    '<button  id="del" type="button" class="btn btn-danger">删除</button>' +  "\n" + 
+                    '<button  id="update" type="button" class="btn btn-primary">更新</button>' + 
+                //'</div>' + 
                 '<br>' + 
+                 '<br>' + 
                 ' <table id="example" class="display select" width="100%" cellspacing="0">' + 
                     ' <thead>' + 
                         '   <tr>' + 
@@ -288,12 +289,13 @@ function listgoods()
              '</h1>'
         );      
       $("#target").html('<form id="frm-example">'+
-            '<div class="container">' + 
-           '<a class="btn btn-primary" id="add" href="index.html?function=addgoods" role="button">添加</a> ' + 
-           ' <button  id="del" role="button" class="btn btn-primary">删除</button>' + 
+           // '<div class="container">' + 
+           '<a class="btn btn-primary" id="add" href="index.html?function=addgoods" role="button">添加</a> ' + "\n" + 
+           ' <button  id="del" role="button" class="btn btn-danger">删除</button>' + "\n" + 
            ' <button  id="update" role="button" class="btn btn-primary">更新</button>' + 
-        '</div>' + 
+        //'</div>' + 
     '<br>' + 
+     '<br>' + 
        ' <table id="example" class="display select" width="100%" cellspacing="0">' + 
        ' <thead>' + 
         '   <tr>' + 
