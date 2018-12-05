@@ -39,7 +39,6 @@ function list_addcustomer()
                  '</table>' + 
              '</form>'
     );
-    
     var table = $('#example').DataTable({
 	   searching: false,
       'ajax': {

@@ -7,7 +7,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>AdminLTE 2 | Starter</title>
+  <title>进销存管理系统</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <link rel="stylesheet" href="AdminLTE-2.4.5/bower_components/bootstrap/dist/css/bootstrap.min.css">
@@ -435,18 +435,26 @@ desired effect
 <script src="jxc.js"></script>
 
 <script type="text/javascript">
- function getUrlVars()  
-{  
-        var vars = [], hash;  
-        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');  
-        for(var i = 0; i < hashes.length; i++)  
-        {  
-            hash = hashes[i].split('=');  
-            vars.push(hash[0]);  
-            vars[hash[0]] = hash[1];  
-        }  
-        return vars;  
-}     
+    
+    $(document).ajaxError(function(e,jqxhr,setting,exception){
+        //alert("ajaxError called");
+        if(jqxhr && jqxhr.status === 401){
+            window.location.href = 'login.html';
+        }
+    });
+    
+    function getUrlVars()  
+    {  
+            var vars = [], hash;  
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');  
+            for(var i = 0; i < hashes.length; i++)  
+            {  
+                hash = hashes[i].split('=');  
+                vars.push(hash[0]);  
+                vars[hash[0]] = hash[1];  
+            }  
+            return vars;  
+    }     
     $(document).ready(function() {
         var first = getUrlVars()["function"]; 
         switch(first)
@@ -492,12 +500,7 @@ desired effect
             }
                 
         }
-        
-
-
     });
-    
-
 </script>
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
      Both of these plugins are recommended to enhance the

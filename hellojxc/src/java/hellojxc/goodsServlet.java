@@ -213,6 +213,10 @@ public class goodsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        //登录验证
+        if(!Utility.checkSession(request, response))
+            return;
+        
         String uri = request.getRequestURI();
         if (uri.endsWith("/listgoods")) {
             //return JSON
@@ -235,6 +239,10 @@ public class goodsServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        //登录验证
+        if(!Utility.checkSession(request, response))
+            return;        
+        
         String uri = request.getRequestURI();
         if (uri.endsWith("/addgoods")) {
             addoperation(request,response);

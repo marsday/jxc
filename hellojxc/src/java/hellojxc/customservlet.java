@@ -234,6 +234,7 @@ public class customservlet extends HttpServlet {
     }
     private void sendCustomerList_ajax(HttpServletRequest request,HttpServletResponse response)
             throws IOException, ServletException {
+        
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
 
@@ -313,6 +314,25 @@ public class customservlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        //登录验证
+        if(!Utility.checkSession(request, response))
+            return;
+        /*
+        if(request.getSession() == null || request.getSession().getAttribute("account") == null)
+        {
+            if(request.getHeader("x-requested-with") != null && request.getHeader("x-requested-with").equals("XMLHttpRequest"))
+            {
+                response.sendError(401);
+                response.setStatus(401);
+                response.setHeader("sessionstatus", "timeout");
+            }else
+            {
+                 response.sendRedirect("login.html");
+            }
+            return;
+        }
+        */        
+        
         String uri = request.getRequestURI();
         if (uri.endsWith("/listcustomers")) {
             //return JSON
@@ -335,6 +355,10 @@ public class customservlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        //登录验证
+        if(!Utility.checkSession(request, response))
+            return;     
+        
         String uri = request.getRequestURI();
         if (uri.endsWith("/addcustomer")) {
             addcustomer(request,response);
