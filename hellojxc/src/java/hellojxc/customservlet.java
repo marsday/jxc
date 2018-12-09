@@ -37,6 +37,7 @@ import javax.json.JsonArrayBuilder;
  */
 @WebServlet(name = "customservlet", urlPatterns = {"/listcustomers","/getcustomer","/updatecustomer","/delcustomer","/addcustomer"})
 public class customservlet extends HttpServlet {
+    /*
     private List<Customer> customers = new ArrayList<Customer>();   
     
     @Override
@@ -51,6 +52,7 @@ public class customservlet extends HttpServlet {
         customer2.setName("Mickey M.");
         customers.add(customer2);       
     }
+    */
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>

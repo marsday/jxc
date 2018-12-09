@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -73,9 +76,24 @@ public class loginServlet extends HttpServlet {
                 AccountInfo info = new AccountInfo();
                 info.name_en = result.getString("name_en");
                 info.name_ch = result.getString("name_ch");
+                info.last_login = result.getString("last_login");
+                
                 session.setAttribute("account", info);
-                session.setMaxInactiveInterval(1*60);
-                //session.setAttribute("user", user);
+                session.setMaxInactiveInterval(2*60);//2分钟
+                
+                //更新最新登录时刻
+                Timestamp now = new Timestamp(System.currentTimeMillis());
+                DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                String strLastLogin = sdf.format(now);
+                String updatesql = "update jxc_user set last_login = "+ "'"+ strLastLogin + "'"
+                                    + " where name_en='" + user + "'"+" and del_flag=0";
+                try{
+                    DBHelper.getDbHelper().executeUpdate(updatesql);
+                 }catch(Exception err)
+                {
+                    err.printStackTrace();
+                }  
+                
                 response.sendRedirect("index.html");
             }else
             {
@@ -101,13 +119,7 @@ public class loginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String uri = request.getRequestURI();
-        if (uri.endsWith("/login")) {
-            //return JSON
-            loginoperation(request,response);
-        }
-        else
-            processRequest(request, response);
+        processRequest(request, response);
     }
 
     /**
@@ -121,7 +133,13 @@ public class loginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String uri = request.getRequestURI();
+        if (uri.endsWith("/login")) {
+            //return JSON
+            loginoperation(request,response);
+        }
+        else
+            processRequest(request, response);
     }
 
     /**

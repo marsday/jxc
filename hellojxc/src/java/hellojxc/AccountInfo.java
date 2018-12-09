@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package hellojxc;
-
 /**
  *
  * @author marsday
@@ -12,4 +11,5 @@ package hellojxc;
 public class AccountInfo {
     public String name_en;
     public String name_ch;
+    public String last_login;
 }

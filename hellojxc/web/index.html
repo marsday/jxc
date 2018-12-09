@@ -280,9 +280,9 @@ desired effect
         </li>
         -->
         <li><a href="index.html"><i class="fa fa-link"></i> <span>客户管理</span></a></li>
-        <li><a href="index.html?function=listgoods"><i class="fa fa-link"></i> <span>货物管理</span></a></li>
-        <li><a href="index.html?function=list_in"><i class="fa fa-link"></i> <span>进货管理</span></a></li>
-        <li><a href="index.html?function=list_out"><i class="fa fa-link"></i> <span>出货管理</span></a></li>
+        <li><a href="index.html?function=listgoods"><i class="fa fa-link"></i> <span>货物管理</span></a></li> 
+        <li><a href="index.html?function=listinput"><i class="fa fa-link"></i> <span>进货管理</span></a></li>
+        <li><a href="index.html?function=listoutput"><i class="fa fa-link"></i> <span>出货管理</span></a></li>
         <li class="treeview">
           <a href="#"><i class="fa fa-link"></i> <span>图表统计</span>
             <span class="pull-right-container">
@@ -435,14 +435,13 @@ desired effect
 <script src="jxc.js"></script>
 
 <script type="text/javascript">
-    
+    //$.fn.dataTable.ext.errMode = 'throw';
     $(document).ajaxError(function(e,jqxhr,setting,exception){
         //alert("ajaxError called");
         if(jqxhr && jqxhr.status === 401){
             window.location.href = 'login.html';
         }
     });
-    
     function getUrlVars()  
     {  
             var vars = [], hash;  
@@ -459,6 +458,21 @@ desired effect
         var first = getUrlVars()["function"]; 
         switch(first)
         {
+            case "listinput":
+            {
+                listinput();
+                break;
+            }
+            case "addinput":
+            {
+                addinput();
+                break;
+            }
+            case "showinput":
+            {
+                showinput();
+                break;
+            }
             case "listgoods":
             {
                 listgoods();
@@ -476,7 +490,7 @@ desired effect
                 var id = getUrlVars()["id"]; 
                 show_updategoods(id);
                 break;
-            }
+            }           
             case "addcustomer"://添加客户信息
             {
                 show_addcustomer();

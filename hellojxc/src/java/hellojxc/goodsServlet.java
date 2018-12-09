@@ -66,14 +66,14 @@ public class goodsServlet extends HttpServlet {
 
         String json = "{\"data\":[";
      
-        String sql = "select id, name, unit, type from jxc_goods where del_flag=0";
+        String sql = "select name, unit, type from jxc_goods where del_flag=0";
         ResultSet result = null;
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
             int index = 0;
             while(result.next())
             {
-                String id = result.getString("id");
+                //String id = result.getString("id");
                 String name = result.getString("name");
                 String unit = result.getString("unit");
                 String type = result.getString("type");
@@ -95,7 +95,8 @@ public class goodsServlet extends HttpServlet {
                 */
                 // value array json
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-                arrayBuilder.add(id);
+                //arrayBuilder.add(id);
+                arrayBuilder.add(name);
                 arrayBuilder.add(name);
                 arrayBuilder.add(unit);
                 arrayBuilder.add(type);
@@ -133,13 +134,13 @@ public class goodsServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
             
-        String[] ids = request.getParameterValues("id");
+        String[] names = request.getParameterValues("id");
         String input;
         //if(ids.length > 0)
         //{
-            input = ids[0];
+            input = new String( names[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
-        String sql = "select id, name, unit, type from jxc_goods where id= " + input;
+        String sql = "select name, unit, type from jxc_goods where name= " + "'" + input + "'";
         String json = "{\"data\":[";
         ResultSet result = null;
         try{
@@ -147,14 +148,14 @@ public class goodsServlet extends HttpServlet {
             int index = 0;
             while(result.next())
             {
-                String id = result.getString("id");
+                //String id = result.getString("id");
                 String name = result.getString("name");
                 String unit = result.getString("unit");
                 String type = result.getString("type");
                 
                 //name-value json
                 JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-                jsonBuilder.add("id", id);
+                jsonBuilder.add("id", name);
                 jsonBuilder.add("name", name);
                 jsonBuilder.add("unit", unit);
                 jsonBuilder.add("type", type);
@@ -260,14 +261,14 @@ public class goodsServlet extends HttpServlet {
         String[] names = request.getParameterValues("id[]");
         if(names.length > 0)
         {
-            String sql = "update jxc_goods set del_flag = 1 where id in (";
+            String sql = "update jxc_goods set del_flag = 1 where name in (";
             int index = 0;
             for(String obj:names)
             {
                  String name = new String(obj.getBytes("ISO-8859-1"), "UTF-8");
                  if(index!=0)
                      sql += ",";
-                 sql += name;
+                 sql += "'" + name + "'";
                  index++;
 
             }
@@ -312,13 +313,13 @@ public class goodsServlet extends HttpServlet {
             throws ServletException, IOException {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
-        String id = new String(request.getParameter("id").getBytes("ISO-8859-1"), "UTF-8");
+        String org_name = new String(request.getParameter("id").getBytes("ISO-8859-1"), "UTF-8");
         String name = new String(request.getParameter("name").getBytes("ISO-8859-1"), "UTF-8");
         String unit = new String(request.getParameter("unit").getBytes("ISO-8859-1"), "UTF-8");   
         String type = new String(request.getParameter("type").getBytes("ISO-8859-1"), "UTF-8"); 
         
         String sql = "update jxc_goods set name = " + "'"+name +"'," + " type = " + "'"+ type + "'," + " unit = " + "'"+ unit +"'"
-                                                        + " where id=" + id; 
+                                                        + " where name=" + "'" + org_name + "'"; 
 
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
