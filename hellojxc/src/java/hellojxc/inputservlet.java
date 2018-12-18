@@ -7,6 +7,17 @@ package hellojxc;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -45,7 +56,99 @@ public class inputservlet extends HttpServlet {
             out.println("</html>");
         }
     }
+    
+    private void sendInputList_ajax(HttpServletRequest request,HttpServletResponse response)
+            throws IOException, ServletException {
+        //2018-12-1 or 2018-12-02
+        String datepicker_start = new String(request.getParameter("startday").getBytes("ISO-8859-1"), "UTF-8");
+        String datepicker_end = new String(request.getParameter("endday").getBytes("ISO-8859-1"), "UTF-8");
+        /*
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd ");
+        Date date_start;
+        Date date_end;
+        try {
+            date_start = (Date) sdf.parse(datepicker_start);
+            date_end = (Date) sdf.parse(datepicker_end);
+        } catch (ParseException ex) {
+            Logger.getLogger(inputservlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        */
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
 
+        String json = "{\"data\":[";
+     
+        String sql = "select id, goods_name, volume, price, buytime, recordtime, operator from jxc_input where " 
+                                + " buytime >= '"+ datepicker_start + "'"
+                                + " and buytime <= '"+ datepicker_end + "'"
+                                + " and del_flag=0";
+        ResultSet result = null;
+        try{
+            result = DBHelper.getDbHelper().executeQuery(sql);
+            int index = 0;
+            while(result.next())
+            {
+                String id = result.getString("id");
+                String goods_name = result.getString("goods_name");
+                String volume = result.getString("volume");
+                String price = result.getString("price");
+                String buytime = result.getDate("buytime").toString();
+                String recordtime = result.getDate("recordtime").toString();
+                String operator = result.getString("operator");
+                /*
+                //name-value json
+                JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+                jsonBuilder.add("id", id);
+                jsonBuilder.add("name", name);
+                jsonBuilder.add("mobile", mobile);
+                jsonBuilder.add("location", location);
+                jsonBuilder.add("type", type);
+                JsonObject empObj = jsonBuilder.build();
+                
+                StringWriter strWtr = new StringWriter();
+                JsonWriter jsonWtr = Json.createWriter(strWtr);
+                
+                jsonWtr.writeObject(empObj);
+                jsonWtr.close();
+                */
+                // value array json
+                JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+                arrayBuilder.add(id);
+                arrayBuilder.add(goods_name);
+                arrayBuilder.add(volume);
+                arrayBuilder.add(price);
+                arrayBuilder.add(buytime);
+                arrayBuilder.add(recordtime);
+                arrayBuilder.add(operator);
+                
+                JsonArray empArray = arrayBuilder.build();
+                
+                StringWriter strWtr = new StringWriter();
+                JsonWriter jsonWtr = Json.createWriter(strWtr);
+                
+                jsonWtr.writeArray(empArray);
+                jsonWtr.close();
+                if(index !=0)
+                    json+=",";
+                
+                json += strWtr.toString();
+                            
+                index++;
+            }
+            if(result != null)
+                result.close();
+        }catch(Exception err)
+        {
+            err.printStackTrace();
+        }
+        json += "]}";
+        //String json = "{\"data\": [[\"1\",\"Liqiang\",\"Shanghai\"],[\"2\",\"ZLY\",\"FuJian\"]]}";
+        PrintWriter writer = response.getWriter();
+        writer.println(json);
+        writer.flush();
+ 
+    }
+   
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -58,7 +161,12 @@ public class inputservlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String uri = request.getRequestURI();
+        if(uri.endsWith("/getinput")) {
+            //getcustomer_AJAX(request,response);
+        }
+        else
+            processRequest(request, response);
     }
 
     /**
@@ -72,7 +180,13 @@ public class inputservlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String uri = request.getRequestURI();
+        if (uri.endsWith("/listinput")) {
+            //return JSON
+            sendInputList_ajax(request,response);
+        }
+        else
+            processRequest(request, response);
     }
 
     /**

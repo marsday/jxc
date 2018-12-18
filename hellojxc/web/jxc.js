@@ -541,8 +541,11 @@ function listinput()
            '<a class="btn btn-primary" id="add" href="index.html?function=addinput" role="button">添加</a> ' + "\n" + 
            ' <button  id="del" role="button" class="btn btn-danger">删除</button>' + "\n" + 
            ' <button  id="update" role="button" class="btn btn-primary">更新</button>' + 
-      // 开始和结束时间选择，货物名称选择，经办人选择
-     '<br>' + 
+           ' <button  id="query" role="button" class="btn btn-primary">查询</button>' + 
+        '<br>' + 
+        '<br>' + 
+      '<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
+      '<p>结束日期：<input type="text" id="datepicker_end" name="datepicker_end"></p>'+
      '<br>' + 
        ' <table id="example" class="display select" width="100%" cellspacing="0">' + 
        ' <thead>' + 
@@ -551,7 +554,8 @@ function listinput()
         '     <th>货物名称</th>' + 
         '     <th>数量</th>' + 
         '     <th>总价</th>' + 
-        '     <th>时间</th>' + 
+        '     <th>购买日期</th>' + 
+        '     <th>记录日期</th>' + 
         '     <th>经办人</th>' + 
         '   </tr>' + 
         '</thead>' + 
@@ -568,30 +572,88 @@ function listinput()
          '</table>' + 
     '</form>'
     );
+
+    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth(), 1);
     
-    var table = $('#example').DataTable({
-	   searching: false,
-      'ajax': {
-         'url': '/hellojxc/listinput'
-      },
-      'columnDefs': [
-            {
-                'targets': 0,
-                'searchable': false,
-                'orderable': false,
-                'className': 'dt-body-left',
-                'render': function (data, type, full, meta){
-                    return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
-                }
-            }
-        ],
-      'order': [[1, 'asc']]
-    });
+    $("#datepicker_start").datepicker();
+    $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_start").val(ld.getFullYear() + '-' + (ld.getMonth() + 1) + '-' + ld.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+    $("#datepicker_end").datepicker();
+    $("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+    var t;
+    var refresh = function() {
+        var startday=$("#datepicker_start").val();
+        var endday=$("#datepicker_end").val();
+        //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+        t = $('#example').dataTable({
+              searching: false,
+             'ajax': {
+                'url': '/hellojxc/listinput',
+                'type': 'POST'
+             },
+             'fnServerParams':function(aoData){
+               aoData.push(
+                       {
+                         "name": "startday",
+                         "value": startday?startday:null
+                       },
+                       {
+                           "name":"endday",
+                           "value": endday?endday:null
+                        }
+               );  
+             },
+             'columnDefs': [
+                   {
+                       'targets': 0,
+                       'searchable': false,
+                       'orderable': false,
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
+                       }
+                   }
+               ],
+             'order': [[1, 'asc']]
+           });       
+    }
+    refresh();
     
     $("#del").on('click', function(){
         $("#frm-example").attr("action","/hellojxc/delinput");
         $("#frm-example").attr("method","POST");
-        $("#frm-example").submit();
+      /*  
+      var form = $("#frm-example");
+      var anyselected = 0;
+      // Iterate over all checkboxes in the table
+      table.$('input[type="checkbox"]').each(function(){
+         // If checkbox doesn't exist in DOM
+        // if(!$.contains(document, this)){
+            // If checkbox is checked
+            if(this.checked){
+               // Create a hidden element
+               anyselected = 1;
+               $(form).append(
+                  $('<input>')
+                     .attr('type', 'hidden')
+                     .attr('name', this.name)
+                     .val(this.value)
+               );
+            }
+        // }
+      });
+      
+      if(anyselected == 0)
+      {
+          alert("请选取需要删除的记录");
+          //event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+          return false;//返回false，取消submit
+      }      
+      */
+      $("#frm-example").submit();
     });
 
     $("#update").on('click', function(){
@@ -625,6 +687,14 @@ function listinput()
        //$(location).attr('href', getparam);
   });
 
+ $("#query").on('click', function(){ 
+    if(t)
+    {
+        t.fnDestroy();
+        refresh();
+    }
+    return false;
+  });
    // Handle click on "Select all" control
    $('#example-select-all').on('click', function(){
       // Get all rows with search applied
@@ -676,7 +746,7 @@ function listinput()
           event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
           return false;//返回false，取消submit
       }
-   });   
+   });
 }
 
  function addinput()
