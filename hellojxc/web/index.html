@@ -474,7 +474,8 @@ desired effect
             }
             case "showinput":
             {
-                showinput();
+                var id = getUrlVars()["id"]; 
+                showinput(id);
                 break;
             }
             case "listgoods":

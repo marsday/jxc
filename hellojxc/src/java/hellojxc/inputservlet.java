@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -169,7 +171,7 @@ public class inputservlet extends HttpServlet {
             return;
         String uri = request.getRequestURI();
         if(uri.endsWith("/getinput")) {
-            //getcustomer_AJAX(request,response);
+            getoperation(request,response);
         }
         else
             processRequest(request, response);
@@ -240,6 +242,71 @@ public class inputservlet extends HttpServlet {
         
     }
     
+    private void getoperation(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+         
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+            
+        String[] names = request.getParameterValues("id");
+        String input;
+        //if(ids.length > 0)
+        //{
+            input = new String( names[0].getBytes("ISO-8859-1"), "UTF-8");
+        //}
+        String sql = "select id,goods_name, volume, price, buytime,operator,refer from jxc_input where id= " + "'" + input + "'";
+        String json = "{\"data\":[";
+        ResultSet result = null;
+        try{
+            result = DBHelper.getDbHelper().executeQuery(sql);
+            int index = 0;
+            while(result.next())
+            {
+                String id = result.getString("id");
+                String goods_name = result.getString("goods_name");
+                String volume = result.getString("volume");
+                String price = result.getString("price");
+                String buytime = result.getString("buytime");
+                String operator = result.getString("operator");
+                String refer = result.getString("refer");
+                
+                //name-value json
+                JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+                jsonBuilder.add("id", id);
+                jsonBuilder.add("goods_name", goods_name);
+                jsonBuilder.add("volume", volume);
+                jsonBuilder.add("price", price);
+                jsonBuilder.add("buytime", buytime);
+                jsonBuilder.add("operator", operator);
+                jsonBuilder.add("refer", refer);
+                JsonObject empObj = jsonBuilder.build();
+                
+                StringWriter strWtr = new StringWriter();
+                JsonWriter jsonWtr = Json.createWriter(strWtr);
+                
+                jsonWtr.writeObject(empObj);
+                jsonWtr.close();
+
+                if(index !=0)
+                    json+=",";
+                
+                json += strWtr.toString();
+                            
+                index++;
+            }
+            if(result != null)
+                result.close();
+        }catch(Exception err)
+        {
+            err.printStackTrace();
+        }
+        json += "]}";
+        //String json = "{\"data\": [[\"1\",\"Liqiang\",\"Shanghai\"],[\"2\",\"ZLY\",\"FuJian\"]]}";
+        PrintWriter writer = response.getWriter();
+        writer.println(json);
+        writer.flush();
+    }
+
     /**
      * Returns a short description of the servlet.
      *

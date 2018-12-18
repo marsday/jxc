@@ -586,12 +586,12 @@ function listinput()
     $("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
     $("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
     
-    var t;
+    var table;
     var refresh = function() {
         var startday=$("#datepicker_start").val();
         var endday=$("#datepicker_end").val();
         //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
-        t = $('#example').dataTable({
+        table = $('#example').dataTable({
               searching: false,
              'ajax': {
                 'url': '/hellojxc/listinput',
@@ -623,7 +623,7 @@ function listinput()
              'order': [[1, 'asc']]
            });       
     }
-    //加载页面是初始化datatable
+    //加载页面时初始化datatable
     refresh();
     
     $("#del").on('click', function(){
@@ -692,9 +692,9 @@ function listinput()
   });
 
     $("#query").on('click', function(){ 
-       if(t)
+       if(table)
        {
-           t.fnDestroy();
+           table.fnDestroy();
            refresh();
        }
        return false;
@@ -820,48 +820,67 @@ function listinput()
         ); 
     	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/updateinput" method="POST">'+
 		'<input type="hidden" id="id" name="id">' +
-                '<div class="input-group">' + 
-			'<span class="input-group-addon">名称*</span>' +
-			'<input id="name" name="name" type="text" class="form-control" style="width:30%">' +
-		'</div>' +
+                '<div class="input-group">' +	
+			'<span class="input-group-addon">货物名称</span>' +
+			'<select name="goodsname" class="selectpicker" data-style="btn-info"></select>' +
+                '</div>' +  
+		'<br>' +                
+		'<div class="input-group">' + 
+			'<span class="input-group-addon">数量  </span>' +
+			'<input id="volume" name="volume" type="text" class="form-control" style="width:30%">' +
+		'</div>' +                
 		'<br>' +
 		'<div class="input-group">' +
-			'<span class="input-group-addon">单位</span>' +
-			'<input id="unit" name="unit" type="text" class="form-control" style="width:30%">' +
-		'</div>' +   
-		'<br>' +
-		'<div class="input-group">' +	
-			'<span class="input-group-addon">货物类型</span>' +
-			'<select id="slk" name="type" class="selectpicker" data-style="btn-info" ></select>' +
-                 '</div>' +                   
+			'<span class="input-group-addon">总价  </span>' +
+			'<input id="price" name="price" type="text" class="form-control" style="width:30%">' +
+		'</div>' + 
+		'<br>' + 
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">交易日期</span>' +
+			'<input id="buytime" name="buytime" type="text" class="form-control" style="width:28%">' +
+		'</div>' + 
+		'<br>' +   
+		'<div class="input-group">' +
+			'<span class="input-group-addon">经办人</span>' +
+			'<input id="operator" name="operator" type="text" readonly class="form-control" style="width:30%">' +
+		'</div>' + 
+		'<br>' +                 
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">备注  </span>' +
+			'<textarea id="refer" name="refer" class="form-control" style="width:30%"></textarea>' +
+		'</div>' +         
 		'<br>' +
 		'<button type="submit" class="btn btn-default">提交</button>');  
-           
+    //购买日期初始化
+    $("#buytime").datepicker();
+    $("#buytime").datepicker("option", "dateFormat", "yy-mm-dd");
+
+    //获取货物名称列表
+    $.getJSON('/hellojxc/listgoods',function(result){
+            //TODO 规律性无法返回完整数据
+            alert("listgoods success: " + result.data.length);
+            $('.selectpicker').selectpicker();
+            for(var i=0;i<result.data.length;i++)
+            {
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+            }
+            $('.selectpicker').selectpicker('refresh');
+            $('.selectpicker').selectpicker('render');
+    });    
     var geturl = "/hellojxc/getinput?id=" + id;
-        $.getJSON(geturl,function(result){
+    $.getJSON(geturl,function(result){
             $.each(result, function(i, field){//就一条json数据，每条json数据里也只有一条记录
-                //alert(field[0].name);//id,name,mobile,location,type
                 $("#id").val(field[0].id);
-                $("#name").val(field[0].name);
-                $("#unit").val(field[0].unit);   
+                $("#volume").val(field[0].volume);   
+                $("#price").val(field[0].price);
+                $("#buytime").val(field[0].buytime).datepicker({ dateFormat: 'yy-mm-dd' });//购买时间
+                $("#operator").val(field[0].operator);
+                $("#refer").val(field[0].refer);
                 
-                
-                $('.selectpicker').selectpicker();               
-                if(field[0].type === '0')
-                {
-                    $('.selectpicker').append("<option value=\"0\" selected=\"selected\" >核销货物</option>");
-                    $('.selectpicker').append("<option value=\"1\">非核销货物</option>");
-                }
-                else
-                {
-                    $('.selectpicker').append("<option value=\"0\">核销货物</option>");
-                    $('.selectpicker').append("<option value=\"1\" selected=\"selected\" >非核销货物</option>");                 
-                } 
-               $('.selectpicker').selectpicker('refresh');
-               $('.selectpicker').selectpicker('render');                
-                
+                $(".selectpicker").selectpicker('val',field[0].goods_name);//货物名称选择
+                $('.selectpicker').selectpicker('refresh');
                return false;
             });
-         });
+   });
 }
   

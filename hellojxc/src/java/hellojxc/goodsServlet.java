@@ -61,6 +61,7 @@ public class goodsServlet extends HttpServlet {
     
     private void listoperation(HttpServletRequest request,HttpServletResponse response)
             throws IOException, ServletException {
+        
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
 
@@ -77,22 +78,7 @@ public class goodsServlet extends HttpServlet {
                 String name = result.getString("name");
                 String unit = result.getString("unit");
                 String type = result.getString("type");
-                /*
-                //name-value json
-                JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-                jsonBuilder.add("id", id);
-                jsonBuilder.add("name", name);
-                jsonBuilder.add("mobile", mobile);
-                jsonBuilder.add("location", location);
-                jsonBuilder.add("type", type);
-                JsonObject empObj = jsonBuilder.build();
                 
-                StringWriter strWtr = new StringWriter();
-                JsonWriter jsonWtr = Json.createWriter(strWtr);
-                
-                jsonWtr.writeObject(empObj);
-                jsonWtr.close();
-                */
                 // value array json
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 //arrayBuilder.add(id);
@@ -114,6 +100,7 @@ public class goodsServlet extends HttpServlet {
                             
                 index++;
             }
+            Logger.getLogger(goodsServlet.class.getName()).log(Level.SEVERE, null, "result of listgoods is; " + index);
             if(result != null)
                 result.close();
         }catch(Exception err)
