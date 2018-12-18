@@ -27,7 +27,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author marsday
  */
-@WebServlet(name = "loginServlet", urlPatterns = {"/login"})
+@WebServlet(name = "loginServlet", urlPatterns = {"/login","/logout"})
 public class loginServlet extends HttpServlet {
 
     /**
@@ -55,6 +55,17 @@ public class loginServlet extends HttpServlet {
             out.println("</html>");
         }
     }
+    private void logoutoperation(HttpServletRequest request,HttpServletResponse response)
+            throws IOException, ServletException {
+        response.setCharacterEncoding("UTF=8");
+        response.setContentType("text/html;charset=UTF-8");
+        
+        HttpSession session = request.getSession();
+        session.invalidate();
+        
+        response.sendRedirect("login.html");
+        
+    }
     private void loginoperation(HttpServletRequest request,HttpServletResponse response)
             throws IOException, ServletException {
         
@@ -79,7 +90,7 @@ public class loginServlet extends HttpServlet {
                 info.last_login = result.getString("last_login");
                 
                 session.setAttribute("account", info);
-                session.setMaxInactiveInterval(2*60);//2分钟
+                session.setMaxInactiveInterval(10*60);//10分钟
                 
                 //更新最新登录时刻
                 Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -137,8 +148,9 @@ public class loginServlet extends HttpServlet {
         if (uri.endsWith("/login")) {
             //return JSON
             loginoperation(request,response);
-        }
-        else
+        }else if (uri.endsWith("/logout")) {
+            logoutoperation(request,response);
+        }else
             processRequest(request, response);
     }
 

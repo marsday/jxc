@@ -557,6 +557,7 @@ function listinput()
         '     <th>购买日期</th>' + 
         '     <th>记录日期</th>' + 
         '     <th>经办人</th>' + 
+        '     <th>备注</th>' + 
         '   </tr>' + 
         '</thead>' + 
         '<tfoot>' + 
@@ -565,8 +566,10 @@ function listinput()
         '     <th>货物名称</th>' + 
         '     <th>数量</th>' + 
         '     <th>总价</th>' + 
-        '     <th>时间</th>' + 
+        '     <th>购买日期</th>' + 
+        '     <th>记录日期</th>' + 
         '     <th>经办人</th>' + 
+        '     <th>备注</th>' +         
         '   </tr>' + 
         '</tfoot>' + 
          '</table>' + 
@@ -620,6 +623,7 @@ function listinput()
              'order': [[1, 'asc']]
            });       
     }
+    //加载页面是初始化datatable
     refresh();
     
     $("#del").on('click', function(){
@@ -687,14 +691,14 @@ function listinput()
        //$(location).attr('href', getparam);
   });
 
- $("#query").on('click', function(){ 
-    if(t)
-    {
-        t.fnDestroy();
-        refresh();
-    }
-    return false;
-  });
+    $("#query").on('click', function(){ 
+       if(t)
+       {
+           t.fnDestroy();
+           refresh();
+       }
+       return false;
+     });
    // Handle click on "Select all" control
    $('#example-select-all').on('click', function(){
       // Get all rows with search applied
@@ -759,30 +763,51 @@ function listinput()
         ); 
 
 	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/addinput" method="POST">'+
+                '<div class="input-group">' +	
+			'<span class="input-group-addon">货物名称</span>' +
+			'<select name="goodsname" class="selectpicker" data-style="btn-info"></select>' +
+                '</div>' +  
+		'<br>' +                
 		'<div class="input-group">' + 
-			'<span class="input-group-addon">名称*</span>' +
-			'<input name="name" type="text" class="form-control" style="width:30%">' +
-		'</div>' +
+			'<span class="input-group-addon">数量  </span>' +
+			'<input name="volume" type="text" class="form-control" style="width:30%">' +
+		'</div>' +                
 		'<br>' +
 		'<div class="input-group">' +
-			'<span class="input-group-addon">单位</span>' +
-			'<input name="unit" type="text" class="form-control" style="width:30%">' +
+			'<span class="input-group-addon">总价  </span>' +
+			'<input name="price" type="text" class="form-control" style="width:30%">' +
+		'</div>' + 
+		'<br>' + 
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">交易日期</span>' +
+			'<input name="operation_day" id="operation_day"  type="text" class="form-control" style="width:28%">' +
+		'</div>' + 
+		'<br>' +   
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">备注  </span>' +
+			'<textarea name="refer" class="form-control" style="width:30%"></textarea>' +
 		'</div>' + 
 		'<br>' +                
-                '<div class="input-group">' +	
-			'<span class="input-group-addon">货物类型</span>' +
-			'<select name="type" class="selectpicker" data-style="btn-info" ></select>' +
-                '</div>' +  
-		'<br>' +
 		'<button type="submit" class="btn btn-default">提交</button>');
-        
-        $('.selectpicker').selectpicker();
-	$('.selectpicker').append("<option value=\"0\" selected=\"selected\" >核销货物</option>");
-	$('.selectpicker').append("<option value=\"1\">非核销货物</option>");
-	
-	$('.selectpicker').selectpicker('refresh');
-        $('.selectpicker').selectpicker('render');
-        
+        //初始化交易日期：默认为当天
+        var d = new Date();
+        $("#operation_day").datepicker();
+        $("#operation_day").datepicker("option", "dateFormat", "yy-mm-dd");
+        $("#operation_day").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+        //获取货物名称列表
+        $.getJSON('/hellojxc/listgoods',function(result){
+            $('.selectpicker').selectpicker();
+            for(var i=0;i<result.data.length;i++)
+            {
+                if(i===0)
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][0] +"</option>");
+                else
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+            }
+            $('.selectpicker').selectpicker('refresh');
+            $('.selectpicker').selectpicker('render');
+        });
 }
 
  function showinput(id)

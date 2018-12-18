@@ -23,6 +23,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -78,7 +79,7 @@ public class inputservlet extends HttpServlet {
 
         String json = "{\"data\":[";
      
-        String sql = "select id, goods_name, volume, price, buytime, recordtime, operator from jxc_input where " 
+        String sql = "select id, goods_name, volume, price, buytime, recordtime, operator,refer from jxc_input where " 
                                 + " buytime >= '"+ datepicker_start + "'"
                                 + " and buytime <= '"+ datepicker_end + "'"
                                 + " and del_flag=0";
@@ -95,6 +96,7 @@ public class inputservlet extends HttpServlet {
                 String buytime = result.getDate("buytime").toString();
                 String recordtime = result.getDate("recordtime").toString();
                 String operator = result.getString("operator");
+                String refer = result.getString("refer");
                 /*
                 //name-value json
                 JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
@@ -120,6 +122,7 @@ public class inputservlet extends HttpServlet {
                 arrayBuilder.add(buytime);
                 arrayBuilder.add(recordtime);
                 arrayBuilder.add(operator);
+                arrayBuilder.add(refer);
                 
                 JsonArray empArray = arrayBuilder.build();
                 
@@ -161,6 +164,9 @@ public class inputservlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        //登录验证
+        if(!Utility.checkSession(request, response))
+            return;
         String uri = request.getRequestURI();
         if(uri.endsWith("/getinput")) {
             //getcustomer_AJAX(request,response);
@@ -180,15 +186,60 @@ public class inputservlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        //登录验证
+        if(!Utility.checkSession(request, response))
+            return;
         String uri = request.getRequestURI();
         if (uri.endsWith("/listinput")) {
             //return JSON
             sendInputList_ajax(request,response);
+        }else if(uri.endsWith("/addinput")) {
+            addoperation(request,response);
         }
         else
             processRequest(request, response);
     }
-
+    private void addoperation(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
+        //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
+        String goodsname = new String(request.getParameter("goodsname").getBytes("ISO-8859-1"), "UTF-8");
+        String volume = new String(request.getParameter("volume").getBytes("ISO-8859-1"), "UTF-8");
+        String price = new String(request.getParameter("price").getBytes("ISO-8859-1"), "UTF-8");
+        String operation_day = new String(request.getParameter("operation_day").getBytes("ISO-8859-1"), "UTF-8");
+        String refer = new String(request.getParameter("refer").getBytes("ISO-8859-1"), "UTF-8");
+        
+        //当前登录者即为经办人
+        HttpSession session = request.getSession();
+        AccountInfo info = (AccountInfo)session.getAttribute("account");
+        String operator = info.name_ch;
+        
+        //当前日期即为记录日期
+        java.util.Date ud = new java.util.Date();
+        Date date = new Date(ud.getTime());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String record_day = sdf.format(date);
+        
+        String sql = "insert into jxc_input (goods_name,volume,price,buytime,recordtime,operator,refer) values(" 
+                + "'" +  goodsname + "'," 
+                +  volume + ","
+                +  price  + ","
+                +  "'" + operation_day + "'," 
+                +  "'" +  record_day  + "',"  
+                +  "'" +  operator  + "',"  
+                +  "'"  +  refer  + "'"  
+                + ")";
+ 
+       try{
+         DBHelper.getDbHelper().executeUpdate(sql);
+       }catch(Exception err)
+       {
+            err.printStackTrace();
+       }
+        response.sendRedirect("index.html?function=listinput");
+        
+    }
+    
     /**
      * Returns a short description of the servlet.
      *
