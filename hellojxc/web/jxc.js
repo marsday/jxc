@@ -629,35 +629,7 @@ function listinput()
     $("#del").on('click', function(){
         $("#frm-example").attr("action","/hellojxc/delinput");
         $("#frm-example").attr("method","POST");
-      /*  
-      var form = $("#frm-example");
-      var anyselected = 0;
-      // Iterate over all checkboxes in the table
-      table.$('input[type="checkbox"]').each(function(){
-         // If checkbox doesn't exist in DOM
-        // if(!$.contains(document, this)){
-            // If checkbox is checked
-            if(this.checked){
-               // Create a hidden element
-               anyselected = 1;
-               $(form).append(
-                  $('<input>')
-                     .attr('type', 'hidden')
-                     .attr('name', this.name)
-                     .val(this.value)
-               );
-            }
-        // }
-      });
-      
-      if(anyselected == 0)
-      {
-          alert("请选取需要删除的记录");
-          //event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
-          return false;//返回false，取消submit
-      }      
-      */
-      $("#frm-example").submit();
+        $("#frm-example").submit();
     });
 
     $("#update").on('click', function(){
@@ -702,7 +674,8 @@ function listinput()
    // Handle click on "Select all" control
    $('#example-select-all').on('click', function(){
       // Get all rows with search applied
-      var rows = table.rows({ 'search': 'applied' }).nodes();
+      var t = $('#example').DataTable();
+      var rows = t.rows({ 'search': 'applied' }).nodes();
       // Check/uncheck checkboxes for all rows in the table
       $('input[type="checkbox"]', rows).prop('checked', this.checked);
    });
@@ -854,11 +827,11 @@ function listinput()
     //购买日期初始化
     $("#buytime").datepicker();
     $("#buytime").datepicker("option", "dateFormat", "yy-mm-dd");
-
+    
+    //重要：改为同步执行，否则多个getJSON的情况下，会数据混乱
+    $.ajaxSettings.async = false;
     //获取货物名称列表
     $.getJSON('/hellojxc/listgoods',function(result){
-            //TODO 规律性无法返回完整数据
-            alert("listgoods success: " + result.data.length);
             $('.selectpicker').selectpicker();
             for(var i=0;i<result.data.length;i++)
             {
@@ -866,7 +839,7 @@ function listinput()
             }
             $('.selectpicker').selectpicker('refresh');
             $('.selectpicker').selectpicker('render');
-    });    
+    });  	
     var geturl = "/hellojxc/getinput?id=" + id;
     $.getJSON(geturl,function(result){
             $.each(result, function(i, field){//就一条json数据，每条json数据里也只有一条记录
@@ -882,5 +855,7 @@ function listinput()
                return false;
             });
    });
+   //恢复设置为异步执行
+   $.ajaxSettings.async = true;
 }
   

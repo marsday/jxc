@@ -197,10 +197,84 @@ public class inputservlet extends HttpServlet {
             sendInputList_ajax(request,response);
         }else if(uri.endsWith("/addinput")) {
             addoperation(request,response);
+        }else if(uri.endsWith("/updateinput")) {
+            updateoperation(request,response);
+        }else if(uri.endsWith("/delinput")) {
+            deloperation(request,response);
         }
         else
             processRequest(request, response);
     }
+    private void deloperation(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String[] names = request.getParameterValues("id[]");
+        if(names.length > 0)
+        {
+            String sql = "update jxc_input set del_flag = 1 where id in (";
+            int index = 0;
+            for(String obj:names)
+            {
+                 String name = new String(obj.getBytes("ISO-8859-1"), "UTF-8");
+                 if(index!=0)
+                     sql += ",";
+                 sql += "'" + name + "'";
+                 index++;
+
+            }
+            sql += ")";
+
+            try{
+             DBHelper.getDbHelper().executeUpdate(sql);
+            }catch(Exception err)
+            {
+                err.printStackTrace();
+            }      
+        }
+       response.sendRedirect("index.html?function=listinput");
+    } 
+        
+    private void updateoperation(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
+        //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
+        String id = new String(request.getParameter("id").getBytes("ISO-8859-1"), "UTF-8");
+        String goodsname = new String(request.getParameter("goodsname").getBytes("ISO-8859-1"), "UTF-8");
+        String volume = new String(request.getParameter("volume").getBytes("ISO-8859-1"), "UTF-8");   
+        String price = new String(request.getParameter("price").getBytes("ISO-8859-1"), "UTF-8"); 
+        String buytime = new String(request.getParameter("buytime").getBytes("ISO-8859-1"), "UTF-8"); 
+        String refer = new String(request.getParameter("refer").getBytes("ISO-8859-1"), "UTF-8"); 
+        //当前登录者即为经办人
+        HttpSession session = request.getSession();
+        AccountInfo info = (AccountInfo)session.getAttribute("account");
+        String operator = info.name_ch;
+        
+         //当前日期即为记录日期
+        java.util.Date ud = new java.util.Date();
+        Date date = new Date(ud.getTime());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String record_day = sdf.format(date);
+        
+        String sql = "update jxc_input set goods_name = " + "'"+goodsname +"',"
+                                                        + " volume= " + volume + "," 
+                                                        + " price= " + price +"," 
+                                                        + " buytime= " + "'"+ buytime + "',"
+                                                        + " recordtime= " + "'"+ record_day + "',"
+                                                        + " refer= " + "'"+ refer + "',"
+                                                        + " operator= " + "'"+ operator + "'"
+                                                        + " where id="  +  id; 
+
+       try{
+         DBHelper.getDbHelper().executeUpdate(sql);
+       }catch(Exception err)
+       {
+            err.printStackTrace();
+       }
+        //request.getRequestDispatcher("/index_1.html").forward(request,response);
+        response.sendRedirect("index.html?function=listinput");
+        
+    }
+        
     private void addoperation(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8

@@ -69,9 +69,9 @@ public class goodsServlet extends HttpServlet {
      
         String sql = "select name, unit, type from jxc_goods where del_flag=0";
         ResultSet result = null;
+        int index = 0;       
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
-            int index = 0;
             while(result.next())
             {
                 //String id = result.getString("id");
@@ -100,7 +100,7 @@ public class goodsServlet extends HttpServlet {
                             
                 index++;
             }
-            Logger.getLogger(goodsServlet.class.getName()).log(Level.SEVERE, null, "result of listgoods is; " + index);
+            //Logger.getLogger(goodsServlet.class.getName()).log(Level.SEVERE, null, "result of listgoods is; " + index);
             if(result != null)
                 result.close();
         }catch(Exception err)
