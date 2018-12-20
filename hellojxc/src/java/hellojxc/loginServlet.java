@@ -15,6 +15,8 @@ import java.text.SimpleDateFormat;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -27,7 +29,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author marsday
  */
-@WebServlet(name = "loginServlet", urlPatterns = {"/login","/logout"})
+@WebServlet(name = "loginServlet", urlPatterns = {"/login","/logout","/loginfo"})
 public class loginServlet extends HttpServlet {
 
     /**
@@ -55,6 +57,7 @@ public class loginServlet extends HttpServlet {
             out.println("</html>");
         }
     }
+    
     private void logoutoperation(HttpServletRequest request,HttpServletResponse response)
             throws IOException, ServletException {
         response.setCharacterEncoding("UTF=8");
@@ -118,6 +121,40 @@ public class loginServlet extends HttpServlet {
         
     }
     
+    private void loginfooperation(HttpServletRequest request,HttpServletResponse response)
+            throws IOException, ServletException {
+        
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+        
+        HttpSession session = request.getSession();
+        AccountInfo info = (AccountInfo)session.getAttribute("account");
+        String name_en = info.name_en;
+        String name_ch = info.name_ch;
+        String last_login = info.last_login;
+        
+        String json = "{\"data\":[";
+        
+        JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+        jsonBuilder.add("name_en", name_en);
+        jsonBuilder.add("name_ch", name_ch);
+        jsonBuilder.add("last_login", last_login); 
+        
+        JsonObject empObj = jsonBuilder.build();
+        StringWriter strWtr = new StringWriter();
+        JsonWriter jsonWtr = Json.createWriter(strWtr);
+        jsonWtr.writeObject(empObj);
+        jsonWtr.close();
+        json += strWtr.toString();
+        
+        json += "]}";
+        
+        PrintWriter writer = response.getWriter();
+        writer.println(json);
+        writer.flush();
+        
+    }
+    
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -130,7 +167,16 @@ public class loginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        //登录验证
+        if(!Utility.checkSession(request, response))
+            return;        
+        String uri = request.getRequestURI();
+        if (uri.endsWith("/logout")) {
+            logoutoperation(request,response);
+        }else if (uri.endsWith("/loginfo")) {
+            loginfooperation(request,response);
+        }else
+            processRequest(request, response);
     }
 
     /**
@@ -148,8 +194,6 @@ public class loginServlet extends HttpServlet {
         if (uri.endsWith("/login")) {
             //return JSON
             loginoperation(request,response);
-        }else if (uri.endsWith("/logout")) {
-            logoutoperation(request,response);
         }else
             processRequest(request, response);
     }

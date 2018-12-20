@@ -81,7 +81,7 @@ public class inputservlet extends HttpServlet {
 
         String json = "{\"data\":[";
      
-        String sql = "select id, goods_name, volume, price, buytime, recordtime, operator,refer from jxc_input where " 
+        String sql = "select id, goods_name, volume, price, buytime, recordtime, operator,customer_info,refer from jxc_input where "
                                 + " buytime >= '"+ datepicker_start + "'"
                                 + " and buytime <= '"+ datepicker_end + "'"
                                 + " and del_flag=0";
@@ -93,28 +93,13 @@ public class inputservlet extends HttpServlet {
             {
                 String id = result.getString("id");
                 String goods_name = result.getString("goods_name");
-                String volume = result.getString("volume");
-                String price = result.getString("price");
+                String volume = String.valueOf(result.getInt("volume"));
+                String price = String.valueOf(result.getInt("price"));
                 String buytime = result.getDate("buytime").toString();
                 String recordtime = result.getDate("recordtime").toString();
                 String operator = result.getString("operator");
+                String customer_info = result.getString("customer_info");
                 String refer = result.getString("refer");
-                /*
-                //name-value json
-                JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-                jsonBuilder.add("id", id);
-                jsonBuilder.add("name", name);
-                jsonBuilder.add("mobile", mobile);
-                jsonBuilder.add("location", location);
-                jsonBuilder.add("type", type);
-                JsonObject empObj = jsonBuilder.build();
-                
-                StringWriter strWtr = new StringWriter();
-                JsonWriter jsonWtr = Json.createWriter(strWtr);
-                
-                jsonWtr.writeObject(empObj);
-                jsonWtr.close();
-                */
                 // value array json
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 arrayBuilder.add(id);
@@ -124,6 +109,7 @@ public class inputservlet extends HttpServlet {
                 arrayBuilder.add(buytime);
                 arrayBuilder.add(recordtime);
                 arrayBuilder.add(operator);
+                arrayBuilder.add(customer_info==null?"":customer_info);
                 arrayBuilder.add(refer);
                 
                 JsonArray empArray = arrayBuilder.build();
@@ -243,6 +229,7 @@ public class inputservlet extends HttpServlet {
         String volume = new String(request.getParameter("volume").getBytes("ISO-8859-1"), "UTF-8");   
         String price = new String(request.getParameter("price").getBytes("ISO-8859-1"), "UTF-8"); 
         String buytime = new String(request.getParameter("buytime").getBytes("ISO-8859-1"), "UTF-8"); 
+        String customerinfo = new String(request.getParameter("customerinfo").getBytes("ISO-8859-1"), "UTF-8"); 
         String refer = new String(request.getParameter("refer").getBytes("ISO-8859-1"), "UTF-8"); 
         //当前登录者即为经办人
         HttpSession session = request.getSession();
@@ -261,6 +248,7 @@ public class inputservlet extends HttpServlet {
                                                         + " buytime= " + "'"+ buytime + "',"
                                                         + " recordtime= " + "'"+ record_day + "',"
                                                         + " refer= " + "'"+ refer + "',"
+                                                        + " customer_info= " + "'"+ customerinfo + "',"
                                                         + " operator= " + "'"+ operator + "'"
                                                         + " where id="  +  id; 
 
@@ -283,6 +271,7 @@ public class inputservlet extends HttpServlet {
         String volume = new String(request.getParameter("volume").getBytes("ISO-8859-1"), "UTF-8");
         String price = new String(request.getParameter("price").getBytes("ISO-8859-1"), "UTF-8");
         String operation_day = new String(request.getParameter("operation_day").getBytes("ISO-8859-1"), "UTF-8");
+        String customerinfo = new String(request.getParameter("customerinfo").getBytes("ISO-8859-1"), "UTF-8"); 
         String refer = new String(request.getParameter("refer").getBytes("ISO-8859-1"), "UTF-8");
         
         //当前登录者即为经办人
@@ -296,13 +285,14 @@ public class inputservlet extends HttpServlet {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String record_day = sdf.format(date);
         
-        String sql = "insert into jxc_input (goods_name,volume,price,buytime,recordtime,operator,refer) values(" 
+        String sql = "insert into jxc_input (goods_name,volume,price,buytime,recordtime,operator,customer_info,refer) values(" 
                 + "'" +  goodsname + "'," 
                 +  volume + ","
                 +  price  + ","
                 +  "'" + operation_day + "'," 
                 +  "'" +  record_day  + "',"  
                 +  "'" +  operator  + "',"  
+                +  "'" +  customerinfo  + "',"  
                 +  "'"  +  refer  + "'"  
                 + ")";
  
@@ -328,7 +318,7 @@ public class inputservlet extends HttpServlet {
         //{
             input = new String( names[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
-        String sql = "select id,goods_name, volume, price, buytime,operator,refer from jxc_input where id= " + "'" + input + "'";
+        String sql = "select id,goods_name, volume, price, buytime,operator,customer_info,refer from jxc_input where id= " + "'" + input + "'";
         String json = "{\"data\":[";
         ResultSet result = null;
         try{
@@ -338,10 +328,11 @@ public class inputservlet extends HttpServlet {
             {
                 String id = result.getString("id");
                 String goods_name = result.getString("goods_name");
-                String volume = result.getString("volume");
-                String price = result.getString("price");
+                String volume = String.valueOf(result.getInt("volume"));
+                String price = String.valueOf(result.getInt("price"));
                 String buytime = result.getString("buytime");
                 String operator = result.getString("operator");
+                String customer_info = result.getString("customer_info");
                 String refer = result.getString("refer");
                 
                 //name-value json
@@ -352,6 +343,7 @@ public class inputservlet extends HttpServlet {
                 jsonBuilder.add("price", price);
                 jsonBuilder.add("buytime", buytime);
                 jsonBuilder.add("operator", operator);
+                jsonBuilder.add("customer_info", customer_info==null?"":customer_info);
                 jsonBuilder.add("refer", refer);
                 JsonObject empObj = jsonBuilder.build();
                 

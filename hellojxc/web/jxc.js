@@ -1,4 +1,17 @@
 
+function getloginfo()
+{
+	//获取登录者信息
+	$.getJSON('/hellojxc/loginfo',function(result){
+            //alert("log info " + result.data[0].name_en);
+			$("#account_simple").text(result.data[0].name_en);
+	        $("#account_full").text(result.data[0].name_en + "--" + result.data[0].name_ch);
+			$("#last_login").text("上次登录时间:" + result.data[0].last_login);
+			
+			$("#account_en").text(result.data[0].name_en);
+			$("#account_ch").text(result.data[0].name_ch);
+	}); 
+}
 // list customers
 function list_addcustomer()
 {
@@ -557,6 +570,7 @@ function listinput()
         '     <th>购买日期</th>' + 
         '     <th>记录日期</th>' + 
         '     <th>经办人</th>' + 
+        '     <th>客户信息</th>' + 
         '     <th>备注</th>' + 
         '   </tr>' + 
         '</thead>' + 
@@ -569,6 +583,7 @@ function listinput()
         '     <th>购买日期</th>' + 
         '     <th>记录日期</th>' + 
         '     <th>经办人</th>' + 
+        '     <th>客户信息</th>' +         
         '     <th>备注</th>' +         
         '   </tr>' + 
         '</tfoot>' + 
@@ -728,7 +743,7 @@ function listinput()
 
  function addinput()
 {
-          $("section.content-header").html(
+        $("section.content-header").html(
             '<h1>' +
             '进货管理' +
             ' <small>进货记录添加</small>' +
@@ -755,6 +770,11 @@ function listinput()
 			'<span class="input-group-addon">交易日期</span>' +
 			'<input name="operation_day" id="operation_day"  type="text" class="form-control" style="width:28%">' +
 		'</div>' + 
+		'<br>' +   
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">客户信息</span>' +
+			'<textarea name="customerinfo" class="form-control" style="width:30%"></textarea>' +
+		'</div>' +                 
 		'<br>' +   
  		'<div class="input-group">' +
 			'<span class="input-group-addon">备注  </span>' +
@@ -819,6 +839,11 @@ function listinput()
 		'</div>' + 
 		'<br>' +                 
  		'<div class="input-group">' +
+			'<span class="input-group-addon">客户信息</span>' +
+			'<textarea id="customerinfo" name="customerinfo" class="form-control" style="width:30%"></textarea>' +
+		'</div>' +                   
+		'<br>' +                 
+ 		'<div class="input-group">' +
 			'<span class="input-group-addon">备注  </span>' +
 			'<textarea id="refer" name="refer" class="form-control" style="width:30%"></textarea>' +
 		'</div>' +         
@@ -829,7 +854,7 @@ function listinput()
     $("#buytime").datepicker("option", "dateFormat", "yy-mm-dd");
     
     //重要：改为同步执行，否则多个getJSON的情况下，会数据混乱
-    $.ajaxSettings.async = false;
+    //$.ajaxSettings.async = false;
     //获取货物名称列表
     $.getJSON('/hellojxc/listgoods',function(result){
             $('.selectpicker').selectpicker();
@@ -848,6 +873,7 @@ function listinput()
                 $("#price").val(field[0].price);
                 $("#buytime").val(field[0].buytime).datepicker({ dateFormat: 'yy-mm-dd' });//购买时间
                 $("#operator").val(field[0].operator);
+                $("#customerinfo").val(field[0].customer_info);
                 $("#refer").val(field[0].refer);
                 
                 $(".selectpicker").selectpicker('val',field[0].goods_name);//货物名称选择
@@ -856,6 +882,43 @@ function listinput()
             });
    });
    //恢复设置为异步执行
-   $.ajaxSettings.async = true;
+   //$.ajaxSettings.async = true;
+}
+
+function inputchart()
+{
+    $("section.content-header").html(
+            '<h1>' +
+            '图表统计' +
+            ' <small>进货数据统计分析</small>' +
+             '</h1>'
+    );    
+    $("#target").attr("style","width: 600px;height:400px;");
+    
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('target'));
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: 'ECharts 入门示例'
+        },
+        tooltip: {},
+        legend: {
+            data:['销量']
+        },
+        xAxis: {
+            data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+        },
+        yAxis: {},
+        series: [{
+            name: '销量',
+            type: 'bar',
+            data: [5, 20, 36, 10, 10, 20]
+        }]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);    
 }
   
