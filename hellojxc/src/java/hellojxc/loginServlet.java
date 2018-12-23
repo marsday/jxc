@@ -66,7 +66,7 @@ public class loginServlet extends HttpServlet {
         HttpSession session = request.getSession();
         session.invalidate();
         
-        response.sendRedirect("login.html");
+        //response.sendRedirect("login.html");
         
     }
     private void loginoperation(HttpServletRequest request,HttpServletResponse response)

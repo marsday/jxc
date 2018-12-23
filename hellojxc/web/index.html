@@ -126,7 +126,8 @@ desired effect
                   <a href="#" class="btn btn-default btn-flat">修改密码</a>
                 </div>
                 <div class="pull-right">
-                  <a href="#" class="btn btn-default btn-flat">退出</a>
+                  <!--<a href="#" class="btn btn-default btn-flat">退出</a>-->
+				  <button id="logout" role="button"  class="btn btn-default btn-flat">退出</button>
                 </div>
               </li>
             </ul>
@@ -189,7 +190,8 @@ desired effect
           </ul>
         </li>
         -->
-        <li><a href="index.html"><i class="fa fa-link"></i> <span>客户管理</span></a></li>
+        <!--<li><a href="index.html"><i class="fa fa-link"></i> <span>客户管理</span></a></li>-->
+		<li><a href="index.html"><i class="fa fa-link"></i> <span>库存信息</span></a></li>
         <li><a href="index.html?function=listgoods"><i class="fa fa-link"></i> <span>货物管理</span></a></li> 
         <li><a href="index.html?function=listinput"><i class="fa fa-link"></i> <span>进货管理</span></a></li>
         <li><a href="index.html?function=listoutput"><i class="fa fa-link"></i> <span>出货管理</span></a></li>
@@ -200,8 +202,8 @@ desired effect
               </span>
           </a>
           <ul class="treeview-menu">
-            <li><a href="index.html?function=inputchart">进货图表统计</a></li>
-            <li><a href="index.html?function=inputchart">出货图表统计</a></li>
+			<li><a href="index.html?function=inputchart"><i class="fa fa-bar-chart"></i> 进货图表统计</a></li>
+			<li><a href="index.html?function=inputchart"><i class="fa fa-bar-chart"></i> 出货图表统计</a></li>
           </ul>
         </li>
       </ul>
@@ -233,6 +235,7 @@ desired effect
         | Your Page Content Here |
         -------------------------->
         <div id="target"></div>
+        <div id="charttarget"></div>		
     </section>
     <!-- /.content -->
   </div>
@@ -373,10 +376,18 @@ desired effect
 		//获取登录者信息
 		getloginfo();	
 		
+		//登录退出设置
+		$("#logout").on('click', function(){
+			  $.get("/hellojxc/logout",function(data,status){
+				//alert("状态: " + status);
+				window.location.href="login.html";
+			  });
+		});
+	
         var first = getUrlVars()["function"]; 
         switch(first)
         {
-            case "listinput":
+            case "listinput"://进货管理
             {
                 listinput();
                 break;
@@ -390,6 +401,22 @@ desired effect
             {
                 var id = getUrlVars()["id"]; 
                 showinput(id);
+                break;
+            }
+			case "listoutput"://出货管理
+            {
+                listoutput();
+                break;
+            }
+            case "addoutput":
+            {
+                addoutput();
+                break;
+            }
+            case "showoutput":
+            {
+                var id = getUrlVars()["id"]; 
+                showoutput(id);
                 break;
             }
             case "listgoods":
@@ -427,13 +454,10 @@ desired effect
                 inputchart();
                 break;
             }
-            default://客户信息一览
+            default:
             {
-                //list curstomers
-                //clear_target();
-                //$("#target").load("listcustomers.html", function(){
-               //});
-                list_addcustomer();
+                //list_addcustomer();//客户信息一览
+				storeinfo();//库存信息
                 break;
             }
                 

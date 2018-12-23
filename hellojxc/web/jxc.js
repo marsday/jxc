@@ -565,9 +565,9 @@ function listinput()
         '   <tr>' + 
         '     <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
         '     <th>货物名称</th>' + 
-        '     <th>数量</th>' + 
-        '     <th>总价</th>' + 
-        '     <th>购买日期</th>' + 
+        '     <th>买入数量</th>' + 
+        '     <th>买入总价</th>' + 
+        '     <th>买入日期</th>' + 
         '     <th>记录日期</th>' + 
         '     <th>经办人</th>' + 
         '     <th>客户信息</th>' + 
@@ -578,9 +578,9 @@ function listinput()
         '   <tr>' + 
         '     <th></th>' + 
         '     <th>货物名称</th>' + 
-        '     <th>数量</th>' + 
-        '     <th>总价</th>' + 
-        '     <th>购买日期</th>' + 
+        '     <th>买入数量</th>' + 
+        '     <th>买入总价</th>' + 
+        '     <th>买入日期</th>' + 
         '     <th>记录日期</th>' + 
         '     <th>经办人</th>' + 
         '     <th>客户信息</th>' +         
@@ -757,12 +757,12 @@ function listinput()
                 '</div>' +  
 		'<br>' +                
 		'<div class="input-group">' + 
-			'<span class="input-group-addon">数量  </span>' +
+			'<span class="input-group-addon">买入数量</span>' +
 			'<input name="volume" type="text" class="form-control" style="width:30%">' +
 		'</div>' +                
 		'<br>' +
 		'<div class="input-group">' +
-			'<span class="input-group-addon">总价  </span>' +
+			'<span class="input-group-addon">买入总价</span>' +
 			'<input name="price" type="text" class="form-control" style="width:30%">' +
 		'</div>' + 
 		'<br>' + 
@@ -777,7 +777,7 @@ function listinput()
 		'</div>' +                 
 		'<br>' +   
  		'<div class="input-group">' +
-			'<span class="input-group-addon">备注  </span>' +
+			'<span class="input-group-addon">备注信息</span>' +
 			'<textarea name="refer" class="form-control" style="width:30%"></textarea>' +
 		'</div>' + 
 		'<br>' +                
@@ -819,12 +819,12 @@ function listinput()
                 '</div>' +  
 		'<br>' +                
 		'<div class="input-group">' + 
-			'<span class="input-group-addon">数量  </span>' +
+			'<span class="input-group-addon">买入数量</span>' +
 			'<input id="volume" name="volume" type="text" class="form-control" style="width:30%">' +
 		'</div>' +                
 		'<br>' +
 		'<div class="input-group">' +
-			'<span class="input-group-addon">总价  </span>' +
+			'<span class="input-group-addon">买入总价</span>' +
 			'<input id="price" name="price" type="text" class="form-control" style="width:30%">' +
 		'</div>' + 
 		'<br>' + 
@@ -844,7 +844,7 @@ function listinput()
 		'</div>' +                   
 		'<br>' +                 
  		'<div class="input-group">' +
-			'<span class="input-group-addon">备注  </span>' +
+			'<span class="input-group-addon">备注信息</span>' +
 			'<textarea id="refer" name="refer" class="form-control" style="width:30%"></textarea>' +
 		'</div>' +         
 		'<br>' +
@@ -885,6 +885,502 @@ function listinput()
    //$.ajaxSettings.async = true;
 }
 
+function listoutput()
+{
+  $("section.content-header").html(
+            '<h1>' +
+            '出货管理' +
+            ' <small>出货一览</small>' +
+             '</h1>'
+        );      
+      $("#target").html('<form id="frm-example">'+
+           // '<div class="container">' + 
+           '<a class="btn btn-primary" id="add" href="index.html?function=addoutput" role="button">添加</a> ' + "\n" + 
+           ' <button  id="del" role="button" class="btn btn-danger">删除</button>' + "\n" + 
+           ' <button  id="update" role="button" class="btn btn-primary">更新</button>' + 
+           ' <button  id="query" role="button" class="btn btn-primary">查询</button>' + 
+        '<br>' + 
+        '<br>' + 
+      '<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
+      '<p>结束日期：<input type="text" id="datepicker_end" name="datepicker_end"></p>'+
+     '<br>' + 
+       ' <table id="example" class="display select" width="100%" cellspacing="0">' + 
+       ' <thead>' + 
+        '   <tr>' + 
+        '     <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
+        '     <th>货物名称</th>' + 
+        '     <th>卖出数量</th>' + 
+        '     <th>卖出总价</th>' + 
+        '     <th>卖出日期</th>' + 
+        '     <th>记录日期</th>' + 
+        '     <th>经办人</th>' + 
+        '     <th>客户信息</th>' + 
+        '     <th>备注</th>' + 
+        '   </tr>' + 
+        '</thead>' + 
+        '<tfoot>' + 
+        '   <tr>' + 
+        '     <th></th>' + 
+        '     <th>货物名称</th>' + 
+        '     <th>卖出数量</th>' + 
+        '     <th>卖出总价</th>' + 
+        '     <th>卖出日期</th>' + 
+        '     <th>记录日期</th>' + 
+        '     <th>经办人</th>' + 
+        '     <th>客户信息</th>' +         
+        '     <th>备注</th>' +         
+        '   </tr>' + 
+        '</tfoot>' + 
+         '</table>' + 
+    '</form>'
+    );
+
+    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth(), 1);
+    
+    $("#datepicker_start").datepicker();
+    $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_start").val(ld.getFullYear() + '-' + (ld.getMonth() + 1) + '-' + ld.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+    $("#datepicker_end").datepicker();
+    $("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+    var table;
+    var refresh = function() {
+        var startday=$("#datepicker_start").val();
+        var endday=$("#datepicker_end").val();
+        //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+        table = $('#example').dataTable({
+              searching: false,
+             'ajax': {
+                'url': '/hellojxc/listoutput',
+                'type': 'POST'
+             },
+             'fnServerParams':function(aoData){
+               aoData.push(
+                       {
+                         "name": "startday",
+                         "value": startday?startday:null
+                       },
+                       {
+                           "name":"endday",
+                           "value": endday?endday:null
+                        }
+               );  
+             },
+             'columnDefs': [
+                   {
+                       'targets': 0,
+                       'searchable': false,
+                       'orderable': false,
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
+                       }
+                   }
+               ],
+             'order': [[1, 'asc']]
+           });       
+    }
+    //加载页面时初始化datatable
+    refresh();
+    
+    $("#del").on('click', function(){
+        $("#frm-example").attr("action","/hellojxc/deloutput");
+        $("#frm-example").attr("method","POST");
+        $("#frm-example").submit();
+    });
+
+    $("#update").on('click', function(){
+      //只获取第一个被选取的，如果没有，则出提示信息
+      var isok = 0;
+      //var form = this;
+      var getparam="index.html?function=showoutput&&id=";
+      // Iterate over all checkboxes in the table
+      table.$('input[type="checkbox"]').each(function(){
+         // If checkbox doesn't exist in DOM
+        //if(!$.contains(document, this)){ //该判断总是无效，所以去除；原因不明
+            // If checkbox is checked
+            if(this.checked){
+               // Create a hidden element
+               getparam+=this.value;
+               //alert('URL is' + getparam);
+               isok=1;
+               return false;// return false 相当于 break;只要获取第一个即可； return true; = continue;
+            }
+         //}
+      });
+      if(isok == 0)
+      {
+        alert("请选取需要更新的记录");
+        return false;
+     }
+       window.location.href=getparam;
+       //window.location.replace(getparam);
+       event.preventDefault();
+        //return false;//这里必须返回false，否则会触发submit事件；原因不明
+       //$(location).attr('href', getparam);
+  });
+
+    $("#query").on('click', function(){ 
+       if(table)
+       {
+           table.fnDestroy();
+           refresh();
+       }
+       return false;
+     });
+   // Handle click on "Select all" control
+   $('#example-select-all').on('click', function(){
+      // Get all rows with search applied
+      var t = $('#example').DataTable();
+      var rows = t.rows({ 'search': 'applied' }).nodes();
+      // Check/uncheck checkboxes for all rows in the table
+      $('input[type="checkbox"]', rows).prop('checked', this.checked);
+   });
+
+   // Handle click on checkbox to set state of "Select all" control
+   $('#example tbody').on('change', 'input[type="checkbox"]', function(){
+      // If checkbox is not checked
+      if(!this.checked){
+         var el = $('#example-select-all').get(0);
+         // If "Select all" control is checked and has 'indeterminate' property
+         if(el && el.checked && ('indeterminate' in el)){
+            // Set visual state of "Select all" control
+            // as 'indeterminate'
+            el.indeterminate = true;
+         }
+      }
+   });
+
+   // Handle form submission event
+   $('#frm-example').on('submit', function(e){
+      //alert("test");
+      var form = this;
+      var anyselected = 0;
+      // Iterate over all checkboxes in the table
+      table.$('input[type="checkbox"]').each(function(){
+         // If checkbox doesn't exist in DOM
+        // if(!$.contains(document, this)){
+            // If checkbox is checked
+            if(this.checked){
+               // Create a hidden element
+               anyselected = 1;
+               $(form).append(
+                  $('<input>')
+                     .attr('type', 'hidden')
+                     .attr('name', this.name)
+                     .val(this.value)
+               );
+            }
+        // }
+      });
+      
+      if(anyselected == 0)
+      {
+          alert("请选取需要删除的记录");
+          event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+          return false;//返回false，取消submit
+      }
+   });
+}
+
+ function addoutput()
+{
+        $("section.content-header").html(
+            '<h1>' +
+            '出货管理' +
+            ' <small>出货记录添加</small>' +
+             '</h1>'
+        ); 
+
+	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/addoutput" method="POST">'+
+                '<div class="input-group">' +	
+			'<span class="input-group-addon">货物名称</span>' +
+			'<select name="goodsname" class="selectpicker" data-style="btn-info"></select>' +
+                '</div>' +  
+		'<br>' +                
+		'<div class="input-group">' + 
+			'<span class="input-group-addon">卖出数量</span>' +
+			'<input name="volume" type="text" class="form-control" style="width:30%">' +
+		'</div>' +                
+		'<br>' +
+		'<div class="input-group">' +
+			'<span class="input-group-addon">卖出总价</span>' +
+			'<input name="price" type="text" class="form-control" style="width:30%">' +
+		'</div>' + 
+		'<br>' + 
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">交易日期</span>' +
+			'<input name="operation_day" id="operation_day"  type="text" class="form-control" style="width:28%">' +
+		'</div>' + 
+		'<br>' +   
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">客户信息</span>' +
+			'<textarea name="customerinfo" class="form-control" style="width:30%"></textarea>' +
+		'</div>' +                 
+		'<br>' +   
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">备注信息</span>' +
+			'<textarea name="refer" class="form-control" style="width:30%"></textarea>' +
+		'</div>' + 
+		'<br>' +                
+		'<button type="submit" class="btn btn-default">提交</button>');
+        //初始化交易日期：默认为当天
+        var d = new Date();
+        $("#operation_day").datepicker();
+        $("#operation_day").datepicker("option", "dateFormat", "yy-mm-dd");
+        $("#operation_day").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+        //获取货物名称列表
+        $.getJSON('/hellojxc/listgoods',function(result){
+            $('.selectpicker').selectpicker();
+            for(var i=0;i<result.data.length;i++)
+            {
+                if(i===0)
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][0] +"</option>");
+                else
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+            }
+            $('.selectpicker').selectpicker('refresh');
+            $('.selectpicker').selectpicker('render');
+        });
+}
+
+ function showoutput(id)
+{
+      $("section.content-header").html(
+            '<h1>' +
+            '出货管理' +
+            ' <small>出货记录更新</small>' +
+             '</h1>'
+        ); 
+    	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/updateoutput" method="POST">'+
+		'<input type="hidden" id="id" name="id">' +
+                '<div class="input-group">' +	
+			'<span class="input-group-addon">货物名称</span>' +
+			'<select name="goodsname" class="selectpicker" data-style="btn-info"></select>' +
+                '</div>' +  
+		'<br>' +                
+		'<div class="input-group">' + 
+			'<span class="input-group-addon">卖出数量</span>' +
+			'<input id="volume" name="volume" type="text" class="form-control" style="width:30%">' +
+		'</div>' +                
+		'<br>' +
+		'<div class="input-group">' +
+			'<span class="input-group-addon">卖出总价</span>' +
+			'<input id="price" name="price" type="text" class="form-control" style="width:30%">' +
+		'</div>' + 
+		'<br>' + 
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">交易日期</span>' +
+			'<input id="buytime" name="buytime" type="text" class="form-control" style="width:28%">' +
+		'</div>' + 
+		'<br>' +   
+		'<div class="input-group">' +
+			'<span class="input-group-addon">经办人</span>' +
+			'<input id="operator" name="operator" type="text" readonly class="form-control" style="width:30%">' +
+		'</div>' + 
+		'<br>' +                 
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">客户信息</span>' +
+			'<textarea id="customerinfo" name="customerinfo" class="form-control" style="width:30%"></textarea>' +
+		'</div>' +                   
+		'<br>' +                 
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">备注信息</span>' +
+			'<textarea id="refer" name="refer" class="form-control" style="width:30%"></textarea>' +
+		'</div>' +         
+		'<br>' +
+		'<button type="submit" class="btn btn-default">提交</button>');  
+    //购买日期初始化
+    $("#buytime").datepicker();
+    $("#buytime").datepicker("option", "dateFormat", "yy-mm-dd");
+    
+    //重要：改为同步执行，否则多个getJSON的情况下，会数据混乱
+    //$.ajaxSettings.async = false;
+    //获取货物名称列表
+    $.getJSON('/hellojxc/listgoods',function(result){
+            $('.selectpicker').selectpicker();
+            for(var i=0;i<result.data.length;i++)
+            {
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+            }
+            $('.selectpicker').selectpicker('refresh');
+            $('.selectpicker').selectpicker('render');
+    });  	
+    var geturl = "/hellojxc/getoutput?id=" + id;
+    $.getJSON(geturl,function(result){
+            $.each(result, function(i, field){//就一条json数据，每条json数据里也只有一条记录
+                $("#id").val(field[0].id);
+                $("#volume").val(field[0].volume);   
+                $("#price").val(field[0].price);
+                $("#buytime").val(field[0].buytime).datepicker({ dateFormat: 'yy-mm-dd' });//购买时间
+                $("#operator").val(field[0].operator);
+                $("#customerinfo").val(field[0].customer_info);
+                $("#refer").val(field[0].refer);
+                
+                $(".selectpicker").selectpicker('val',field[0].goods_name);//货物名称选择
+                $('.selectpicker').selectpicker('refresh');
+               return false;
+            });
+   });
+   //恢复设置为异步执行
+   //$.ajaxSettings.async = true;
+}
+
+
+function storeinfo()
+{
+    $("section.content-header").html(
+            '<h1>' +
+            '库存信息' +
+            ' <small>库存一览</small>' +
+             '</h1>'
+    );
+
+    $("#target").html('<form id="frm-example">'+
+        ' <button  id="query" role="button" class="btn btn-primary">查询</button>' + 
+        '<br>' + 
+        '<br>' + 
+		'<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
+		'<p>结束日期：<input type="text" id="datepicker_end" name="datepicker_end"></p>'+
+		'<br>' + 
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">货物名称</span>' +
+			'<select id="goodsname" name="goodsname" class="selectpicker" data-style="btn-info"></select>' +
+        '</div>' + 	
+		'<br>' + 		
+		' <table id="example" class="display select" width="100%" cellspacing="0">' + 
+		' <thead>' + 
+        '   <tr>' + 
+		'     <th>序号</th>' + 
+        '     <th>货物名称</th>' + 
+        '     <th>库存(进货-出货)</th>' + 
+        '   </tr>' + 
+        '</thead>' + 
+        '<tfoot>' + 
+        '   <tr>' + 
+		'     <th>序号</th>' + 		
+        '     <th>货物名称</th>' + 
+        '     <th>库存(进货-出货)</th>' +         
+        '   </tr>' + 
+        '</tfoot>' + 
+         '</table>' + 
+		'</form>'
+    );
+
+	//获取货物名称列表
+	$.getJSON('/hellojxc/listgoods',function(result){
+		$('.selectpicker').selectpicker();
+		$('.selectpicker').append("<option value=\"all\" selected=\"selected\">all</option>");
+		for(var i=0;i<result.data.length;i++)
+		{
+			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+			/*
+			if(i===0)
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][0] +"</option>");
+            else
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+			*/
+		}
+		$('.selectpicker').selectpicker('refresh');
+		$('.selectpicker').selectpicker('render');
+	});
+		
+    var d = new Date(), ld = new Date(d.getFullYear(), 0, 1);
+    
+    $("#datepicker_start").datepicker();
+    $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_start").val(ld.getFullYear() + '-' + (ld.getMonth() + 1) + '-' + ld.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+    $("#datepicker_end").datepicker();
+    $("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+
+    var table;
+    var refresh = function() {
+        var startday=$("#datepicker_start").val();
+        var endday=$("#datepicker_end").val();
+		var goods_name=$("#goodsname").val();
+        //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+        table = $('#example').dataTable({
+              searching: false,
+             'ajax': {
+                'url': '/hellojxc/store',
+                'type': 'POST'
+             },
+             'fnServerParams':function(aoData){
+               aoData.push(
+                       {
+                         "name": "startday",
+                         "value": startday?startday:null
+                       },
+                       {
+                           "name":"endday",
+                           "value": endday?endday:null
+                       },
+					   {
+						   "name":"goods_name",
+						   "value":goods_name
+					   }
+               );  
+             },
+             'order': [[0, 'asc']]
+           });  
+
+		//获取DataTable的查询结果json数据
+		var api_table = $('#example').DataTable();
+		var json = api_table.ajax.json();
+		var name_array=new Array(json.data.length); 
+		var volume_array=new Array(json.data.length); 
+		for(var i=0;i<json.data.length;i++)
+		{
+			name_array[i] = json.data[i][1];
+			volume_array[i] = json.data[i][2];
+		}
+		
+		$("#charttarget").attr("style","width: 600px;height:400px;");
+		
+		// 基于准备好的dom，初始化echarts实例
+		var myChart = echarts.init(document.getElementById('charttarget'));
+
+		// 指定图表的配置项和数据
+		var option = {
+			title: {
+				text: '库存一览'
+			},
+			tooltip: {},
+			legend: {
+				data:['库存']
+			},
+			xAxis: {
+				data: name_array//["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+			},
+			yAxis: {},
+			series: [{
+				name: '库存',
+				type: 'bar',
+				data: volume_array//[5, 20, 36, 10, 10, 20]
+			}]
+		};
+
+		// 使用刚指定的配置项和数据显示图表。
+		myChart.setOption(option); 			   
+    }
+    //加载页面时初始化datatable
+    refresh();	
+	
+	$("#query").on('click', function(){ 
+	if(table)
+	{
+		table.fnDestroy();
+		refresh();
+	}
+	return false;
+    });
+	
+}
 function inputchart()
 {
     $("section.content-header").html(
