@@ -1229,13 +1229,50 @@ function listoutput()
    //$.ajaxSettings.async = true;
 }
 
+function inputchart()
+{
+    $("section.content-header").html(
+            '<h1>' +
+            '图表统计' +
+            ' <small>进货数据统计分析</small>' +
+             '</h1>'
+    );    
+    $("#target").attr("style","width: 600px;height:400px;");
+    
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('target'));
 
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: 'ECharts 入门示例'
+        },
+        tooltip: {},
+        legend: {
+            data:['销量']
+        },
+        xAxis: {
+            data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+        },
+        yAxis: {},
+        series: [{
+            name: '销量',
+            type: 'bar',
+            data: [5, 20, 36, 10, 10, 20]
+        }]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);    
+}
+  
+  
 function storeinfo()
 {
     $("section.content-header").html(
             '<h1>' +
-            '库存信息' +
-            ' <small>库存一览</small>' +
+            '库存信息统计' +
+            ' <small>可核销货物库存一览</small>' +
              '</h1>'
     );
 
@@ -1381,40 +1418,176 @@ function storeinfo()
     });
 	
 }
-function inputchart()
+
+function finabyuserchart()
 {
     $("section.content-header").html(
             '<h1>' +
-            '图表统计' +
-            ' <small>进货数据统计分析</small>' +
+            '财务收支统计' +
+            ' <small>财务收支一览</small>' +
              '</h1>'
-    );    
-    $("#target").attr("style","width: 600px;height:400px;");
+    );
+
+    $("#target").html('<form id="frm-example">'+
+        ' <button  id="query" role="button" class="btn btn-primary">查询</button>' + 
+        '<br>' + 
+        '<br>' + 
+		'<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
+		'<p>结束日期：<input type="text" id="datepicker_end" name="datepicker_end"></p>'+
+		'<br>' + 
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">经办人名称</span>' +
+			'<select id="usernames" name="usernames" class="selectpicker" data-style="btn-info"></select>' +
+        '</div>' + 	
+		'<br>' + 		
+		' <table id="example" class="display select" width="100%" cellspacing="0">' + 
+		' <thead>' + 
+        '   <tr>' + 
+		'     <th>序号</th>' + 
+        '     <th>经办人名称</th>' + 
+        '     <th>支出</th>' + 
+		'     <th>收入</th>' + 
+        '     <th>净收入(收入-支出)</th>' + 		
+        '   </tr>' + 
+        '</thead>' + 
+        '<tfoot>' + 
+        '   <tr>' + 
+		'     <th>序号</th>' + 		
+        '     <th>经办人名称</th>' + 
+        '     <th>支出</th>' + 
+		'     <th>收入</th>' + 
+        '     <th>净收入(收入-支出)</th>' +        
+        '   </tr>' + 
+        '</tfoot>' + 
+         '</table>' + 
+		'</form>'
+    );
+
+	//获取经办人名称列表
+	$.getJSON('/hellojxc/listusers',function(result){
+		$('.selectpicker').selectpicker();
+		$('.selectpicker').append("<option value=\"all\" selected=\"selected\">all</option>");
+		for(var i=0;i<result.data.length;i++)
+		{
+			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+			/*
+			if(i===0)
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][0] +"</option>");
+            else
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+			*/
+		}
+		$('.selectpicker').selectpicker('refresh');
+		$('.selectpicker').selectpicker('render');
+	});
+		
+    var d = new Date(), ld = new Date(d.getFullYear(), 0, 1);
     
-    // 基于准备好的dom，初始化echarts实例
-    var myChart = echarts.init(document.getElementById('target'));
+    $("#datepicker_start").datepicker();
+    $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_start").val(ld.getFullYear() + '-' + (ld.getMonth() + 1) + '-' + ld.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+    $("#datepicker_end").datepicker();
+    $("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
 
-    // 指定图表的配置项和数据
-    var option = {
-        title: {
-            text: 'ECharts 入门示例'
-        },
-        tooltip: {},
-        legend: {
-            data:['销量']
-        },
-        xAxis: {
-            data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
-        },
-        yAxis: {},
-        series: [{
-            name: '销量',
-            type: 'bar',
-            data: [5, 20, 36, 10, 10, 20]
-        }]
-    };
+    var table;
+    var refresh = function() {
+        var startday=$("#datepicker_start").val();
+        var endday=$("#datepicker_end").val();
+		var usernames=$("#usernames").val();
+        //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+        table = $('#example').dataTable({
+              searching: false,
+             'ajax': {
+                'url': '/hellojxc/finabyuser',
+                'type': 'POST'
+             },
+             'fnServerParams':function(aoData){
+               aoData.push(
+                       {
+                         "name": "startday",
+                         "value": startday?startday:null
+                       },
+                       {
+                           "name":"endday",
+                           "value": endday?endday:null
+                       },
+					   {
+						   "name":"usernames",
+						   "value":usernames
+					   }
+               );  
+             },
+             'order': [[0, 'asc']]
+           });  
 
-    // 使用刚指定的配置项和数据显示图表。
-    myChart.setOption(option);    
+		//获取DataTable的查询结果json数据
+		var api_table = $('#example').DataTable();
+		var json = api_table.ajax.json();
+		var name_array=new Array(json.data.length); 
+		var out_array=new Array(json.data.length); 
+		var in_array=new Array(json.data.length); 
+		var net_array=new Array(json.data.length); 
+		for(var i=0;i<json.data.length;i++)
+		{
+			name_array[i] = json.data[i][1];
+			out_array[i] = json.data[i][2];
+			in_array[i] = json.data[i][3];
+			net_array[i] = json.data[i][4];
+		}
+		
+		$("#charttarget").attr("style","width: 600px;height:400px;");
+		
+		// 基于准备好的dom，初始化echarts实例
+		var myChart = echarts.init(document.getElementById('charttarget'));
+
+		// 指定图表的配置项和数据
+		var option = {			
+			title: {
+				text: '收支一览'
+			},
+			
+			tooltip: {},
+			legend: {
+				data:['支出','收入','净收入']
+			},
+			xAxis: {
+				data: name_array
+			},
+			yAxis: {},
+			series: [
+			{
+				name: '支出',
+				type: 'bar',
+				data: out_array
+			},
+						{
+				name: '收入',
+				type: 'bar',
+				data: in_array
+			},
+						{
+				name: '净收入',
+				type: 'bar',
+				data: net_array
+			}
+			]
+		};
+
+		// 使用刚指定的配置项和数据显示图表。
+		myChart.setOption(option); 			   
+    }
+    //加载页面时初始化datatable
+    refresh();	
+	
+	$("#query").on('click', function(){ 
+	if(table)
+	{
+		table.fnDestroy();
+		refresh();
+	}
+	return false;
+    });
+	
 }
-  

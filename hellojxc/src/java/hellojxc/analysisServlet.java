@@ -28,9 +28,28 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author marsday
  */
-@WebServlet(name = "analysisServlet", urlPatterns = {"/store","/fina"})
+@WebServlet(name = "analysisServlet", urlPatterns = {"/store","/finabygoods","/finabyuser"})
 public class analysisServlet extends HttpServlet {
-
+    public class FinaVolume {
+        public String goodsname;       
+        public int in_volume;    
+        public int out_volume;
+        public int net_volume;
+    };
+    public class FinaPrice {
+        public String goodsname;       
+        public int in_price;    
+        public int out_price;
+        public int net_price;
+    };
+    
+     public class FinaUser {
+        public String username;       
+        public int in_price;    
+        public int out_price;
+        public int net_price;
+    };   
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -90,8 +109,10 @@ public class analysisServlet extends HttpServlet {
         if (uri.endsWith("/store")) {
             //return JSON
             storeOperation(request,response);
-        }else if(uri.endsWith("/fina")) {
-            finaOperation(request,response);
+        }else if(uri.endsWith("/finabygoods")) {
+            finabygoodsOperation(request,response);
+        }else if(uri.endsWith("/finabyuser")) {
+            finabyuserOperation(request,response);
         }else
             processRequest(request, response);
     }
@@ -218,8 +239,9 @@ public class analysisServlet extends HttpServlet {
         writer.println(json);
         writer.flush();       
     }
+    
     //出入货物的金额统计：所有货物(核销类，非核销类)都需要出入财务管理
-   private void finaOperation(HttpServletRequest request, HttpServletResponse response)
+   private void finabygoodsOperation(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
     /*
     select goods_name,sum(price)as in_volume from jxc_input where del_flag=0 and goods_name in (select name from jxc_goods where del_flag=0)  group by goods_name
@@ -328,7 +350,133 @@ public class analysisServlet extends HttpServlet {
         writer.println(json);
         writer.flush();       
     }
-    /**
+    
+    //经办人的财务统计
+   private void finabyuserOperation(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+    /*
+    select operator,sum(price)as in_volume from jxc_input where del_flag=0 and operator in (select name_ch from jxc_user where del_flag = 0 ) group by operator
+    select operator,sum(price)as out_volume from jxc_output where del_flag=0 and operator in (select name_ch from jxc_user where del_flag = 0 ) group by operator 
+       */ 
+        String startday = new String(request.getParameter("startday").getBytes("UTF-8"), "UTF-8");
+        String endday = new String(request.getParameter("endday").getBytes("UTF-8"), "UTF-8");
+        String user_names = new String(request.getParameter("usernames").getBytes("UTF-8"), "UTF-8");
+        
+        String input_sql;
+        String output_sql;
+
+        if(user_names.equals("all"))
+        {
+            input_sql = "select operator,sum(price)as in_price from jxc_input where"
+                    + " buytime >= '"+ startday + "'"
+                    + " and buytime <= '"+ endday + "'"
+                    + "and del_flag=0 and operator in (select name_ch from jxc_user where del_flag = 0 )  group by operator";
+            output_sql = "select operator,sum(price)as out_price from jxc_output where" 
+                    + " buytime >= '"+ startday + "'"
+                    + " and buytime <= '"+ endday + "'"                    
+                    +" and del_flag=0 and operator in (select name_ch from jxc_user where del_flag = 0 ) group by operator";
+        }else
+        {
+            input_sql = "select operator,sum(price)as in_price from jxc_input where "
+                    + " buytime >= '"+ startday + "'"
+                    + " and buytime <= '"+ endday + "'"                    
+                    +" and del_flag=0 and operator = '" +user_names+ "'";
+            output_sql = "select operator,sum(price)as out_price from jxc_output where "
+                   + " buytime >= '"+ startday + "'"
+                   + " and buytime <= '"+ endday + "'"                        
+                   +" and del_flag=0 and operator = '" +user_names+ "'";
+        }
+ 
+        Map store = new HashMap();
+        //获取进货金额(负数)
+        ResultSet in_result = null;
+        try{
+            in_result = DBHelper.getDbHelper().executeQuery(input_sql);
+            while(in_result.next())
+            {
+                String name = in_result.getString("operator");
+                int price = in_result.getInt("in_price");
+                FinaUser detail = new FinaUser();
+                detail.username = name;
+                detail.in_price = price;
+                detail.out_price = 0;
+                detail.net_price = 0;
+                store.put(name,detail);
+            }
+            if(in_result != null)
+                in_result.close();            
+        }catch(Exception err)
+        {
+            err.printStackTrace();
+        }
+
+        //获取出货金额(正数),更新净收入
+        ResultSet out_result = null;
+        try{
+            out_result = DBHelper.getDbHelper().executeQuery(output_sql);
+            while(out_result.next())
+            {
+                String name = out_result.getString("operator");
+                int price = out_result.getInt("out_price"); 
+                if(store.containsKey(name))
+                {
+                    //已有进货信息，更新存货量
+                    FinaUser detail = (FinaUser)store.get(name);
+                    detail.out_price = price;
+                    detail.net_price = detail.out_price - detail.in_price;
+                    store.put(name, detail);
+                }else
+                {
+                    FinaUser detail = new FinaUser();
+                    detail.username = name;
+                    detail.in_price = 0;
+                    detail.out_price = price;
+                    detail.net_price = detail.out_price - detail.in_price;
+                   store.put(name,detail); 
+                }
+            }             
+            if(out_result != null)
+                out_result.close();             
+        }catch(Exception err)
+        {
+            err.printStackTrace();
+        }
+        
+        String json = "{\"data\":[";
+        Iterator iter = store.keySet().iterator();
+        int index=1;
+        while (iter.hasNext()) {
+            String name = (String)iter.next();
+            FinaUser detail = (FinaUser)store.get(name);
+
+            JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            arrayBuilder.add(String.valueOf(index));
+            arrayBuilder.add(name);
+            arrayBuilder.add(String.valueOf(detail.in_price));
+            arrayBuilder.add(String.valueOf(detail.out_price));
+            arrayBuilder.add(String.valueOf(detail.net_price));
+            
+            JsonArray empArray = arrayBuilder.build();
+            StringWriter strWtr = new StringWriter();
+            JsonWriter jsonWtr = Json.createWriter(strWtr);
+            jsonWtr.writeArray(empArray);
+            jsonWtr.close();
+            if(index !=1)
+                json+=",";
+            json += strWtr.toString(); 
+            
+            index++;
+        }        
+        json += "]}";
+        
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");        
+        PrintWriter writer = response.getWriter();
+        writer.println(json);
+        writer.flush();       
+    }
+       
+   /**
      * Returns a short description of the servlet.
      *
      * @return a String containing servlet description

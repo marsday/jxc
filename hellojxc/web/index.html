@@ -191,10 +191,14 @@ desired effect
         </li>
         -->
         <!--<li><a href="index.html"><i class="fa fa-link"></i> <span>客户管理</span></a></li>-->
-		<li><a href="index.html"><i class="fa fa-link"></i> <span>库存信息</span></a></li>
+		<li><a href="index.html"><i class="fa fa-bar-chart"></i> <span>库存信息统计</span></a></li>
         <li><a href="index.html?function=listgoods"><i class="fa fa-link"></i> <span>货物管理</span></a></li> 
         <li><a href="index.html?function=listinput"><i class="fa fa-link"></i> <span>进货管理</span></a></li>
         <li><a href="index.html?function=listoutput"><i class="fa fa-link"></i> <span>出货管理</span></a></li>
+		<li><a href="index.html?function=inputchart"><i class="fa fa-bar-chart"></i> <span>进货图表统计</span></a></li>
+		<li><a href="index.html?function=inputchart"><i class="fa fa-bar-chart"></i> <span>出货图表统计</span></a></li>
+		<li><a href="index.html?function=finabyuserchart"><i class="fa fa-bar-chart"></i> <span>财务收支统计</span></a></li>
+		<!--
         <li class="treeview">
           <a href="#"><i class="fa fa-link"></i> <span>图表统计</span>
             <span class="pull-right-container">
@@ -206,6 +210,7 @@ desired effect
 			<li><a href="index.html?function=inputchart"><i class="fa fa-bar-chart"></i> 出货图表统计</a></li>
           </ul>
         </li>
+		-->
       </ul>
       <!-- /.sidebar-menu -->
     </section>
@@ -436,7 +441,8 @@ desired effect
                 var id = getUrlVars()["id"]; 
                 show_updategoods(id);
                 break;
-            }           
+            }
+/*			
             case "addcustomer"://添加客户信息
             {
                 show_addcustomer();
@@ -449,11 +455,17 @@ desired effect
                
                 break;
             }
-            case "inputchart"://进货图表统计
+*/
+            case "finabyuserchart"://经办人财务收支统计
             {
-                inputchart();
+                finabyuserchart();
                 break;
             }
+            case "finabygoodschart"://货物财务收支统计
+            {
+                //finabygoodschart();
+                break;
+            }			
             default:
             {
                 //list_addcustomer();//客户信息一览

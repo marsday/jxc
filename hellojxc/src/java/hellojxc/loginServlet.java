@@ -29,7 +29,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author marsday
  */
-@WebServlet(name = "loginServlet", urlPatterns = {"/login","/logout","/loginfo"})
+@WebServlet(name = "loginServlet", urlPatterns = {"/login","/logout","/loginfo","/listusers"})
 public class loginServlet extends HttpServlet {
 
     /**
@@ -78,7 +78,27 @@ public class loginServlet extends HttpServlet {
         String user = request.getParameter("user");
         String password = request.getParameter("password");
         
-        //String sql = "select * from jxc_user where name_en='liqiang' and password='123456' and del_flag=0";
+        //内设超级账户
+        if(user.compareTo("admin") == 0)
+        {
+           if(password.compareTo("654321") == 0)
+           {
+                HttpSession session = request.getSession();
+                AccountInfo info = new AccountInfo();
+                info.name_en = "admin";
+                info.name_ch = "管理者";
+                info.last_login = "----";
+       
+                session.setAttribute("account", info);
+                session.setMaxInactiveInterval(10*60);//10分钟     
+                response.sendRedirect("index.html");
+           }else
+            {
+                //TODO 登录error
+                response.sendRedirect("login_error.html");
+            }
+           return;
+        }
         String sql = "select * from jxc_user where name_en='" + user + "'" + " and password='" + password + "'" + "and del_flag=0";
         ResultSet result = null;
         try{
@@ -154,6 +174,62 @@ public class loginServlet extends HttpServlet {
         writer.flush();
         
     }
+  
+    private void listoperation(HttpServletRequest request,HttpServletResponse response)
+            throws IOException, ServletException {
+        
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+
+        String json = "{\"data\":[";
+     
+        String sql = "select name_en, password, name_ch, last_login from jxc_user where del_flag=0";
+        ResultSet result = null;
+        int index = 0;       
+        try{
+            result = DBHelper.getDbHelper().executeQuery(sql);
+            while(result.next())
+            {
+                //String id = result.getString("id");
+                String name_ch = result.getString("name_ch");
+                String name_en = result.getString("name_en");
+                String last_login = result.getString("last_login");
+                
+                // value array json
+                JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+                //arrayBuilder.add(id);
+                arrayBuilder.add(name_ch);
+                arrayBuilder.add(name_en);
+                arrayBuilder.add(last_login);
+
+                JsonArray empArray = arrayBuilder.build();
+                
+                StringWriter strWtr = new StringWriter();
+                JsonWriter jsonWtr = Json.createWriter(strWtr);
+                
+                jsonWtr.writeArray(empArray);
+                jsonWtr.close();
+                if(index !=0)
+                    json+=",";
+                
+                json += strWtr.toString();
+                            
+                index++;
+            }
+            //Logger.getLogger(goodsServlet.class.getName()).log(Level.SEVERE, null, "result of listgoods is; " + index);
+            if(result != null)
+                result.close();
+        }catch(Exception err)
+        {
+            err.printStackTrace();
+        }
+        json += "]}";
+        //String json = "{\"data\": [[\"1\",\"Liqiang\",\"Shanghai\"],[\"2\",\"ZLY\",\"FuJian\"]]}";
+        PrintWriter writer = response.getWriter();
+        writer.println(json);
+        writer.flush();
+ 
+    }
     
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -175,6 +251,9 @@ public class loginServlet extends HttpServlet {
             logoutoperation(request,response);
         }else if (uri.endsWith("/loginfo")) {
             loginfooperation(request,response);
+        }else if(uri.endsWith("/listusers")) {
+            //return JSON
+            listoperation(request,response);
         }else
             processRequest(request, response);
     }
@@ -194,6 +273,7 @@ public class loginServlet extends HttpServlet {
         if (uri.endsWith("/login")) {
             //return JSON
             loginoperation(request,response);
+            return;
         }else
             processRequest(request, response);
     }
