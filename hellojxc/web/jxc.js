@@ -1462,6 +1462,54 @@ function finabyuserchart()
          '</table>' + 
 		'</form>'
     );
+	$("#chartsrow").html(
+		'<div class="col-md-6">' +
+		'		  <div class="box box-primary">' +
+		'			<div class="box-header with-border">' +
+		'			  <h3 class="box-title">收支一览(柱状图)</h3>' +
+		'			  <div class="box-tools pull-right">' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>' +
+		'				</button>' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>' +
+		'			  </div>' +
+		'			</div>' +
+		'			<div class="box-body" style="display: block;">' +
+		'			  <div id="charttarget1">' +
+		'			  </div>' +
+		'			</div>' +
+		'		  </div>' +
+		'		  <div class="box box-danger">' +
+		'			<div class="box-header with-border">' +
+		'			  <h3 class="box-title">收入统计(饼状图)</h3>' +
+		'			  <div class="box-tools pull-right">' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>' +
+		'				</button>' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>' +
+		'			  </div>' +
+		'			</div>' +
+		'			<div class="box-body" style="display: block;">' +
+		'			  <div id="charttarget2">' +
+		'			  </div>' +
+		'			</div>' +
+		'		  </div>' +
+		'		</div>' +
+		'		<div class="col-md-6">' +
+		'		  <div class="box box-info">' +
+		'			<div class="box-header with-border">' +
+		'			  <h3 class="box-title">支出统计(饼状图)</h3>' +
+		'			  <div class="box-tools pull-right">' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>' +
+		'				</button>' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>' +
+		'			  </div>' +
+		'			</div>' +
+		'			<div class="box-body">' +
+		'			  <div id="charttarget3">' +
+		'			  </div>' +
+		'			</div>' +
+		'		  </div>' +
+		'/div>'
+	);
 
 	//获取经办人名称列表
 	$.getJSON('/hellojxc/listusers',function(result){
@@ -1522,13 +1570,13 @@ function finabyuserchart()
              'order': [[0, 'asc']]
            });  
 
-		//获取DataTable的查询结果json数据
+		//计算饼状图所需数据
 		var api_table = $('#example').DataTable();
 		var json = api_table.ajax.json();
 		var name_array=new Array(json.data.length); 
 		var out_array=new Array(json.data.length); 
 		var in_array=new Array(json.data.length); 
-		var net_array=new Array(json.data.length); 
+		var net_array=new Array(json.data.length);
 		for(var i=0;i<json.data.length;i++)
 		{
 			name_array[i] = json.data[i][1];
@@ -1537,13 +1585,13 @@ function finabyuserchart()
 			net_array[i] = json.data[i][4];
 		}
 		
-		$("#charttarget").attr("style","width: 600px;height:400px;");
+		$("#charttarget1").attr("style","width: 600px;height:400px;");
 		
 		// 基于准备好的dom，初始化echarts实例
-		var myChart = echarts.init(document.getElementById('charttarget'));
+		var myChart1 = echarts.init(document.getElementById('charttarget1'));
 
 		// 指定图表的配置项和数据
-		var option = {			
+		var option1 = {			
 			title: {
 				text: '收支一览'
 			},
@@ -1574,9 +1622,96 @@ function finabyuserchart()
 			}
 			]
 		};
+		myChart1.setOption(option1); 
+		
+		
+		//计算饼状图所需数据
+		var out_seriesData=[];
+		var in_seriesData=[];
+		for(var i=0;i<name_array.length;i++)
+		{ 
+			var obj1=new Object();
+			obj1.name=name_array[i];
+			obj1.value=out_array[i];
+			out_seriesData[i]=obj1;
+			
+			var obj2=new Object();
+			obj2.name=name_array[i];
+			obj2.value=in_array[i];
+			in_seriesData[i]=obj2;			
+		}
 
-		// 使用刚指定的配置项和数据显示图表。
-		myChart.setOption(option); 			   
+	   $("#charttarget2").attr("style","width: 600px;height:400px;");
+		var myCharts2 = echarts.init(document.getElementById('charttarget2'));
+		var option2 = {
+			 title : {
+					text: '支出统计',
+					//subtext: '纯属虚构',
+					x:'center'
+				},
+				tooltip : {
+					trigger: 'item',
+					formatter: "{a} <br/>{b} : {c} ({d}%)"
+				},
+				legend: {
+					orient: 'vertical',
+					left: 'left',
+					data: name_array
+				},
+				series : [
+					{
+						name: '支出统计',
+						type: 'pie',
+						radius : '55%',
+						center: ['50%', '60%'],
+						data: out_seriesData,
+						itemStyle: {
+							emphasis: {
+								shadowBlur: 10,
+								shadowOffsetX: 0,
+								shadowColor: 'rgba(0, 0, 0, 0.5)'
+							}
+						}
+					}
+				]			
+		};
+		myCharts2.setOption(option2);	
+
+	   $("#charttarget3").attr("style","width: 600px;height:400px;");
+		var myCharts3 = echarts.init(document.getElementById('charttarget3'));
+		var option3 = {
+			 title : {
+					text: '收入统计',
+					//subtext: '纯属虚构',
+					x:'center'
+				},
+				tooltip : {
+					trigger: 'item',
+					formatter: "{a} <br/>{b} : {c} ({d}%)"
+				},
+				legend: {
+					orient: 'vertical',
+					left: 'left',
+					data: name_array
+				},
+				series : [
+					{
+						name: '收入统计',
+						type: 'pie',
+						radius : '55%',
+						center: ['50%', '60%'],
+						data: in_seriesData,
+						itemStyle: {
+							emphasis: {
+								shadowBlur: 10,
+								shadowOffsetX: 0,
+								shadowColor: 'rgba(0, 0, 0, 0.5)'
+							}
+						}
+					}
+				]			
+		};
+		myCharts3.setOption(option3);		
     }
     //加载页面时初始化datatable
     refresh();	
