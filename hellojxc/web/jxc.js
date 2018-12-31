@@ -313,7 +313,6 @@ function listgoods()
         '   <tr>' + 
         '     <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
         '     <th>名称</th>' + 
-        '     <th>单位</th>' + 
         '     <th>类型</th>' + 
         '   </tr>' + 
         '</thead>' + 
@@ -321,7 +320,6 @@ function listgoods()
         '   <tr>' + 
         '     <th></th>' + 
         '     <th>名称</th>' + 
-        '     <th>单位</th>' + 
         '     <th>类型</th>' + 
         '   </tr>' + 
         '</tfoot>' + 
@@ -345,7 +343,7 @@ function listgoods()
                 }
             }
             ,{
-                'targets': 3,
+                'targets': 2,
                 'searchable': false,
                 //'orderable': false,
                 'className': 'dt-body-left',
@@ -1293,6 +1291,8 @@ function storeinfo()
         '   <tr>' + 
 		'     <th>序号</th>' + 
         '     <th>货物名称</th>' + 
+        '     <th>进货</th>' + 
+		'     <th>出货</th>' + 
         '     <th>库存(进货-出货)</th>' + 
         '   </tr>' + 
         '</thead>' + 
@@ -1300,7 +1300,9 @@ function storeinfo()
         '   <tr>' + 
 		'     <th>序号</th>' + 		
         '     <th>货物名称</th>' + 
-        '     <th>库存(进货-出货)</th>' +         
+        '     <th>进货</th>' + 
+		'     <th>出货</th>' + 
+        '     <th>库存(进货-出货)</th>' +      
         '   </tr>' + 
         '</tfoot>' + 
          '</table>' + 
@@ -1370,11 +1372,15 @@ function storeinfo()
 		var api_table = $('#example').DataTable();
 		var json = api_table.ajax.json();
 		var name_array=new Array(json.data.length); 
-		var volume_array=new Array(json.data.length); 
+		var in_volumes=new Array(json.data.length);
+		var out_volumes=new Array(json.data.length); 
+		var net_volumes=new Array(json.data.length); 		
 		for(var i=0;i<json.data.length;i++)
 		{
 			name_array[i] = json.data[i][1];
-			volume_array[i] = json.data[i][2];
+			in_volumes[i] = json.data[i][2];
+			out_volumes[i] = json.data[i][3];
+			net_volumes[i] = json.data[i][4];
 		}
 		
 		$("#charttarget").attr("style","width: 600px;height:400px;");
@@ -1389,17 +1395,29 @@ function storeinfo()
 			},
 			tooltip: {},
 			legend: {
-				data:['库存']
+				data:['进货','出货','库存']
 			},
 			xAxis: {
 				data: name_array//["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
 			},
 			yAxis: {},
-			series: [{
-				name: '库存',
-				type: 'bar',
-				data: volume_array//[5, 20, 36, 10, 10, 20]
-			}]
+			series: [
+				{
+					name: '进货',
+					type: 'bar',
+					data: in_volumes//[5, 20, 36, 10, 10, 20]
+				},
+				{
+					name: '出货',
+					type: 'bar',
+					data: out_volumes//[5, 20, 36, 10, 10, 20]
+				},
+				{
+					name: '库存',
+					type: 'bar',
+					data: net_volumes//[5, 20, 36, 10, 10, 20]
+				}				
+			]
 		};
 
 		// 使用刚指定的配置项和数据显示图表。
@@ -1418,6 +1436,179 @@ function storeinfo()
     });
 	
 }
+
+function finabygoodschart()
+{
+    $("section.content-header").html(
+            '<h1>' +
+            '库存资金统计' +
+            ' <small>货物库存资金占用一览</small>' +
+             '</h1>'
+    );
+
+    $("#target").html('<form id="frm-example">'+
+        ' <button  id="query" role="button" class="btn btn-primary">查询</button>' + 
+        '<br>' + 
+        '<br>' + 
+		'<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
+		'<p>结束日期：<input type="text" id="datepicker_end" name="datepicker_end"></p>'+
+		'<br>' + 
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">货物名称</span>' +
+			'<select id="goodsname" name="goodsname" class="selectpicker" data-style="btn-info"></select>' +
+        '</div>' + 	
+		'<br>' + 		
+		' <table id="example" class="display select" width="100%" cellspacing="0">' + 
+		' <thead>' + 
+        '   <tr>' + 
+		'     <th>序号</th>' + 
+        '     <th>货物名称</th>' + 
+        '     <th>进货资金</th>' + 
+		'     <th>出货资金</th>' + 
+        '     <th>库存占用资金(进货-出货)</th>' + 
+        '   </tr>' + 
+        '</thead>' + 
+        '<tfoot>' + 
+        '   <tr>' + 
+		'     <th>序号</th>' + 		
+        '     <th>货物名称</th>' + 
+        '     <th>进货资金</th>' + 
+		'     <th>出货资金</th>' + 
+        '     <th>库存占用资金(进货-出货)</th>' +    
+        '   </tr>' + 
+        '</tfoot>' + 
+         '</table>' + 
+		'</form>'
+    );
+
+	//获取货物名称列表
+	$.getJSON('/hellojxc/listgoods',function(result){
+		$('.selectpicker').selectpicker();
+		$('.selectpicker').append("<option value=\"all\" selected=\"selected\">all</option>");
+		for(var i=0;i<result.data.length;i++)
+		{
+			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+			/*
+			if(i===0)
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][0] +"</option>");
+            else
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+			*/
+		}
+		$('.selectpicker').selectpicker('refresh');
+		$('.selectpicker').selectpicker('render');
+	});
+		
+    var d = new Date(), ld = new Date(d.getFullYear(), 0, 1);
+    
+    $("#datepicker_start").datepicker();
+    $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_start").val(ld.getFullYear() + '-' + (ld.getMonth() + 1) + '-' + ld.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+    $("#datepicker_end").datepicker();
+    $("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+
+    var table;
+    var refresh = function() {
+        var startday=$("#datepicker_start").val();
+        var endday=$("#datepicker_end").val();
+		var goods_name=$("#goodsname").val();
+        //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+        table = $('#example').dataTable({
+              searching: false,
+             'ajax': {
+                'url': '/hellojxc/finabygoods',
+                'type': 'POST'
+             },
+             'fnServerParams':function(aoData){
+               aoData.push(
+                       {
+                         "name": "startday",
+                         "value": startday?startday:null
+                       },
+                       {
+                           "name":"endday",
+                           "value": endday?endday:null
+                       },
+					   {
+						   "name":"goods_name",
+						   "value":goods_name
+					   }
+               );  
+             },
+             'order': [[0, 'asc']]
+           });  
+
+		//获取DataTable的查询结果json数据
+		var api_table = $('#example').DataTable();
+		var json = api_table.ajax.json();
+		var name_array=new Array(json.data.length); 
+		var in_volumes=new Array(json.data.length);
+		var out_volumes=new Array(json.data.length); 
+		var net_volumes=new Array(json.data.length); 		
+		for(var i=0;i<json.data.length;i++)
+		{
+			name_array[i] = json.data[i][1];
+			in_volumes[i] = json.data[i][2];
+			out_volumes[i] = json.data[i][3];
+			net_volumes[i] = json.data[i][4];
+		}
+		
+		$("#charttarget").attr("style","width: 600px;height:400px;");
+		
+		// 基于准备好的dom，初始化echarts实例
+		var myChart = echarts.init(document.getElementById('charttarget'));
+
+		// 指定图表的配置项和数据
+		var option = {
+			title: {
+				text: '资金占用一览'
+			},
+			tooltip: {},
+			legend: {
+				data:['进货资金','出货资金','库存占用资金']
+			},
+			xAxis: {
+				data: name_array//["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+			},
+			yAxis: {},
+			series: [
+				{
+					name: '进货资金',
+					type: 'bar',
+					data: in_volumes//[5, 20, 36, 10, 10, 20]
+				},
+				{
+					name: '出货资金',
+					type: 'bar',
+					data: out_volumes//[5, 20, 36, 10, 10, 20]
+				},
+				{
+					name: '库存占用资金',
+					type: 'bar',
+					data: net_volumes//[5, 20, 36, 10, 10, 20]
+				}				
+			]
+		};
+
+		// 使用刚指定的配置项和数据显示图表。
+		myChart.setOption(option); 			   
+    }
+    //加载页面时初始化datatable
+    refresh();	
+	
+	$("#query").on('click', function(){ 
+	if(table)
+	{
+		table.fnDestroy();
+		refresh();
+	}
+	return false;
+    });
+	
+}
+
 
 function finabyuserchart()
 {

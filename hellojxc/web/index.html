@@ -70,11 +70,11 @@ desired effect
   <header class="main-header">
 
     <!-- Logo -->
-    <a href="index2.html" class="logo">
+    <a href="#" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><b>A</b>LT</span>
+      <span class="logo-mini"><b>库存</b>管理</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><b>Admin</b>LTE</span>
+      <span class="logo-lg"><b>库存</b>管理系统</span>
     </a>
 
     <!-- Header Navbar -->
@@ -191,12 +191,11 @@ desired effect
         </li>
         -->
         <!--<li><a href="index.html"><i class="fa fa-link"></i> <span>客户管理</span></a></li>-->
-		<li><a href="index.html"><i class="fa fa-bar-chart"></i> <span>库存信息统计</span></a></li>
-        <li><a href="index.html?function=listgoods"><i class="fa fa-link"></i> <span>货物管理</span></a></li> 
+        <li><a href="index.html"><i class="fa fa-link"></i> <span>货物管理</span></a></li> 
         <li><a href="index.html?function=listinput"><i class="fa fa-link"></i> <span>进货管理</span></a></li>
         <li><a href="index.html?function=listoutput"><i class="fa fa-link"></i> <span>出货管理</span></a></li>
-		<li><a href="index.html?function=inputchart"><i class="fa fa-bar-chart"></i> <span>进货图表统计</span></a></li>
-		<li><a href="index.html?function=inputchart"><i class="fa fa-bar-chart"></i> <span>出货图表统计</span></a></li>
+		<li><a href="index.html?function=storeinfo""><i class="fa fa-bar-chart"></i> <span>库存信息统计</span></a></li>
+		<li><a href="index.html?function=finabygoodschart"><i class="fa fa-bar-chart"></i> <span>库存资金统计</span></a></li>		
 		<li><a href="index.html?function=finabyuserchart"><i class="fa fa-bar-chart"></i> <span>财务收支统计</span></a></li>
 		<!--
         <li class="treeview">
@@ -476,11 +475,6 @@ desired effect
                 showoutput(id);
                 break;
             }
-            case "listgoods":
-            {
-                listgoods();
-                break;
-            }
             case "addgoods":
             {
                 //alert("addgoods TODO");
@@ -508,20 +502,24 @@ desired effect
                 break;
             }
 */
+            case "storeinfo"://库存信息统计
+            {
+                storeinfo();
+                break;
+            }
             case "finabyuserchart"://经办人财务收支统计
             {
                 finabyuserchart();
                 break;
             }
-            case "finabygoodschart"://货物财务收支统计
+            case "finabygoodschart"://库存资金统计
             {
-                //finabygoodschart();
+                finabygoodschart();
                 break;
             }			
-            default:
+            default://货物管理
             {
-                //list_addcustomer();//客户信息一览
-				storeinfo();//库存信息
+				listgoods();
                 break;
             }
                 

@@ -169,9 +169,11 @@ public class analysisServlet extends HttpServlet {
             while(in_result.next())
             {
                 String name = in_result.getString("goods_name");
-                int volume = in_result.getInt("in_volume");                
-                if(name != null)
-                    store.put(name,volume);
+                int volume = in_result.getInt("in_volume");     
+                FinaVolume detail = new FinaVolume();
+                detail.goodsname = name;
+                detail.in_volume = volume;
+                store.put(name,detail);
             }
             if(in_result != null)
                 in_result.close();            
@@ -192,12 +194,19 @@ public class analysisServlet extends HttpServlet {
                 {
                     if(store.containsKey(name))
                     {
-                        //有进货信息，更新存货量
-                       int in_volume = (int)store.get(name);
-                       store.put(name, in_volume-volume);
+                        //有进货信息，更新存货量:进货量-出货量(因为进货量一般总是大于出货量)
+                        FinaVolume detail = (FinaVolume)store.get(name);
+                        detail.out_volume = volume;
+                        detail.net_volume = detail.in_volume - detail.out_volume;
+                        store.put(name, detail);
                     }else
                     {
-                       store.put(name,-volume); 
+                        FinaVolume detail = new FinaVolume();
+                        detail.goodsname = name;
+                        detail.in_volume = 0;
+                        detail.out_volume = volume;
+                        detail.net_volume = detail.in_volume - detail.out_volume;
+                        store.put(name,detail); 
                     }
                 }
             }             
@@ -213,12 +222,14 @@ public class analysisServlet extends HttpServlet {
         int index=1;
         while (iter.hasNext()) {
             String name = (String)iter.next();
-            String volume = String.valueOf((int)store.get(name));
-
+            FinaVolume detail = (FinaVolume)store.get(name);
+            
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
             arrayBuilder.add(String.valueOf(index));
             arrayBuilder.add(name);
-            arrayBuilder.add(volume);
+            arrayBuilder.add(String.valueOf(detail.in_volume));
+            arrayBuilder.add(String.valueOf(detail.out_volume));
+            arrayBuilder.add(String.valueOf(detail.net_volume));
             
             JsonArray empArray = arrayBuilder.build();
             StringWriter strWtr = new StringWriter();
@@ -277,15 +288,20 @@ public class analysisServlet extends HttpServlet {
         }
  
         Map store = new HashMap();
-        //获取进货数量信息
+        //获取进货消费资金信息
         ResultSet in_result = null;
         try{
             in_result = DBHelper.getDbHelper().executeQuery(input_sql);
             while(in_result.next())
             {
                 String name = in_result.getString("goods_name");
-                int price = in_result.getInt("in_price");                
-                store.put(name,price);
+                int price = in_result.getInt("in_price"); 
+                FinaPrice detail = new FinaPrice();
+                detail.goodsname = name;
+                detail.in_price = price;
+                detail.out_price = 0;
+                detail.net_price = 0;
+                store.put(name,detail);
             }
             if(in_result != null)
                 in_result.close();            
@@ -294,7 +310,7 @@ public class analysisServlet extends HttpServlet {
             err.printStackTrace();
         }
 
-        //获取出货数量信息
+        //获取出货所得资金信息
         ResultSet out_result = null;
         try{
             out_result = DBHelper.getDbHelper().executeQuery(output_sql);
@@ -304,12 +320,20 @@ public class analysisServlet extends HttpServlet {
                 int price = out_result.getInt("out_price"); 
                 if(store.containsKey(name))
                 {
-                    //有进货信息，更新存货量
-                   int in_price = (int)store.get(name);
-                   store.put(name, in_price-price);
+                    //有进货信息，更新存货占用总资金:进货-出货
+                   //int in_price = (int)store.get(name);
+                    FinaPrice d = (FinaPrice)store.get(name);
+                    d.out_price = price;
+                    d.net_price = d.in_price - d.out_price;
+                   store.put(name, d);
                 }else
                 {
-                   store.put(name,-price); 
+                    FinaPrice d = new FinaPrice();
+                    d.goodsname = name;
+                    d.in_price = 0;
+                    d.out_price = price;
+                    d.net_price = d.in_price - d.out_price;
+                   store.put(name,d); 
                 }
             }             
             if(out_result != null)
@@ -324,12 +348,14 @@ public class analysisServlet extends HttpServlet {
         int index=1;
         while (iter.hasNext()) {
             String name = (String)iter.next();
-            String price = String.valueOf((int)store.get(name));
+            FinaPrice d = (FinaPrice)store.get(name);
 
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
             arrayBuilder.add(String.valueOf(index));
             arrayBuilder.add(name);
-            arrayBuilder.add(price);
+            arrayBuilder.add(String.valueOf(d.in_price));
+            arrayBuilder.add(String.valueOf(d.out_price));
+            arrayBuilder.add(String.valueOf(d.net_price));
             
             JsonArray empArray = arrayBuilder.build();
             StringWriter strWtr = new StringWriter();

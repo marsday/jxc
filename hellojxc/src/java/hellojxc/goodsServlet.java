@@ -67,24 +67,21 @@ public class goodsServlet extends HttpServlet {
 
         String json = "{\"data\":[";
      
-        String sql = "select name, unit, type from jxc_goods where del_flag=0";
+        //String sql = "select name, unit, type from jxc_goods where del_flag=0";
+        String sql = "select name, type from jxc_goods where del_flag=0";
         ResultSet result = null;
         int index = 0;       
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
             while(result.next())
             {
-                //String id = result.getString("id");
                 String name = result.getString("name");
-                String unit = result.getString("unit");
                 String type = result.getString("type");
                 
                 // value array json
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-                //arrayBuilder.add(id);
                 arrayBuilder.add(name);
                 arrayBuilder.add(name);
-                arrayBuilder.add(unit);
                 arrayBuilder.add(type);
                 JsonArray empArray = arrayBuilder.build();
                 
