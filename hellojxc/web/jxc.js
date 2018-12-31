@@ -1304,7 +1304,7 @@ function storeinfo()
 		'<br>' + 
         '<div class="input-group">' +	
 			'<span class="input-group-addon">货物名称</span>' +
-			'<select id="goodsname" name="goodsname" class="selectpicker" data-style="btn-info"></select>' +
+			'<select id="goods_id" name="goods_id" class="selectpicker" data-style="btn-info"></select>' +
         '</div>' + 	
 		'<br>' + 		
 		' <table id="example" class="display select" width="100%" cellspacing="0">' + 
@@ -1334,6 +1334,7 @@ function storeinfo()
 	$.getJSON('/hellojxc/listgoods',function(result){
 		$('.selectpicker').selectpicker();
 		$('.selectpicker').append("<option value=\"all\" selected=\"selected\">all</option>");
+		//$('.selectpicker').append("<option value=\"-\">-</option>");
 		for(var i=0;i<result.data.length;i++)
 		{
 			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
@@ -1362,7 +1363,7 @@ function storeinfo()
     var refresh = function() {
         var startday=$("#datepicker_start").val();
         var endday=$("#datepicker_end").val();
-		var goods_name=$("#goodsname").val();
+		var goods_id=$("#goods_id").val();
         //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
         table = $('#example').dataTable({
               searching: false,
@@ -1381,8 +1382,8 @@ function storeinfo()
                            "value": endday?endday:null
                        },
 					   {
-						   "name":"goods_name",
-						   "value":goods_name
+						   "name":"goods_id",
+						   "value":goods_id
 					   }
                );  
              },
@@ -1476,7 +1477,7 @@ function finabygoodschart()
 		'<br>' + 
         '<div class="input-group">' +	
 			'<span class="input-group-addon">货物名称</span>' +
-			'<select id="goodsname" name="goodsname" class="selectpicker" data-style="btn-info"></select>' +
+			'<select id="goodsid" name="goodsid" class="selectpicker" data-style="btn-info"></select>' +
         '</div>' + 	
 		'<br>' + 		
 		' <table id="example" class="display select" width="100%" cellspacing="0">' + 
@@ -1534,7 +1535,7 @@ function finabygoodschart()
     var refresh = function() {
         var startday=$("#datepicker_start").val();
         var endday=$("#datepicker_end").val();
-		var goods_name=$("#goodsname").val();
+		var goods_id=$("#goodsid").val();
         //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
         table = $('#example').dataTable({
               searching: false,
@@ -1553,8 +1554,8 @@ function finabygoodschart()
                            "value": endday?endday:null
                        },
 					   {
-						   "name":"goods_name",
-						   "value":goods_name
+						   "name":"goods_id",
+						   "value":goods_id
 					   }
                );  
              },

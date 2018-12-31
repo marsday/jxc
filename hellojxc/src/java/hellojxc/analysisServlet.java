@@ -120,12 +120,16 @@ public class analysisServlet extends HttpServlet {
     private void storeOperation(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
     /*
-    select goods_name,sum(volume)as in_volume from jxc_input where del_flag=0 and goods_name in (select name from jxc_goods where del_flag=0 and type=0)  group by goods_name
-    select goods_name,sum(volume)as out_volume from jxc_output where del_flag=0 and goods_name in (select name from jxc_goods where del_flag=0 and type=0) group by goods_name
+    //所有的
+    select a.name as goods_name, a.del_flag as del_flag ,sum(b.volume)as in_volume from jxc_goods as a ,jxc_input as b 
+    where a.id = b.goods_id and b.del_flag = 0 group by goods_name
+    //指定的    
+    select a.name as goods_name, a.del_flag as del_flag ,sum(b.volume)as in_volume from jxc_goods as a ,jxc_input as b 
+    where a.id = b.goods_id and b.del_flag = 0 and b.goods_id = 3
     */
         String startday = new String(request.getParameter("startday").getBytes("UTF-8"), "UTF-8");
         String endday = new String(request.getParameter("endday").getBytes("UTF-8"), "UTF-8");
-        String goods_name = new String(request.getParameter("goods_name").getBytes("UTF-8"), "UTF-8");
+        String goods_id = new String(request.getParameter("goods_id").getBytes("UTF-8"), "UTF-8");
         
         String input_sql;
         String output_sql;
@@ -140,26 +144,27 @@ public class analysisServlet extends HttpServlet {
                + " and buytime <= '"+ endday + "'"                        
                +" and del_flag=0 and goods_name in ('" +goods_name+ "')";
         */
-        if(goods_name.equals("all"))
+        if(goods_id.equals("all"))
         {
-            input_sql = "select goods_name,sum(volume)as in_volume from jxc_input where"
-                    + " buytime >= '"+ startday + "'"
-                    + " and buytime <= '"+ endday + "'"
-                    + "and del_flag=0 and goods_name in (select name from jxc_goods where del_flag=0 and type=0)  group by goods_name";
-            output_sql = "select goods_name,sum(volume)as out_volume from jxc_output where" 
-                    + " buytime >= '"+ startday + "'"
-                    + " and buytime <= '"+ endday + "'"                    
-                    +" and del_flag=0 and goods_name in (select name from jxc_goods where del_flag=0 and type=0) group by goods_name";
-        }else
-        {
-            input_sql = "select goods_name,sum(volume)as in_volume from jxc_input where "
-                    + " buytime >= '"+ startday + "'"
-                    + " and buytime <= '"+ endday + "'"                    
-                    +" and del_flag=0 and goods_name = '" +goods_name+ "'";
-            output_sql = "select goods_name,sum(volume)as out_volume from jxc_output where "
-                   + " buytime >= '"+ startday + "'"
-                   + " and buytime <= '"+ endday + "'"                        
-                   +" and del_flag=0 and goods_name = '" +goods_name+ "'";
+            //所有在货物管理中定义的(包含删除的)货物的进出情况
+            input_sql = "select a.name as goods_name,sum(b.volume)as in_volume from jxc_goods as a ,jxc_input as b  where"
+                    + " b.buytime >= '"+ startday + "'"
+                    + " and b.buytime <= '"+ endday + "'"
+                    + "and a.id = b.goods_id and b.del_flag = 0 group by goods_name";
+            output_sql = "select a.name as goods_name,sum(b.volume)as out_volume from jxc_goods as a ,jxc_output as b  where"
+                    + " b.buytime >= '"+ startday + "'"
+                    + " and b.buytime <= '"+ endday + "'"
+                    + "and a.id = b.goods_id and b.del_flag = 0 group by goods_name";
+        }else{
+            //在货物管理中有效的，指定的货物的进出情况
+            input_sql = "select a.name as goods_name, sum(b.volume)as in_volume from jxc_goods as a ,jxc_input as b  where"
+                    + " b.buytime >= '"+ startday + "'"
+                    + " and b.buytime <= '"+ endday + "'"
+                    + "and a.id = b.goods_id and b.del_flag = 0 and b.goods_id=" + goods_id;
+            output_sql = "select a.name as goods_name, sum(b.volume)as out_volume from jxc_goods as a ,jxc_output as b  where"
+                    + " b.buytime >= '"+ startday + "'"
+                    + " and b.buytime <= '"+ endday + "'"
+                    + "and a.id = b.goods_id and b.del_flag = 0 and b.goods_id=" + goods_id;
         }
         Map store = new HashMap();
         //获取进货数量信息
@@ -257,34 +262,41 @@ public class analysisServlet extends HttpServlet {
     /*
     select goods_name,sum(price)as in_volume from jxc_input where del_flag=0 and goods_name in (select name from jxc_goods where del_flag=0)  group by goods_name
     select goods_name,sum(price)as out_volume from jxc_output where del_flag=0 and goods_name in (select name from jxc_goods where del_flag=0) group by goods_name
+       
+     //所有的
+    select a.name as goods_name, sum(b.price)as in_price from jxc_goods as a ,jxc_input as b 
+    where a.id = b.goods_id and b.del_flag = 0 group by goods_name
+    //指定的    
+    select a.name as goods_name, sum(b.price)as in_price from jxc_goods as a ,jxc_input as b 
+    where a.id = b.goods_id and b.del_flag = 0 and b.goods_id = 3      
     */ 
         String startday = new String(request.getParameter("startday").getBytes("UTF-8"), "UTF-8");
         String endday = new String(request.getParameter("endday").getBytes("UTF-8"), "UTF-8");
-        String goods_name = new String(request.getParameter("goods_name").getBytes("UTF-8"), "UTF-8");
+        String goods_id = new String(request.getParameter("goods_id").getBytes("UTF-8"), "UTF-8");
         
         String input_sql;
         String output_sql;
 
-        if(goods_name.equals("all"))
+        if(goods_id.equals("all"))
         {
-            input_sql = "select goods_name,sum(price)as in_price from jxc_input where"
+            input_sql = "select a.name as goods_name, sum(b.price)as in_price from jxc_goods as a ,jxc_input as b where"
                     + " buytime >= '"+ startday + "'"
                     + " and buytime <= '"+ endday + "'"
-                    + "and del_flag=0 and goods_name in (select name from jxc_goods where del_flag=0 and type=0)  group by goods_name";
-            output_sql = "select goods_name,sum(price)as out_price from jxc_output where" 
+                    + "and a.id = b.goods_id and b.del_flag = 0 group by goods_name";
+            output_sql = "select a.name as goods_name, sum(b.price)as out_price from jxc_goods as a ,jxc_output as b where" 
                     + " buytime >= '"+ startday + "'"
                     + " and buytime <= '"+ endday + "'"                    
-                    +" and del_flag=0 and goods_name in (select name from jxc_goods where del_flag=0 and type=0) group by goods_name";
+                    +" and a.id = b.goods_id and b.del_flag = 0 group by goods_name";
         }else
         {
-            input_sql = "select goods_name,sum(price)as in_price from jxc_input where "
+            input_sql = "select a.name as goods_name, sum(b.price)as in_price from jxc_goods as a ,jxc_input as b  where "
                     + " buytime >= '"+ startday + "'"
                     + " and buytime <= '"+ endday + "'"                    
-                    +" and del_flag=0 and goods_name = '" +goods_name+ "'";
-            output_sql = "select goods_name,sum(price)as out_price from jxc_output where "
+                    +" and a.id = b.goods_id and b.del_flag = 0 and b.goods_id =" +goods_id;
+            output_sql = "select a.name as goods_name, sum(b.price)as out_price from jxc_goods as a ,jxc_output as b  where "
                    + " buytime >= '"+ startday + "'"
                    + " and buytime <= '"+ endday + "'"                        
-                   +" and del_flag=0 and goods_name = '" +goods_name+ "'";
+                   +" and a.id = b.goods_id and b.del_flag = 0 and b.goods_id =" +goods_id;
         }
  
         Map store = new HashMap();
