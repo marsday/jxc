@@ -81,10 +81,10 @@ public class inputservlet extends HttpServlet {
 
         String json = "{\"data\":[";
      
-        String sql = "select id, goods_name, volume, price, buytime, recordtime, operator,customer_info,refer from jxc_input where "
-                                + " buytime >= '"+ datepicker_start + "'"
-                                + " and buytime <= '"+ datepicker_end + "'"
-                                + " and del_flag=0";
+        String sql = "select a.id, b.name as goods_name, b.del_flag as del_flag, a.volume, a.price, a.buytime, a.recordtime, a.operator, a.customer_info, a.refer from jxc_input as a, jxc_goods as b where "
+                                + " a.buytime >= '"+ datepicker_start + "'"
+                                + " and a.buytime <= '"+ datepicker_end + "'"
+                                + " and a.goods_id = b.id and a.del_flag = 0";
         ResultSet result = null;
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
@@ -93,6 +93,9 @@ public class inputservlet extends HttpServlet {
             {
                 String id = result.getString("id");
                 String goods_name = result.getString("goods_name");
+                int del_flag = result.getInt("del_flag");
+                if(del_flag != 0)
+                   goods_name = "---"; 
                 String volume = String.valueOf(result.getInt("volume"));
                 String price = String.valueOf(result.getInt("price"));
                 String buytime = result.getDate("buytime").toString();
@@ -225,7 +228,7 @@ public class inputservlet extends HttpServlet {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
         String id = new String(request.getParameter("id").getBytes("ISO-8859-1"), "UTF-8");
-        String goodsname = new String(request.getParameter("goodsname").getBytes("ISO-8859-1"), "UTF-8");
+        String goodsid = new String(request.getParameter("goodsid").getBytes("ISO-8859-1"), "UTF-8");
         String volume = new String(request.getParameter("volume").getBytes("ISO-8859-1"), "UTF-8");   
         String price = new String(request.getParameter("price").getBytes("ISO-8859-1"), "UTF-8"); 
         String buytime = new String(request.getParameter("buytime").getBytes("ISO-8859-1"), "UTF-8"); 
@@ -242,7 +245,7 @@ public class inputservlet extends HttpServlet {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String record_day = sdf.format(date);
         
-        String sql = "update jxc_input set goods_name = " + "'"+goodsname +"',"
+        String sql = "update jxc_input set goods_id = " + "'"+goodsid +"',"
                                                         + " volume= " + volume + "," 
                                                         + " price= " + price +"," 
                                                         + " buytime= " + "'"+ buytime + "',"
@@ -267,7 +270,7 @@ public class inputservlet extends HttpServlet {
             throws ServletException, IOException {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
-        String goodsname = new String(request.getParameter("goodsname").getBytes("ISO-8859-1"), "UTF-8");
+        String goodsid = new String(request.getParameter("goodsid").getBytes("ISO-8859-1"), "UTF-8");
         String volume = new String(request.getParameter("volume").getBytes("ISO-8859-1"), "UTF-8");
         String price = new String(request.getParameter("price").getBytes("ISO-8859-1"), "UTF-8");
         String operation_day = new String(request.getParameter("operation_day").getBytes("ISO-8859-1"), "UTF-8");
@@ -285,8 +288,8 @@ public class inputservlet extends HttpServlet {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String record_day = sdf.format(date);
         
-        String sql = "insert into jxc_input (goods_name,volume,price,buytime,recordtime,operator,customer_info,refer) values(" 
-                + "'" +  goodsname + "'," 
+        String sql = "insert into jxc_input (goods_id,volume,price,buytime,recordtime,operator,customer_info,refer) values(" 
+                + "'" +  goodsid + "'," 
                 +  volume + ","
                 +  price  + ","
                 +  "'" + operation_day + "'," 
@@ -318,7 +321,7 @@ public class inputservlet extends HttpServlet {
         //{
             input = new String( names[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
-        String sql = "select id,goods_name, volume, price, buytime,operator,customer_info,refer from jxc_input where id= " + "'" + input + "'";
+        String sql = "select id,goods_id, volume, price, buytime,operator,customer_info,refer from jxc_input where id= " + "'" + input + "'";
         String json = "{\"data\":[";
         ResultSet result = null;
         try{
@@ -327,7 +330,7 @@ public class inputservlet extends HttpServlet {
             while(result.next())
             {
                 String id = result.getString("id");
-                String goods_name = result.getString("goods_name");
+                String goods_id = result.getString("goods_id");
                 String volume = String.valueOf(result.getInt("volume"));
                 String price = String.valueOf(result.getInt("price"));
                 String buytime = result.getString("buytime");
@@ -338,7 +341,7 @@ public class inputservlet extends HttpServlet {
                 //name-value json
                 JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
                 jsonBuilder.add("id", id);
-                jsonBuilder.add("goods_name", goods_name);
+                jsonBuilder.add("goods_id", goods_id);
                 jsonBuilder.add("volume", volume);
                 jsonBuilder.add("price", price);
                 jsonBuilder.add("buytime", buytime);
