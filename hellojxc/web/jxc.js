@@ -168,12 +168,20 @@ function list_addcustomer()
         // }
       });
       
-      if(anyselected == 0)
-      {
-          alert("请选取需要删除的记录");
-          event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
-          return false;//返回false，取消submit
-      }
+		if(anyselected == 0)
+		{
+			alert("请选取需要删除的记录");
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+			return false;//返回false，取消submit
+		}else
+		{
+			var mymessage=confirm("你确定要删除所选记录吗？");
+			if(mymessage==false)
+			{
+				return false;//返回false，取消submit
+			}
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+		}
    });
 }
 
@@ -419,55 +427,58 @@ function listgoods()
 
    // Handle form submission event
    $('#frm-example').on('submit', function(e){
-      //alert("test");
-      var form = this;
-      var anyselected = 0;
-      // Iterate over all checkboxes in the table
-      table.$('input[type="checkbox"]').each(function(){
-         // If checkbox doesn't exist in DOM
-        // if(!$.contains(document, this)){
-            // If checkbox is checked
-            if(this.checked){
-               // Create a hidden element
-               anyselected = 1;
-               $(form).append(
-                  $('<input>')
-                     .attr('type', 'hidden')
-                     .attr('name', this.name)
-                     .val(this.value)
-               );
-            }
-        // }
-      });
-      
-      if(anyselected == 0)
-      {
-          alert("请选取需要删除的记录");
-          event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
-          return false;//返回false，取消submit
-      }
+		//alert("test");
+		var form = this;
+		var anyselected = 0;
+		// Iterate over all checkboxes in the table
+		table.$('input[type="checkbox"]').each(function(){
+		   // If checkbox doesn't exist in DOM
+		  // if(!$.contains(document, this)){
+			  // If checkbox is checked
+			  if(this.checked){
+				 // Create a hidden element
+				 anyselected = 1;
+				 $(form).append(
+					$('<input>')
+					   .attr('type', 'hidden')
+					   .attr('name', this.name)
+					   .val(this.value)
+				 );
+			  }
+		  // }
+		});
+		
+		if(anyselected == 0)
+		{
+			alert("请选取需要删除的记录");
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+			return false;//返回false，取消submit
+		}else
+		{
+			var mymessage=confirm("你确定要删除所选记录吗？删除货物，会对关联进出货的显示有影响");
+			if(mymessage==false)
+			{
+				return false;//返回false，取消submit
+			}
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+		}
    });   
 }
 
  function show_addgoods()
 {
-          $("section.content-header").html(
+    $("section.content-header").html(
             '<h1>' +
             '货物管理' +
             ' <small>货物添加</small>' +
              '</h1>'
-        ); 
+    ); 
 
 	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/addgoods" method="POST">'+
 		'<div class="input-group">' + 
 			'<span class="input-group-addon">名称*</span>' +
-			'<input name="name" type="text" class="form-control" style="width:30%">' +
+			'<input name="name" type="text" class="form-control" style="width:30%" maxlength="20" required>' +
 		'</div>' +
-		'<br>' +
-		'<div class="input-group">' +
-			'<span class="input-group-addon">单位</span>' +
-			'<input name="unit" type="text" class="form-control" style="width:30%">' +
-		'</div>' + 
 		'<br>' +                
                 '<div class="input-group">' +	
 			'<span class="input-group-addon">货物类型</span>' +
@@ -476,12 +487,12 @@ function listgoods()
 		'<br>' +
 		'<button type="submit" class="btn btn-default">提交</button>');
         
-        $('.selectpicker').selectpicker();
+    $('.selectpicker').selectpicker();
 	$('.selectpicker').append("<option value=\"0\" selected=\"selected\" >核销货物</option>");
 	$('.selectpicker').append("<option value=\"1\">非核销货物</option>");
 	
 	$('.selectpicker').selectpicker('refresh');
-        $('.selectpicker').selectpicker('render');
+    $('.selectpicker').selectpicker('render');
         
 }
   
@@ -497,13 +508,8 @@ function listgoods()
 		'<input type="hidden" id="id" name="id">' +
                 '<div class="input-group">' + 
 			'<span class="input-group-addon">名称*</span>' +
-			'<input id="name" name="name" type="text" class="form-control" style="width:30%">' +
+			'<input id="name" name="name" type="text" class="form-control" style="width:30%" maxlength="20" required>' +
 		'</div>' +
-		'<br>' +
-		'<div class="input-group">' +
-			'<span class="input-group-addon">单位</span>' +
-			'<input id="unit" name="unit" type="text" class="form-control" style="width:30%">' +
-		'</div>' +   
 		'<br>' +
 		'<div class="input-group">' +	
 			'<span class="input-group-addon">货物类型</span>' +
@@ -518,7 +524,6 @@ function listgoods()
                 //alert(field[0].name);//id,name,mobile,location,type
                 $("#id").val(field[0].id);
                 $("#name").val(field[0].name);
-                $("#unit").val(field[0].unit);   
 
                 $('.selectpicker').selectpicker();               
                 if(field[0].type === '0')
@@ -730,12 +735,20 @@ function listinput()
         // }
       });
       
-      if(anyselected == 0)
-      {
-          alert("请选取需要删除的记录");
-          event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
-          return false;//返回false，取消submit
-      }
+		if(anyselected == 0)
+		{
+			alert("请选取需要删除的记录");
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+			return false;//返回false，取消submit
+		}else
+		{
+			var mymessage=confirm("你确定要删除所选记录吗？");
+			if(mymessage==false)
+			{
+				return false;//返回false，取消submit
+			}
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+		}
    });
 }
 
@@ -1074,12 +1087,20 @@ function listoutput()
         // }
       });
       
-      if(anyselected == 0)
-      {
-          alert("请选取需要删除的记录");
-          event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
-          return false;//返回false，取消submit
-      }
+		if(anyselected == 0)
+		{
+			alert("请选取需要删除的记录");
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+			return false;//返回false，取消submit
+		}else
+		{
+			var mymessage=confirm("你确定要删除所选记录吗？");
+			if(mymessage==false)
+			{
+				return false;//返回false，取消submit
+			}
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+		}
    });
 }
 
