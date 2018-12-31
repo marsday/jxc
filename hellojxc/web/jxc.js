@@ -1116,17 +1116,17 @@ function listoutput()
 	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/addoutput" method="POST">'+
                 '<div class="input-group">' +	
 			'<span class="input-group-addon">货物名称</span>' +
-			'<select name="goodsname" class="selectpicker" data-style="btn-info"></select>' +
+			'<select name="goodsid" class="selectpicker" data-style="btn-info"></select>' +
                 '</div>' +  
 		'<br>' +                
 		'<div class="input-group">' + 
 			'<span class="input-group-addon">卖出数量</span>' +
-			'<input name="volume" type="text" class="form-control" style="width:30%">' +
+			'<input name="volume" type="number" class="form-control" style="width:30%" digits required>' +
 		'</div>' +                
 		'<br>' +
 		'<div class="input-group">' +
 			'<span class="input-group-addon">卖出总价</span>' +
-			'<input name="price" type="text" class="form-control" style="width:30%">' +
+			'<input name="price" type="number" class="form-control" style="width:30%" digits required>' +
 		'</div>' + 
 		'<br>' + 
  		'<div class="input-group">' +
@@ -1157,9 +1157,9 @@ function listoutput()
             for(var i=0;i<result.data.length;i++)
             {
                 if(i===0)
-                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][0] +"</option>");
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][1] +"</option>");
                 else
-                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
             }
             $('.selectpicker').selectpicker('refresh');
             $('.selectpicker').selectpicker('render');
@@ -1183,12 +1183,12 @@ function listoutput()
 		'<br>' +                
 		'<div class="input-group">' + 
 			'<span class="input-group-addon">卖出数量</span>' +
-			'<input id="volume" name="volume" type="text" class="form-control" style="width:30%">' +
+			'<input id="volume" name="volume" type="number" class="form-control" style="width:30%" digits required>' +
 		'</div>' +                
 		'<br>' +
 		'<div class="input-group">' +
 			'<span class="input-group-addon">卖出总价</span>' +
-			'<input id="price" name="price" type="text" class="form-control" style="width:30%">' +
+			'<input id="price" name="price" type="number" class="form-control" style="width:30%" digits required>' +
 		'</div>' + 
 		'<br>' + 
  		'<div class="input-group">' +
@@ -1223,7 +1223,7 @@ function listoutput()
             $('.selectpicker').selectpicker();
             for(var i=0;i<result.data.length;i++)
             {
-                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
             }
             $('.selectpicker').selectpicker('refresh');
             $('.selectpicker').selectpicker('render');
@@ -1239,7 +1239,7 @@ function listoutput()
                 $("#customerinfo").val(field[0].customer_info);
                 $("#refer").val(field[0].refer);
                 
-                $(".selectpicker").selectpicker('val',field[0].goods_name);//货物名称选择
+                $(".selectpicker").selectpicker('val',field[0].goods_id);//货物名称选择
                 $('.selectpicker').selectpicker('refresh');
                return false;
             });
@@ -1336,7 +1336,7 @@ function storeinfo()
 		$('.selectpicker').append("<option value=\"all\" selected=\"selected\">all</option>");
 		for(var i=0;i<result.data.length;i++)
 		{
-			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
 			/*
 			if(i===0)
                 $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][0] +"</option>");
@@ -1508,7 +1508,7 @@ function finabygoodschart()
 		$('.selectpicker').append("<option value=\"all\" selected=\"selected\">all</option>");
 		for(var i=0;i<result.data.length;i++)
 		{
-			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][0] +"</option>");
+			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
 			/*
 			if(i===0)
                 $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][0] +"</option>");
