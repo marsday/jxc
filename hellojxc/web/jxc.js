@@ -320,6 +320,7 @@ function listgoods()
        ' <thead>' + 
         '   <tr>' + 
         '     <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
+		'     <th>ID</th>' + 
         '     <th>名称</th>' + 
         '     <th>类型</th>' + 
         '   </tr>' + 
@@ -327,6 +328,7 @@ function listgoods()
         '<tfoot>' + 
         '   <tr>' + 
         '     <th></th>' + 
+		'     <th>ID</th>' + 		
         '     <th>名称</th>' + 
         '     <th>类型</th>' + 
         '   </tr>' + 
@@ -351,7 +353,7 @@ function listgoods()
                 }
             }
             ,{
-                'targets': 2,
+                'targets': 3,
                 'searchable': false,
                 //'orderable': false,
                 'className': 'dt-body-left',
@@ -505,8 +507,13 @@ function listgoods()
              '</h1>'
         ); 
     	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/updategoods" method="POST">'+
-		'<input type="hidden" id="id" name="id">' +
-                '<div class="input-group">' + 
+		//'<input type="hidden" id="id" name="id">' +
+        '<div class="input-group">' + 
+			'<span class="input-group-addon">ID</span>' +
+			'<input id="id" name="id" readonly type="text" class="form-control" style="width:10%">' +
+		'</div>' +	
+		'<br>' +	
+        '<div class="input-group">' + 
 			'<span class="input-group-addon">名称*</span>' +
 			'<input id="name" name="name" type="text" class="form-control" style="width:30%" maxlength="20" required>' +
 		'</div>' +
@@ -548,8 +555,8 @@ function listinput()
 {
   $("section.content-header").html(
             '<h1>' +
-            '进货管理' +
-            ' <small>进货一览</small>' +
+            '进货一览' +
+            ' <small style="color:red">货物名称显示红色，表示该货物定义已被删除</small>' +
              '</h1>'
         );      
       $("#target").html('<form id="frm-example">'+
@@ -567,6 +574,7 @@ function listinput()
        ' <thead>' + 
         '   <tr>' + 
         '     <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
+		'     <th>货物ID</th>' + 		
         '     <th>货物名称</th>' + 
         '     <th>买入数量</th>' + 
         '     <th>买入总价</th>' + 
@@ -580,7 +588,8 @@ function listinput()
         '<tfoot>' + 
         '   <tr>' + 
         '     <th></th>' + 
-        '     <th>货物名称</th>' + 
+		'     <th>货物ID</th>' + 			
+        '     <th>货物名称</th>' + 	
         '     <th>买入数量</th>' + 
         '     <th>买入总价</th>' + 
         '     <th>买入日期</th>' + 
@@ -594,7 +603,7 @@ function listinput()
     '</form>'
     );
 
-    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth(), 1);
+    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth()-6, 1);
     
     $("#datepicker_start").datepicker();
     $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
@@ -636,7 +645,25 @@ function listinput()
                        'render': function (data, type, full, meta){
                            return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
                        }
-                   }
+                   },
+                   {
+                       'targets': 1,
+					   'visible':false,//隐藏货物ID列
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           return data;
+                       }
+                   },
+                   {
+                       'targets': 2,
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           if(full[1] != '0')
+								return '<p style="color:red">'+data+'</p>';  
+						   else
+							   return data;
+                       }
+                   }				   
                ],
              'order': [[1, 'asc']]
            });       
@@ -805,9 +832,9 @@ function listinput()
             for(var i=0;i<result.data.length;i++)
             {
                 if(i===0)
-                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][1] +"</option>");
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][2] +"</option>");
                 else
-                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
             }
             $('.selectpicker').selectpicker('refresh');
             $('.selectpicker').selectpicker('render');
@@ -871,7 +898,7 @@ function listinput()
             $('.selectpicker').selectpicker();
             for(var i=0;i<result.data.length;i++)
             {
-                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
             }
             $('.selectpicker').selectpicker('refresh');
             $('.selectpicker').selectpicker('render');
@@ -900,8 +927,8 @@ function listoutput()
 {
   $("section.content-header").html(
             '<h1>' +
-            '出货管理' +
-            ' <small>出货一览</small>' +
+            '出货一览' +
+            ' <small style="color:red">货物名称显示红色，表示该货物定义已被删除</small>' +
              '</h1>'
         );      
       $("#target").html('<form id="frm-example">'+
@@ -919,6 +946,7 @@ function listoutput()
        ' <thead>' + 
         '   <tr>' + 
         '     <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
+		'     <th>货物ID</th>' + 			
         '     <th>货物名称</th>' + 
         '     <th>卖出数量</th>' + 
         '     <th>卖出总价</th>' + 
@@ -931,7 +959,8 @@ function listoutput()
         '</thead>' + 
         '<tfoot>' + 
         '   <tr>' + 
-        '     <th></th>' + 
+        '     <th></th>' +
+		'     <th>货物ID</th>' + 			
         '     <th>货物名称</th>' + 
         '     <th>卖出数量</th>' + 
         '     <th>卖出总价</th>' + 
@@ -946,7 +975,7 @@ function listoutput()
     '</form>'
     );
 
-    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth(), 1);
+    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth()-6, 1);
     
     $("#datepicker_start").datepicker();
     $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
@@ -988,7 +1017,25 @@ function listoutput()
                        'render': function (data, type, full, meta){
                            return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
                        }
-                   }
+                   },
+                   {
+                       'targets': 1,
+					   'visible':false,//隐藏货物ID列
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           return data;
+                       }
+                   },
+                   {
+                       'targets': 2,
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           if(full[1] != '0')
+								return '<p style="color:red">'+data+'</p>';  
+						   else
+							   return data;
+                       }
+                   }				   
                ],
              'order': [[1, 'asc']]
            });       
@@ -1157,9 +1204,9 @@ function listoutput()
             for(var i=0;i<result.data.length;i++)
             {
                 if(i===0)
-                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][1] +"</option>");
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][2] +"</option>");
                 else
-                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
             }
             $('.selectpicker').selectpicker('refresh');
             $('.selectpicker').selectpicker('render');
@@ -1223,7 +1270,7 @@ function listoutput()
             $('.selectpicker').selectpicker();
             for(var i=0;i<result.data.length;i++)
             {
-                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
             }
             $('.selectpicker').selectpicker('refresh');
             $('.selectpicker').selectpicker('render');
@@ -1337,7 +1384,7 @@ function storeinfo()
 		//$('.selectpicker').append("<option value=\"-\">-</option>");
 		for(var i=0;i<result.data.length;i++)
 		{
-			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
+			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
 			/*
 			if(i===0)
                 $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][0] +"</option>");
@@ -1349,7 +1396,7 @@ function storeinfo()
 		$('.selectpicker').selectpicker('render');
 	});
 		
-    var d = new Date(), ld = new Date(d.getFullYear(), 0, 1);
+    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth()-6, 1);
     
     $("#datepicker_start").datepicker();
     $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
@@ -1509,7 +1556,7 @@ function finabygoodschart()
 		$('.selectpicker').append("<option value=\"all\" selected=\"selected\">all</option>");
 		for(var i=0;i<result.data.length;i++)
 		{
-			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
+			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
 			/*
 			if(i===0)
                 $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][0] +"</option>");
@@ -1521,7 +1568,7 @@ function finabygoodschart()
 		$('.selectpicker').selectpicker('render');
 	});
 		
-    var d = new Date(), ld = new Date(d.getFullYear(), 0, 1);
+    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth()-6, 1);
     
     $("#datepicker_start").datepicker();
     $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
@@ -1742,7 +1789,7 @@ function finabyuserchart()
 		$('.selectpicker').selectpicker('render');
 	});
 		
-    var d = new Date(), ld = new Date(d.getFullYear(), 0, 1);
+    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth()-6, 1);
     
     $("#datepicker_start").datepicker();
     $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");

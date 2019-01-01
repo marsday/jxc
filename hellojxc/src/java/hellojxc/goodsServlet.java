@@ -82,6 +82,7 @@ public class goodsServlet extends HttpServlet {
                 // value array json
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 arrayBuilder.add(id);
+                arrayBuilder.add(id);
                 arrayBuilder.add(name);
                 arrayBuilder.add(type);
                 JsonArray empArray = arrayBuilder.build();

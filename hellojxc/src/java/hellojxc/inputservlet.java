@@ -93,9 +93,7 @@ public class inputservlet extends HttpServlet {
             {
                 String id = result.getString("id");
                 String goods_name = result.getString("goods_name");
-                int del_flag = result.getInt("del_flag");
-                if(del_flag != 0)
-                   goods_name = "---"; 
+                String del_flag = String.valueOf(result.getInt("del_flag"));
                 String volume = String.valueOf(result.getInt("volume"));
                 String price = String.valueOf(result.getInt("price"));
                 String buytime = result.getDate("buytime").toString();
@@ -106,6 +104,7 @@ public class inputservlet extends HttpServlet {
                 // value array json
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 arrayBuilder.add(id);
+                arrayBuilder.add(del_flag);               
                 arrayBuilder.add(goods_name);
                 arrayBuilder.add(volume);
                 arrayBuilder.add(price);
