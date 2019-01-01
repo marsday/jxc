@@ -1,4 +1,16 @@
-
+function getUrlVars()  
+{  
+        var vars = [], hash;  
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');  
+        for(var i = 0; i < hashes.length; i++)  
+        {  
+            hash = hashes[i].split('=');  
+            vars.push(hash[0]);  
+            vars[hash[0]] = hash[1];  
+        }  
+        return vars;  
+} 
+	
 function getloginfo()
 {
 	//获取登录者信息
@@ -178,9 +190,9 @@ function list_addcustomer()
 			var mymessage=confirm("你确定要删除所选记录吗？");
 			if(mymessage==false)
 			{
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 				return false;//返回false，取消submit
 			}
-			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 		}
    });
 }
@@ -460,9 +472,9 @@ function listgoods()
 			var mymessage=confirm("你确定要删除所选记录吗？删除货物，会对关联进出货的显示有影响");
 			if(mymessage==false)
 			{
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 				return false;//返回false，取消submit
 			}
-			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 		}
    });   
 }
@@ -772,9 +784,9 @@ function listinput()
 			var mymessage=confirm("你确定要删除所选记录吗？");
 			if(mymessage==false)
 			{
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 				return false;//返回false，取消submit
 			}
-			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 		}
    });
 }
@@ -1144,9 +1156,9 @@ function listoutput()
 			var mymessage=confirm("你确定要删除所选记录吗？");
 			if(mymessage==false)
 			{
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 				return false;//返回false，取消submit
 			}
-			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 		}
    });
 }

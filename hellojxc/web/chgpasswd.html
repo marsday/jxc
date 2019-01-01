@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>>进销存管理系统-登录</title>
+  <title>>进销存管理系统-密码修改</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <link rel="stylesheet" href="AdminLTE-2.4.5/bower_components/bootstrap/dist/css/bootstrap.min.css">
@@ -24,37 +24,36 @@
 <body class="hold-transition login-page">
 <div class="login-box">
   <div class="login-logo">
-    <b>进销存管理系统</b>登录
+    <b id="title"> </b>
   </div>
   <!-- /.login-logo -->
   <div class="login-box-body">
-    <p id="title" class="login-box-msg">输入英文用户名和密码以进入系统</p>
+    <p id="msg" class="login-box-msg">请输入新旧密码</p>
 
-	<form id="frm-example" class="bs-example bs-example-form" role="form" action="/hellojxc/login" method="post">
-      <div class="form-group has-feedback">
-        <input id="user" name="user" type="text" class="form-control" placeholder="请输入英文账号" required>
-        <!--<span class="glyphicon glyphicon-envelope form-control-feedback"></span>-->
-      </div>
-      <div class="form-group has-feedback">
-        <input id="input_password" name="input_password" type="password" class="form-control" placeholder="请输入密码" required>
+	<form id="frm-example" class="bs-example bs-example-form" role="form" action="/hellojxc/chgpasswd" method="post">
+  
+	  <div class="form-group has-feedback">
+        <input id="oldpassword" name="oldpassword" type="password" class="form-control" placeholder="请输入旧密码" required>
         <span class="glyphicon glyphicon-lock form-control-feedback"></span>
       </div>
-
+	  
+      <div class="form-group has-feedback">
+        <input id="newpassword1" name="newpassword1" type="password" class="form-control" placeholder="请输入第一遍新密码" required>
+        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+      </div>
+	  
+      <div class="form-group has-feedback">
+        <input id="newpassword2" name="newpassword2" type="password" class="form-control" placeholder="请输入第二遍新密码" required>
+        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+      </div>	
+	  
       <div class="row">
-	  <!--
-        <div class="col-xs-8">
-          <div class="checkbox icheck">
-            <label>
-              <input type="checkbox"> Remember Me
-            </label>
-          </div>
+        <div class="col-xs-6">
+          <button id="return" class="btn btn-primary btn-block btn-flat">返回首页</button>
+        </div>	  
+        <div class="col-xs-6">
+          <button id="chg" type="submit" class="btn btn-primary btn-block btn-flat">提交修改</button>
         </div>
-		-->
-        <!-- /.col -->
-        <div class="col-xs-12">
-          <button id="login" type="submit" class="btn btn-primary btn-block btn-flat">登录</button>
-        </div>
-        <!-- /.col -->
       </div>
     </form>
 
@@ -75,19 +74,44 @@
 <script src="jxc.js"></script>
 
 <script type="text/javascript" language="javascript">
+
 	$(document).ready(function() {
+	
+		//获取登录者信息
+		$.getJSON('/hellojxc/loginfo',function(result){
+				$("#title").text('账户信息:   ' + result.data[0].name_en + "--" + result.data[0].name_ch);
+		});
+
+		//返回到初始页面
+		$("#return").on('click', function(){
+				window.location.href="index.html";
+		});	
+		
+	   // Handle form submission event
+	   $('#frm-example').on('submit', function(e){
+		  //alert("test");
+			var pass1 = $("#newpassword1").val();
+			var pass2 = $("#newpassword2").val();
+			if(pass1 != pass2)
+			{
+				alert("两遍新密码不相同，请确认");
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+				return false;//返回false，取消submit
+			}
+	   });
+   
 	    var first = getUrlVars()["function"]; 
         switch(first)
         {
-		    case "loginerror"://登录失败
+		    case "resulterror"://原密码错误
             {
-				$("#title").attr({
+				$("#msg").attr({
 					'style':'color:red'
 					});
-                $("#title").text("登录失败，请检查用户名和密码");
-				$("#login").text("再次登录");
+                $("#msg").text('用户名或者旧密码错误，请检查');
                 break;
-            }default:
+            }
+			default:
             {
                 break;
             }

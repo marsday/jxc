@@ -29,7 +29,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author marsday
  */
-@WebServlet(name = "loginServlet", urlPatterns = {"/login","/logout","/loginfo","/listusers"})
+@WebServlet(name = "loginServlet", urlPatterns = {"/login","/logout","/loginfo","/listusers","/chgpasswd"})
 public class loginServlet extends HttpServlet {
 
     /**
@@ -76,12 +76,12 @@ public class loginServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         
         String user = request.getParameter("user");
-        String password = request.getParameter("password");
+        String password = request.getParameter("input_password");
         
         //内设超级账户
         if(user.compareTo("admin") == 0)
         {
-           if(password.compareTo("654321") == 0)
+           if(password.compareTo("qwert12345") == 0)
            {
                 HttpSession session = request.getSession();
                 AccountInfo info = new AccountInfo();
@@ -94,8 +94,8 @@ public class loginServlet extends HttpServlet {
                 response.sendRedirect("index.html");
            }else
             {
-                //TODO 登录error
-                response.sendRedirect("login_error.html");
+                //登录error,要求再次登录
+                response.sendRedirect("login.html?function=loginerror");
             }
            return;
         }
@@ -105,7 +105,6 @@ public class loginServlet extends HttpServlet {
             result = DBHelper.getDbHelper().executeQuery(sql);
             if(result.next())
             {
-                //TODO生成session
                 HttpSession session = request.getSession();
                 AccountInfo info = new AccountInfo();
                 info.name_en = result.getString("name_en");
@@ -131,8 +130,8 @@ public class loginServlet extends HttpServlet {
                 response.sendRedirect("index.html");
             }else
             {
-                //TODO 登录error
-                response.sendRedirect("login_error.html");
+                //登录error,要求再次登录
+                response.sendRedirect("login.html?function=loginerror");
             }
         }catch(Exception err)
         {
@@ -274,10 +273,45 @@ public class loginServlet extends HttpServlet {
             //return JSON
             loginoperation(request,response);
             return;
+        }
+        //登录验证
+        if(!Utility.checkSession(request, response))
+            return; 
+        if(uri.endsWith("/chgpasswd"))
+        {
+            chgpasswd(request,response);
         }else
             processRequest(request, response);
     }
-
+    private void chgpasswd(HttpServletRequest request,HttpServletResponse response)
+            throws IOException, ServletException {
+        
+        response.setCharacterEncoding("UTF=8");
+        response.setContentType("text/html;charset=UTF-8");
+ 
+         HttpSession session = request.getSession();
+        AccountInfo info = (AccountInfo)session.getAttribute("account");
+        String name_en = info.name_en;
+        String name_ch = info.name_ch;
+        
+        String oldpassword = request.getParameter("oldpassword");
+        String newpassword1 = request.getParameter("newpassword1");
+        String newpassword2 = request.getParameter("newpassword2");
+        
+        String sql = "update jxc_user set password='"  + newpassword1 +"' where name_en='"+name_en + "' and name_ch='" + name_ch + "' and password='" + oldpassword +"'";
+        int result = 0;
+        try{
+            result = DBHelper.getDbHelper().executeUpdate(sql);
+       }catch(Exception err)
+       {
+            err.printStackTrace();
+       }
+       if(result != 1)//失败时
+            response.sendRedirect("chgpasswd.html?function=resulterror");
+       else
+            response.sendRedirect("index.html");
+    }
+    
     /**
      * Returns a short description of the servlet.
      *
