@@ -1780,7 +1780,7 @@ function finabyuserchart()
 		'			  </div>' +
 		'			</div>' +
 		'		  </div>' +
-		'/div>'
+		'</div>'
 	);
 
 	//获取经办人名称列表
