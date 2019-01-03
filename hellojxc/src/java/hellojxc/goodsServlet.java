@@ -127,6 +127,7 @@ public class goodsServlet extends HttpServlet {
             input = new String( ids[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
         String sql = "select id, name, type from jxc_goods where id= " + "'" + input + "'";
+        Utility.getLogger().log(Level.INFO, "货物品种获取 sql: " + sql);
         String json = "{\"data\":[";
         ResultSet result = null;
         try{
@@ -257,7 +258,7 @@ public class goodsServlet extends HttpServlet {
 
             }
             sql += ")";
-
+             Utility.getLogger().log(Level.INFO, "货物品种删除 sql: " + sql);
             try{
              DBHelper.getDbHelper().executeUpdate(sql);
             }catch(Exception err)
@@ -279,7 +280,7 @@ public class goodsServlet extends HttpServlet {
                 + "'" +  name + "'," 
                 + "'" +  type + "'" 
                 + ")";
-
+       Utility.getLogger().log(Level.INFO, "货物品种增加 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
@@ -301,7 +302,7 @@ public class goodsServlet extends HttpServlet {
         
         String sql = "update jxc_goods set name = " + "'"+name +"'," + " type = " + "'"+ type + "'"
                                                         + " where id=" + "'" + id + "'"; 
-
+        Utility.getLogger().log(Level.INFO, "货物品种更新 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)

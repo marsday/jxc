@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.logging.Level;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -62,7 +63,7 @@ public class loginServlet extends HttpServlet {
             throws IOException, ServletException {
         response.setCharacterEncoding("UTF=8");
         response.setContentType("text/html;charset=UTF-8");
-        
+        Utility.getLogger().log(Level.INFO, " 退出登录");
         HttpSession session = request.getSession();
         session.invalidate();
         
@@ -105,6 +106,7 @@ public class loginServlet extends HttpServlet {
             result = DBHelper.getDbHelper().executeQuery(sql);
             if(result.next())
             {
+                Utility.getLogger().log(Level.INFO, user +" 登录成功");
                 HttpSession session = request.getSession();
                 AccountInfo info = new AccountInfo();
                 info.name_en = result.getString("name_en");
@@ -131,6 +133,7 @@ public class loginServlet extends HttpServlet {
             }else
             {
                 //登录error,要求再次登录
+                Utility.getLogger().log(Level.SEVERE, user +" 登录失败");
                 response.sendRedirect("login.html?function=loginerror");
             }
         }catch(Exception err)

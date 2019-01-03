@@ -6,6 +6,12 @@
 package hellojxc;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author marsday
  */
 public class Utility {
-    
+    private static Logger logger;
     //登录验证
     public static boolean checkSession(HttpServletRequest request,HttpServletResponse response) throws IOException
     {
@@ -34,5 +40,26 @@ public class Utility {
         }
 
         return true;
+    }
+    
+    public static Logger getLogger()
+    {
+        if(logger == null)
+        {
+            logger = Logger.getLogger("jxc");
+            StringBuffer logpath = new StringBuffer();
+            logpath.append("d:\\");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd-HHmmss");
+            logpath = logpath.append("jxc_" + sdf.format(new Date()) + ".log");
+            try{
+                FileHandler filehandler = new FileHandler(logpath.toString(),true);
+                logger.addHandler(filehandler);
+                filehandler.setFormatter(new SimpleFormatter());
+                filehandler.setLevel(Level.ALL);
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+        return logger;
     }
 }

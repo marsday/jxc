@@ -85,6 +85,7 @@ public class inputservlet extends HttpServlet {
                                 + " a.buytime >= '"+ datepicker_start + "'"
                                 + " and a.buytime <= '"+ datepicker_end + "'"
                                 + " and a.goods_id = b.id and a.del_flag = 0";
+        Utility.getLogger().log(Level.INFO, "查询 sql: " + sql);
         ResultSet result = null;
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
@@ -211,7 +212,7 @@ public class inputservlet extends HttpServlet {
 
             }
             sql += ")";
-
+            Utility.getLogger().log(Level.INFO, "进货删除 sql: " + sql);
             try{
              DBHelper.getDbHelper().executeUpdate(sql);
             }catch(Exception err)
@@ -253,7 +254,7 @@ public class inputservlet extends HttpServlet {
                                                         + " customer_info= " + "'"+ customerinfo + "',"
                                                         + " operator= " + "'"+ operator + "'"
                                                         + " where id="  +  id; 
-
+       Utility.getLogger().log(Level.INFO, "进货更新 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
@@ -297,7 +298,7 @@ public class inputservlet extends HttpServlet {
                 +  "'" +  customerinfo  + "',"  
                 +  "'"  +  refer  + "'"  
                 + ")";
- 
+        Utility.getLogger().log(Level.INFO, "进货添加 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
@@ -321,6 +322,7 @@ public class inputservlet extends HttpServlet {
             input = new String( names[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
         String sql = "select id,goods_id, volume, price, buytime,operator,customer_info,refer from jxc_input where id= " + "'" + input + "'";
+        Utility.getLogger().log(Level.INFO, "获取指定进货 sql: " + sql);
         String json = "{\"data\":[";
         ResultSet result = null;
         try{

@@ -1237,7 +1237,7 @@ function listoutput()
 		'<input type="hidden" id="id" name="id">' +
                 '<div class="input-group">' +	
 			'<span class="input-group-addon">货物名称</span>' +
-			'<select name="goodsname" class="selectpicker" data-style="btn-info"></select>' +
+			'<select name="goodsid" class="selectpicker" data-style="btn-info"></select>' +
                 '</div>' +  
 		'<br>' +                
 		'<div class="input-group">' + 

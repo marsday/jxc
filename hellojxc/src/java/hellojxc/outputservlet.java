@@ -85,6 +85,7 @@ public class outputservlet extends HttpServlet {
                                 + " buytime >= '"+ datepicker_start + "'"
                                 + " and buytime <= '"+ datepicker_end + "'"
                                 + " and a.goods_id = b.id and a.del_flag = 0";
+         Utility.getLogger().log(Level.INFO, "出货查询 sql: " + sql);
         ResultSet result = null;
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
@@ -253,7 +254,7 @@ public class outputservlet extends HttpServlet {
                                                         + " customer_info= " + "'"+ customerinfo + "',"
                                                         + " operator= " + "'"+ operator + "'"
                                                         + " where id="  +  id; 
-
+       Utility.getLogger().log(Level.INFO, "出货更新 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
@@ -297,7 +298,7 @@ public class outputservlet extends HttpServlet {
                 +  "'" +  customerinfo  + "',"  
                 +  "'"  +  refer  + "'"  
                 + ")";
- 
+       Utility.getLogger().log(Level.INFO, "出货添加 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
@@ -321,6 +322,7 @@ public class outputservlet extends HttpServlet {
             input = new String( names[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
         String sql = "select id, goods_id, volume, price, buytime,operator,customer_info,refer from jxc_output where id= " + "'" + input + "'";
+        Utility.getLogger().log(Level.INFO, "获取指定出货 sql: " + sql);
         String json = "{\"data\":[";
         ResultSet result = null;
         try{
