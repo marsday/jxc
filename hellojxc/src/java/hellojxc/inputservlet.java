@@ -85,7 +85,8 @@ public class inputservlet extends HttpServlet {
                                 + " a.buytime >= '"+ datepicker_start + "'"
                                 + " and a.buytime <= '"+ datepicker_end + "'"
                                 + " and a.goods_id = b.id and a.del_flag = 0";
-        Utility.getLogger().log(Level.INFO, "查询 sql: " + sql);
+        Utility.getLogger().log(Level.INFO, "查询进货记录");
+		Utility.getLogger().log(Level.CONFIG, "查询进货记录 sql: " + sql);
         ResultSet result = null;
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
@@ -133,7 +134,8 @@ public class inputservlet extends HttpServlet {
                 result.close();
         }catch(Exception err)
         {
-            err.printStackTrace();
+            Utility.getLogger().log(Level.SEVERE, "查询进货记录 error = " + err.getMessage());
+			err.printStackTrace();
         }
         json += "]}";
         //String json = "{\"data\": [[\"1\",\"Liqiang\",\"Shanghai\"],[\"2\",\"ZLY\",\"FuJian\"]]}";
@@ -198,6 +200,7 @@ public class inputservlet extends HttpServlet {
             throws ServletException, IOException {
 
         String[] names = request.getParameterValues("id[]");
+        String idlist="";
         if(names.length > 0)
         {
             String sql = "update jxc_input set del_flag = 1 where id in (";
@@ -206,17 +209,23 @@ public class inputservlet extends HttpServlet {
             {
                  String name = new String(obj.getBytes("ISO-8859-1"), "UTF-8");
                  if(index!=0)
+				 {
+					 idlist += ",";
                      sql += ",";
+				 }
+				 idlist += "'" + name + "'";
                  sql += "'" + name + "'";
                  index++;
 
             }
             sql += ")";
-            Utility.getLogger().log(Level.INFO, "进货删除 sql: " + sql);
+			Utility.getLogger().log(Level.INFO, "进货删除 idlist: " + idlist);
+            Utility.getLogger().log(Level.CONFIG, "进货删除 sql: " + sql);
             try{
              DBHelper.getDbHelper().executeUpdate(sql);
             }catch(Exception err)
             {
+				Utility.getLogger().log(Level.SEVERE, "进货删除 error = " + err.getMessage());
                 err.printStackTrace();
             }      
         }
@@ -254,11 +263,13 @@ public class inputservlet extends HttpServlet {
                                                         + " customer_info= " + "'"+ customerinfo + "',"
                                                         + " operator= " + "'"+ operator + "'"
                                                         + " where id="  +  id; 
-       Utility.getLogger().log(Level.INFO, "进货更新 sql: " + sql);
+		Utility.getLogger().log(Level.INFO, "进货更新 id= " + id);
+	    Utility.getLogger().log(Level.CONFIG, "进货更新 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
+		    Utility.getLogger().log(Level.SEVERE, "更新进货 error = " + err.getMessage());
             err.printStackTrace();
        }
         //request.getRequestDispatcher("/index_1.html").forward(request,response);
@@ -298,11 +309,14 @@ public class inputservlet extends HttpServlet {
                 +  "'" +  customerinfo  + "',"  
                 +  "'"  +  refer  + "'"  
                 + ")";
-        Utility.getLogger().log(Level.INFO, "进货添加 sql: " + sql);
+	
+	   Utility.getLogger().log(Level.INFO, "进货添加 goodsid=" + goodsid + " volume=" + volume + " price=" + price + " operator=" + operator + " operation_day=" + operation_day);		
+       Utility.getLogger().log(Level.CONFIG, "进货添加 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
+		    Utility.getLogger().log(Level.SEVERE, "进货添加 error = " + err.getMessage());
             err.printStackTrace();
        }
         response.sendRedirect("index.html?function=listinput");
@@ -322,7 +336,8 @@ public class inputservlet extends HttpServlet {
             input = new String( names[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
         String sql = "select id,goods_id, volume, price, buytime,operator,customer_info,refer from jxc_input where id= " + "'" + input + "'";
-        Utility.getLogger().log(Level.INFO, "获取指定进货 sql: " + sql);
+		Utility.getLogger().log(Level.INFO, "获取指定进货 id= " + input);
+        Utility.getLogger().log(Level.CONFIG, "获取指定进货 sql: " + sql);
         String json = "{\"data\":[";
         ResultSet result = null;
         try{
@@ -364,10 +379,13 @@ public class inputservlet extends HttpServlet {
                             
                 index++;
             }
+            if(index == 0)
+                Utility.getLogger().log(Level.SEVERE, "没有获取到指定进货记录: sql=" + sql);			
             if(result != null)
                 result.close();
         }catch(Exception err)
         {
+			Utility.getLogger().log(Level.SEVERE, "获取指定进货记录 error = " + err.getMessage());
             err.printStackTrace();
         }
         json += "]}";

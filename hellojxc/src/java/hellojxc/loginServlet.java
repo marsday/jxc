@@ -61,10 +61,14 @@ public class loginServlet extends HttpServlet {
     
     private void logoutoperation(HttpServletRequest request,HttpServletResponse response)
             throws IOException, ServletException {
-        response.setCharacterEncoding("UTF=8");
+        response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
-        Utility.getLogger().log(Level.INFO, " 退出登录");
         HttpSession session = request.getSession();
+        
+        AccountInfo info = (AccountInfo)session.getAttribute("account");
+        String name_en = info.name_en;
+        Utility.getLogger().log(Level.INFO, name_en + " 退出登录");  
+        
         session.invalidate();
         
         //response.sendRedirect("login.html");
@@ -73,7 +77,7 @@ public class loginServlet extends HttpServlet {
     private void loginoperation(HttpServletRequest request,HttpServletResponse response)
             throws IOException, ServletException {
         
-        response.setCharacterEncoding("UTF=8");
+        response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
         
         String user = request.getParameter("user");
@@ -101,6 +105,7 @@ public class loginServlet extends HttpServlet {
            return;
         }
         String sql = "select * from jxc_user where name_en='" + user + "'" + " and password='" + password + "'" + "and del_flag=0";
+        Utility.getLogger().log(Level.CONFIG, "用户登录SQL " + sql);
         ResultSet result = null;
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
@@ -145,7 +150,6 @@ public class loginServlet extends HttpServlet {
     
     private void loginfooperation(HttpServletRequest request,HttpServletResponse response)
             throws IOException, ServletException {
-        
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
         
@@ -154,7 +158,7 @@ public class loginServlet extends HttpServlet {
         String name_en = info.name_en;
         String name_ch = info.name_ch;
         String last_login = info.last_login;
-        
+               
         String json = "{\"data\":[";
         
         JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
@@ -289,7 +293,7 @@ public class loginServlet extends HttpServlet {
     private void chgpasswd(HttpServletRequest request,HttpServletResponse response)
             throws IOException, ServletException {
         
-        response.setCharacterEncoding("UTF=8");
+        response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
  
          HttpSession session = request.getSession();
@@ -297,6 +301,7 @@ public class loginServlet extends HttpServlet {
         String name_en = info.name_en;
         String name_ch = info.name_ch;
         
+        Utility.getLogger().log(Level.INFO, name_en + " 更改密码");       
         String oldpassword = request.getParameter("oldpassword");
         String newpassword1 = request.getParameter("newpassword1");
         String newpassword2 = request.getParameter("newpassword2");

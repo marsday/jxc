@@ -5,6 +5,7 @@
  */
 package hellojxc;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -47,15 +48,19 @@ public class Utility {
         if(logger == null)
         {
             logger = Logger.getLogger("jxc");
+
             StringBuffer logpath = new StringBuffer();
-            logpath.append("d:\\");
+            logpath.append("c:\\hellojxclogs");
+            File file = new File(logpath.toString());
+            if(!file.exists())
+                file.mkdir();
+            
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd-HHmmss");
-            logpath = logpath.append("jxc_" + sdf.format(new Date()) + ".log");
+            logpath = logpath.append("\\jxc_" + sdf.format(new Date()) + ".log");
             try{
                 FileHandler filehandler = new FileHandler(logpath.toString(),true);
                 logger.addHandler(filehandler);
                 filehandler.setFormatter(new SimpleFormatter());
-                filehandler.setLevel(Level.ALL);
             }catch(IOException e){
                 e.printStackTrace();
             }

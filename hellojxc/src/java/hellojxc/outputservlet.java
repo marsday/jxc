@@ -198,6 +198,7 @@ public class outputservlet extends HttpServlet {
             throws ServletException, IOException {
 
         String[] names = request.getParameterValues("id[]");
+	String idlist="";
         if(names.length > 0)
         {
             String sql = "update jxc_output set del_flag = 1 where id in (";
@@ -206,17 +207,23 @@ public class outputservlet extends HttpServlet {
             {
                  String name = new String(obj.getBytes("ISO-8859-1"), "UTF-8");
                  if(index!=0)
-                     sql += ",";
+		{
+                    idlist += ",";
+                    sql += ",";
+		 }
+		idlist += "'" + name + "'";
                  sql += "'" + name + "'";
                  index++;
 
             }
             sql += ")";
-
+            Utility.getLogger().log(Level.INFO, "出货删除 idlist: " + idlist);
+            Utility.getLogger().log(Level.CONFIG, "出货删除 sql: " + sql);
             try{
              DBHelper.getDbHelper().executeUpdate(sql);
             }catch(Exception err)
             {
+		Utility.getLogger().log(Level.SEVERE, "出货删除 error = " + err.getMessage());
                 err.printStackTrace();
             }      
         }
@@ -254,11 +261,13 @@ public class outputservlet extends HttpServlet {
                                                         + " customer_info= " + "'"+ customerinfo + "',"
                                                         + " operator= " + "'"+ operator + "'"
                                                         + " where id="  +  id; 
-       Utility.getLogger().log(Level.INFO, "出货更新 sql: " + sql);
+       Utility.getLogger().log(Level.INFO, "出货更新 id= " + id);
+	   Utility.getLogger().log(Level.INFO, "出货更新 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
+		   	Utility.getLogger().log(Level.SEVERE, "更新进货 error = " + err.getMessage());
             err.printStackTrace();
        }
         //request.getRequestDispatcher("/index_1.html").forward(request,response);
@@ -298,11 +307,13 @@ public class outputservlet extends HttpServlet {
                 +  "'" +  customerinfo  + "',"  
                 +  "'"  +  refer  + "'"  
                 + ")";
-       Utility.getLogger().log(Level.INFO, "出货添加 sql: " + sql);
+	    Utility.getLogger().log(Level.INFO, "进货添加 goodsid=" + goodsid + " volume=" + volume + " price=" + price + " operator=" + operator + " operation_day=" + operation_day);	
+        Utility.getLogger().log(Level.CONFIG, "出货添加 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
+		   Utility.getLogger().log(Level.SEVERE, "出货添加 error = " + err.getMessage());
             err.printStackTrace();
        }
         response.sendRedirect("index.html?function=listoutput");
@@ -359,7 +370,9 @@ public class outputservlet extends HttpServlet {
 
                 if(index !=0)
                     json+=",";
-                
+                if(index == 0)
+					Utility.getLogger().log(Level.SEVERE, "没有获取指定出货记录: sql=" + sql);	
+				
                 json += strWtr.toString();
                             
                 index++;
@@ -368,6 +381,7 @@ public class outputservlet extends HttpServlet {
                 result.close();
         }catch(Exception err)
         {
+			Utility.getLogger().log(Level.SEVERE, "获取指定出货记录 error = " + err.getMessage());
             err.printStackTrace();
         }
         json += "]}";

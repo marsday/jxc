@@ -69,6 +69,7 @@ public class goodsServlet extends HttpServlet {
      
         //String sql = "select name, unit, type from jxc_goods where del_flag=0";
         String sql = "select id, name, type from jxc_goods where del_flag=0";
+        Utility.getLogger().log(Level.CONFIG, "获取货物品种list sql: " + sql);
         ResultSet result = null;
         int index = 0;       
         try{
@@ -99,11 +100,14 @@ public class goodsServlet extends HttpServlet {
                             
                 index++;
             }
-            //Logger.getLogger(goodsServlet.class.getName()).log(Level.SEVERE, null, "result of listgoods is; " + index);
+
+            Utility.getLogger().log(Level.CONFIG, "获取货物品种list记录数目 = " + index);
+			
             if(result != null)
                 result.close();
         }catch(Exception err)
         {
+            Utility.getLogger().log(Level.SEVERE, "获取货物品种list error = " + err.getMessage());
             err.printStackTrace();
         }
         json += "]}";
@@ -127,7 +131,8 @@ public class goodsServlet extends HttpServlet {
             input = new String( ids[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
         String sql = "select id, name, type from jxc_goods where id= " + "'" + input + "'";
-        Utility.getLogger().log(Level.INFO, "货物品种获取 sql: " + sql);
+        Utility.getLogger().log(Level.INFO, "获取指定货物品种: id= " + input);
+        Utility.getLogger().log(Level.CONFIG, "获取指定货物品种 sql: " + sql);
         String json = "{\"data\":[";
         ResultSet result = null;
         try{
@@ -151,23 +156,7 @@ public class goodsServlet extends HttpServlet {
                 
                 jsonWtr.writeObject(empObj);
                 jsonWtr.close();
-                
-                /*
-                // value array json
-                JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-                arrayBuilder.add(id);
-                arrayBuilder.add(name);
-                arrayBuilder.add(mobile);
-                arrayBuilder.add(location);
-                arrayBuilder.add(type);
-                JsonArray empArray = arrayBuilder.build();
-                
-                StringWriter strWtr = new StringWriter();
-                JsonWriter jsonWtr = Json.createWriter(strWtr);
-                
-                jsonWtr.writeArray(empArray);
-                jsonWtr.close();
-                */
+
                 if(index !=0)
                     json+=",";
                 
@@ -175,10 +164,13 @@ public class goodsServlet extends HttpServlet {
                             
                 index++;
             }
+            if(index == 0)
+                Utility.getLogger().log(Level.SEVERE, "没有获取到指定货物品种: sql=" + sql);
             if(result != null)
                 result.close();
         }catch(Exception err)
         {
+            Utility.getLogger().log(Level.SEVERE, "获取指定货物品种 error= " + err.getMessage());
             err.printStackTrace();
         }
         json += "]}";
@@ -244,6 +236,7 @@ public class goodsServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String[] ids = request.getParameterValues("id[]");
+	String idlist="";
         if(ids.length > 0)
         {
             String sql = "update jxc_goods set del_flag = 1 where id in (";
@@ -252,17 +245,23 @@ public class goodsServlet extends HttpServlet {
             {
                  String id = new String(obj.getBytes("ISO-8859-1"), "UTF-8");
                  if(index!=0)
+		{
+                    idlist += ",";
                      sql += ",";
-                 sql += "'" + id + "'";
-                 index++;
+		}
+                sql += "'" + id + "'";
+		idlist += "'" + id + "'";
+                index++;
 
             }
             sql += ")";
-             Utility.getLogger().log(Level.INFO, "货物品种删除 sql: " + sql);
+	    Utility.getLogger().log(Level.INFO, "货物品种删除 idlist=: " + idlist);
+            Utility.getLogger().log(Level.CONFIG, "货物品种删除 sql: " + sql);
             try{
-             DBHelper.getDbHelper().executeUpdate(sql);
+				DBHelper.getDbHelper().executeUpdate(sql);
             }catch(Exception err)
             {
+		Utility.getLogger().log(Level.SEVERE, "删除货物品种 error = " + err.getMessage());
                 err.printStackTrace();
             }      
         }
@@ -280,12 +279,14 @@ public class goodsServlet extends HttpServlet {
                 + "'" +  name + "'," 
                 + "'" +  type + "'" 
                 + ")";
-       Utility.getLogger().log(Level.INFO, "货物品种增加 sql: " + sql);
+		Utility.getLogger().log(Level.INFO, "货物品种增加: name= " + name + " type= " + type);
+        Utility.getLogger().log(Level.CONFIG, "货物品种增加 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
-            err.printStackTrace();
+		   Utility.getLogger().log(Level.SEVERE, "货物品种增加 error = " + err.getMessage());
+           err.printStackTrace();
        }
         //request.getRequestDispatcher("/index_1.html").forward(request,response);
         response.sendRedirect("index.html?function=listgoods");
@@ -302,7 +303,8 @@ public class goodsServlet extends HttpServlet {
         
         String sql = "update jxc_goods set name = " + "'"+name +"'," + " type = " + "'"+ type + "'"
                                                         + " where id=" + "'" + id + "'"; 
-        Utility.getLogger().log(Level.INFO, "货物品种更新 sql: " + sql);
+		Utility.getLogger().log(Level.INFO, "货物品种更新 id=: " + id + " name= " + name);												
+        Utility.getLogger().log(Level.CONFIG, "货物品种更新 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
