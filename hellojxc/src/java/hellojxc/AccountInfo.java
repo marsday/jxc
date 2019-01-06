@@ -12,4 +12,5 @@ public class AccountInfo {
     public String name_en;
     public String name_ch;
     public String last_login;
+    public String type;//0:管理者 1：浏览者
 }

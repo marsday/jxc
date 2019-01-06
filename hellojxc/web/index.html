@@ -191,12 +191,19 @@ desired effect
         </li>
         -->
         <!--<li><a href="index.html"><i class="fa fa-link"></i> <span>客户管理</span></a></li>-->
+        <li><a href="index.html"><i class="fa fa-desktop"></i> <span>对象管理</span></a></li> 
+		<li><a href="#"><i class="fa fa-users"></i> <span>客户管理</span></a></li>
+        <li><a href="#"><i class="fa fa-link"></i> <span>支出管理</span></a></li>
+        <li><a href="#"><i class="fa fa-balance-scale"></i> <span>销售管理</span></a></li>
+		<li><a href="#"><i class="fa fa-bar-chart"></i> <span>XX统计</span></a></li>	
+		<!--
         <li><a href="index.html"><i class="fa fa-link"></i> <span>货物管理</span></a></li> 
         <li><a href="index.html?function=listinput"><i class="fa fa-link"></i> <span>进货管理</span></a></li>
         <li><a href="index.html?function=listoutput"><i class="fa fa-link"></i> <span>出货管理</span></a></li>
-		<li><a href="index.html?function=storeinfo""><i class="fa fa-bar-chart"></i> <span>库存信息统计</span></a></li>
+		<li><a href="index.html?function=storeinfo"><i class="fa fa-bar-chart"></i> <span>库存信息统计</span></a></li>
 		<li><a href="index.html?function=finabygoodschart"><i class="fa fa-bar-chart"></i> <span>库存资金统计</span></a></li>		
 		<li><a href="index.html?function=finabyuserchart"><i class="fa fa-bar-chart"></i> <span>财务收支统计</span></a></li>
+		-->
 		<!--
         <li class="treeview">
           <a href="#"><i class="fa fa-link"></i> <span>图表统计</span>
@@ -356,9 +363,13 @@ desired effect
 
 <script type="text/javascript" language="javascript" src="jquery-validation-1.14.0/dist/localization/messages_zh.js"></script>
 
-<script src="jxc.js"></script>
+<!--<script src="jxc.js"></script>-->
+
+<script src="jxc_next.js"></script>
 
 <script type="text/javascript">
+	var userType = 1;//用户类型:0:admin 1:guest
+
     //$.fn.dataTable.ext.errMode = 'throw';
     $(document).ajaxError(function(e,jqxhr,setting,exception){
         //alert("ajaxError called");
@@ -383,85 +394,17 @@ desired effect
 		});		
 
         var first = getUrlVars()["function"]; 
+		
         switch(first)
-        {
-            case "listinput"://进货管理
+        {			
+            case "preparetarget":
+			{
+				preparetarget();
+				break;
+			}
+			default://对象管理
             {
-                listinput();
-                break;
-            }
-            case "addinput":
-            {
-                addinput();
-                break;
-            }
-            case "showinput":
-            {
-                var id = getUrlVars()["id"]; 
-                showinput(id);
-                break;
-            }
-			case "listoutput"://出货管理
-            {
-                listoutput();
-                break;
-            }
-            case "addoutput":
-            {
-                addoutput();
-                break;
-            }
-            case "showoutput":
-            {
-                var id = getUrlVars()["id"]; 
-                showoutput(id);
-                break;
-            }
-            case "addgoods":
-            {
-                //alert("addgoods TODO");
-                show_addgoods();
-                break;
-            }
-            case "showgoods":
-            {
-                //alert("showgoods TODO");
-                var id = getUrlVars()["id"]; 
-                show_updategoods(id);
-                break;
-            }
-/*			
-            case "addcustomer"://添加客户信息
-            {
-                show_addcustomer();
-                break;
-            }
-            case "showcustomer"://显示客户信息，用于修改
-            {
-                var id = getUrlVars()["id"]; 
-                show_updatecustomer(id);
-               
-                break;
-            }
-*/
-            case "storeinfo"://库存信息统计
-            {
-                storeinfo();
-                break;
-            }
-            case "finabyuserchart"://经办人财务收支统计
-            {
-                finabyuserchart();
-                break;
-            }
-            case "finabygoodschart"://库存资金统计
-            {
-                finabygoodschart();
-                break;
-            }			
-            default://货物管理
-            {
-				listgoods();
+				listtarget();
                 break;
             }
                 

@@ -25,6 +25,7 @@ public class Utility {
     //登录验证
     public static boolean checkSession(HttpServletRequest request,HttpServletResponse response) throws IOException
     {
+
         //区分ajax请求和其他请求
         if(request.getSession() == null || request.getSession().getAttribute("account") == null)
         {
@@ -39,7 +40,7 @@ public class Utility {
             }
             return false;
         }
-
+        
         return true;
     }
     

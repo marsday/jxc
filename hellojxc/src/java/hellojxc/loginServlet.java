@@ -93,6 +93,7 @@ public class loginServlet extends HttpServlet {
                 info.name_en = "admin";
                 info.name_ch = "管理者";
                 info.last_login = "----";
+                info.type = "0";//管理者
        
                 session.setAttribute("account", info);
                 session.setMaxInactiveInterval(10*60);//10分钟     
@@ -104,7 +105,7 @@ public class loginServlet extends HttpServlet {
             }
            return;
         }
-        String sql = "select * from jxc_user where name_en='" + user + "'" + " and password='" + password + "'" + "and del_flag=0";
+        String sql = "select * from jxc_next_user where name_en='" + user + "'" + " and password='" + password + "'" + "and del_flag=0";
         Utility.getLogger().log(Level.CONFIG, "用户登录SQL " + sql);
         ResultSet result = null;
         try{
@@ -116,6 +117,7 @@ public class loginServlet extends HttpServlet {
                 AccountInfo info = new AccountInfo();
                 info.name_en = result.getString("name_en");
                 info.name_ch = result.getString("name_ch");
+                info.type = String.valueOf(result.getInt("type"));
                 info.last_login = result.getString("last_login");
                 
                 session.setAttribute("account", info);
@@ -157,6 +159,7 @@ public class loginServlet extends HttpServlet {
         AccountInfo info = (AccountInfo)session.getAttribute("account");
         String name_en = info.name_en;
         String name_ch = info.name_ch;
+        String type = info.type;
         String last_login = info.last_login;
                
         String json = "{\"data\":[";
@@ -164,6 +167,7 @@ public class loginServlet extends HttpServlet {
         JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
         jsonBuilder.add("name_en", name_en);
         jsonBuilder.add("name_ch", name_ch);
+        jsonBuilder.add("type", type);
         jsonBuilder.add("last_login", last_login); 
         
         JsonObject empObj = jsonBuilder.build();
@@ -189,7 +193,7 @@ public class loginServlet extends HttpServlet {
 
         String json = "{\"data\":[";
      
-        String sql = "select name_en, password, name_ch, last_login from jxc_user where del_flag=0";
+        String sql = "select name_en, password, name_ch, type,last_login from jxc_next_user where del_flag=0";
         ResultSet result = null;
         int index = 0;       
         try{
@@ -199,6 +203,7 @@ public class loginServlet extends HttpServlet {
                 //String id = result.getString("id");
                 String name_ch = result.getString("name_ch");
                 String name_en = result.getString("name_en");
+                String type = String.valueOf(result.getInt("type"));
                 String last_login = result.getString("last_login");
                 
                 // value array json
@@ -206,6 +211,7 @@ public class loginServlet extends HttpServlet {
                 //arrayBuilder.add(id);
                 arrayBuilder.add(name_ch);
                 arrayBuilder.add(name_en);
+                arrayBuilder.add(type);
                 arrayBuilder.add(last_login);
 
                 JsonArray empArray = arrayBuilder.build();
