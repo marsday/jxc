@@ -178,6 +178,8 @@ public class analysisServlet extends HttpServlet {
                 FinaVolume detail = new FinaVolume();
                 detail.goodsname = name;
                 detail.in_volume = volume;
+                detail.out_volume = 0;
+                detail.net_volume = detail.in_volume - detail.out_volume;
                 store.put(name,detail);
             }
             if(in_result != null)
@@ -308,12 +310,12 @@ public class analysisServlet extends HttpServlet {
             {
                 String name = in_result.getString("goods_name");
                 int price = in_result.getInt("in_price"); 
-                FinaPrice detail = new FinaPrice();
-                detail.goodsname = name;
-                detail.in_price = price;
-                detail.out_price = 0;
-                detail.net_price = 0;
-                store.put(name,detail);
+                FinaPrice d = new FinaPrice();
+                d.goodsname = name;
+                d.in_price = price;
+                d.out_price = 0;
+                d.net_price = d.in_price - d.out_price;
+                store.put(name,d);
             }
             if(in_result != null)
                 in_result.close();            
@@ -438,7 +440,7 @@ public class analysisServlet extends HttpServlet {
                 detail.username = name;
                 detail.in_price = price;
                 detail.out_price = 0;
-                detail.net_price = 0;
+                detail.net_price = detail.out_price - detail.in_price;;
                 store.put(name,detail);
             }
             if(in_result != null)
