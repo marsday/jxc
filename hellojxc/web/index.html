@@ -193,7 +193,8 @@ desired effect
         <!--<li><a href="index.html"><i class="fa fa-link"></i> <span>客户管理</span></a></li>-->
         <li><a href="index.html"><i class="fa fa-desktop"></i> <span>对象管理</span></a></li> 
 		<li><a href="#"><i class="fa fa-users"></i> <span>客户管理</span></a></li>
-        <li><a href="#"><i class="fa fa-link"></i> <span>支出管理</span></a></li>
+        <li><a href="#"><i class="fa fa-link"></i> <span>日常支出</span></a></li>
+		<li><a href="#"><i class="fa fa-link"></i> <span>日常收入</span></a></li>
         <li><a href="#"><i class="fa fa-balance-scale"></i> <span>销售管理</span></a></li>
 		<li><a href="#"><i class="fa fa-bar-chart"></i> <span>XX统计</span></a></li>	
 		<!--
@@ -402,6 +403,12 @@ desired effect
 				preparetarget();
 				break;
 			}
+            case "showtarget":
+			{
+				var id = getUrlVars()["id"]; 
+				showtarget(id);
+				break;
+			}			
 			default://对象管理
             {
 				listtarget();

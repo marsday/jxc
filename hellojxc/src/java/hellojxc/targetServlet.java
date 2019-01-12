@@ -30,8 +30,8 @@ import javax.json.JsonArrayBuilder;
  *
  * @author marsday
  */
-@WebServlet(name = "goodsServlet", urlPatterns = {"/listgoods","/addgoods","/delgoods","/updategoods","/getgoods"})
-public class goodsServlet extends HttpServlet {
+@WebServlet(name = "targetServlet", urlPatterns = {"/listtarget","/addtarget","/deltarget","/updatetarget","/gettarget"})
+public class targetServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -67,8 +67,7 @@ public class goodsServlet extends HttpServlet {
 
         String json = "{\"data\":[";
      
-        //String sql = "select name, unit, type from jxc_goods where del_flag=0";
-        String sql = "select id, name, type from jxc_goods where del_flag=0";
+        String sql = "select id, name, type,units,grades from jxc_next_target where del_flag=0";
         Utility.getLogger().log(Level.CONFIG, "获取货物品种list sql: " + sql);
         ResultSet result = null;
         int index = 0;       
@@ -79,12 +78,16 @@ public class goodsServlet extends HttpServlet {
                 String id = result.getString("id");
                 String name = result.getString("name");
                 String type = result.getString("type");
+                String units = result.getString("units");
+                String grades = result.getString("grades");
                 
                 // value array json
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 arrayBuilder.add(id);
                 arrayBuilder.add(id);
                 arrayBuilder.add(name);
+                arrayBuilder.add(units==null?"":units);
+                arrayBuilder.add(grades==null?"":grades);
                 arrayBuilder.add(type);
                 JsonArray empArray = arrayBuilder.build();
                 
@@ -101,13 +104,13 @@ public class goodsServlet extends HttpServlet {
                 index++;
             }
 
-            Utility.getLogger().log(Level.CONFIG, "获取货物品种list记录数目 = " + index);
+            Utility.getLogger().log(Level.CONFIG, "获取target品种list记录数目 = " + index);
 			
             if(result != null)
                 result.close();
         }catch(Exception err)
         {
-            Utility.getLogger().log(Level.SEVERE, "获取货物品种list error = " + err.getMessage());
+            Utility.getLogger().log(Level.SEVERE, "获取target品种list error = " + err.getMessage());
             err.printStackTrace();
         }
         json += "]}";
@@ -130,9 +133,9 @@ public class goodsServlet extends HttpServlet {
         //{
             input = new String( ids[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
-        String sql = "select id, name, type from jxc_goods where id= " + "'" + input + "'";
-        Utility.getLogger().log(Level.INFO, "获取指定货物品种: id= " + input);
-        Utility.getLogger().log(Level.CONFIG, "获取指定货物品种 sql: " + sql);
+        String sql = "select id, name, type,units,grades from jxc_next_target where id= " + "'" + input + "'";
+        Utility.getLogger().log(Level.INFO, "获取指定target品种: id= " + input);
+        Utility.getLogger().log(Level.CONFIG, "获取指定target品种 sql: " + sql);
         String json = "{\"data\":[";
         ResultSet result = null;
         try{
@@ -143,12 +146,15 @@ public class goodsServlet extends HttpServlet {
                 String id = result.getString("id");
                 String name = result.getString("name");
                 String type = result.getString("type");
-                
+                String units = result.getString("units");
+                String grades = result.getString("grades");
                 //name-value json
                 JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
                 jsonBuilder.add("id", id);
                 jsonBuilder.add("name", name);
                 jsonBuilder.add("type", type);
+                jsonBuilder.add("units", units==null?"":units);
+                jsonBuilder.add("grades", grades==null?"":grades);
                 JsonObject empObj = jsonBuilder.build();
                 
                 StringWriter strWtr = new StringWriter();
@@ -165,12 +171,12 @@ public class goodsServlet extends HttpServlet {
                 index++;
             }
             if(index == 0)
-                Utility.getLogger().log(Level.SEVERE, "没有获取到指定货物品种: sql=" + sql);
+                Utility.getLogger().log(Level.SEVERE, "没有获取到指定target品种: sql=" + sql);
             if(result != null)
                 result.close();
         }catch(Exception err)
         {
-            Utility.getLogger().log(Level.SEVERE, "获取指定货物品种 error= " + err.getMessage());
+            Utility.getLogger().log(Level.SEVERE, "获取指定target品种 error= " + err.getMessage());
             err.printStackTrace();
         }
         json += "]}";
@@ -196,10 +202,10 @@ public class goodsServlet extends HttpServlet {
             return;
         
         String uri = request.getRequestURI();
-        if (uri.endsWith("/listgoods")) {
+        if (uri.endsWith("/listtarget")) {
             //return JSON
             listoperation(request,response);
-        }else if(uri.endsWith("/getgoods")) {
+        }else if(uri.endsWith("/gettarget")) {
             getoperation(request,response);
         }
         else
@@ -222,11 +228,11 @@ public class goodsServlet extends HttpServlet {
             return;        
         
         String uri = request.getRequestURI();
-        if (uri.endsWith("/addgoods")) {
+        if (uri.endsWith("/addtarget")) {
             addoperation(request,response);
-        }else if(uri.endsWith("/delgoods")) {
+        }else if(uri.endsWith("/deltarget")) {
             deloperation(request,response);
-        }else if(uri.endsWith("/updategoods")) {
+        }else if(uri.endsWith("/updatetarget")) {
             updateoperation(request,response);
         }
         else
@@ -239,7 +245,7 @@ public class goodsServlet extends HttpServlet {
 	String idlist="";
         if(ids.length > 0)
         {
-            String sql = "update jxc_goods set del_flag = 1 where id in (";
+            String sql = "update jxc_next_target set del_flag = 1 where id in (";
             int index = 0;
             for(String obj:ids)
             {
@@ -255,17 +261,17 @@ public class goodsServlet extends HttpServlet {
 
             }
             sql += ")";
-	    Utility.getLogger().log(Level.INFO, "货物品种删除 idlist=: " + idlist);
-            Utility.getLogger().log(Level.CONFIG, "货物品种删除 sql: " + sql);
+	    Utility.getLogger().log(Level.INFO, "target品种删除 idlist=: " + idlist);
+            Utility.getLogger().log(Level.CONFIG, "target品种删除 sql: " + sql);
             try{
-				DBHelper.getDbHelper().executeUpdate(sql);
+		DBHelper.getDbHelper().executeUpdate(sql);
             }catch(Exception err)
             {
-		Utility.getLogger().log(Level.SEVERE, "删除货物品种 error = " + err.getMessage());
+		Utility.getLogger().log(Level.SEVERE, "删除target品种 error = " + err.getMessage());
                 err.printStackTrace();
             }      
         }
-       response.sendRedirect("index.html?function=listgoods");
+       response.sendRedirect("index.html?function=listtarget");
     } 
     
     private void addoperation(HttpServletRequest request, HttpServletResponse response)
@@ -274,22 +280,49 @@ public class goodsServlet extends HttpServlet {
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
         String name = new String(request.getParameter("name").getBytes("ISO-8859-1"), "UTF-8");
         String type = new String(request.getParameter("type").getBytes("ISO-8859-1"), "UTF-8");
+        String units = "";
+        String grades = "";
+        
+        if(request.getParameter("units") != null)
+        {
+            units = new String(request.getParameter("units").getBytes("ISO-8859-1"), "UTF-8");
+        }
+        
+        if(request.getParameter("grades") != null)
+        {
+            grades = new String(request.getParameter("grades").getBytes("ISO-8859-1"), "UTF-8");
+        }       
 
-        String sql = "insert into jxc_goods (name,type) values(" 
-                + "'" +  name + "'," 
-                + "'" +  type + "'" 
-                + ")";
-		Utility.getLogger().log(Level.INFO, "货物品种增加: name= " + name + " type= " + type);
-        Utility.getLogger().log(Level.CONFIG, "货物品种增加 sql: " + sql);
+        String sql ="";
+        if(type == "1")
+        {
+            //日常对象
+             sql = "insert into jxc_next_target (name,type) values(" 
+                    + "'" +  name + "'," 
+                    +  Integer.parseInt(type)
+                    + ")";              
+
+        }else
+        {
+            //非日常对象
+            sql = "insert into jxc_next_target (name,type,units,grades) values(" 
+                    + "'" +  name + "'," 
+                    +  Integer.parseInt(type)+ "," 
+                    + "'" +  units + "',"
+                    + "'" +  grades + "'"
+                    + ")";        
+        }
+	Utility.getLogger().log(Level.INFO, "target品种增加: name= " + name + " type= " + type + " units= " + units + " grades= " + grades);
+        Utility.getLogger().log(Level.CONFIG, "target品种增加 sql: " + sql);
+        
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
-		   Utility.getLogger().log(Level.SEVERE, "货物品种增加 error = " + err.getMessage());
-           err.printStackTrace();
+            Utility.getLogger().log(Level.SEVERE, "target品种增加 error = " + err.getMessage());
+            err.printStackTrace();
        }
-        //request.getRequestDispatcher("/index_1.html").forward(request,response);
-        response.sendRedirect("index.html?function=listgoods");
+        response.sendRedirect("index.html?function=listtarget");
         
     }
     
@@ -300,19 +333,44 @@ public class goodsServlet extends HttpServlet {
         String id = new String(request.getParameter("id").getBytes("ISO-8859-1"), "UTF-8");
         String name = new String(request.getParameter("name").getBytes("ISO-8859-1"), "UTF-8");
         String type = new String(request.getParameter("type").getBytes("ISO-8859-1"), "UTF-8"); 
+        String units = "";
+        String grades = "";
         
-        String sql = "update jxc_goods set name = " + "'"+name +"'," + " type = " + "'"+ type + "'"
-                                                        + " where id=" + "'" + id + "'"; 
-		Utility.getLogger().log(Level.INFO, "货物品种更新 id=: " + id + " name= " + name);												
-        Utility.getLogger().log(Level.CONFIG, "货物品种更新 sql: " + sql);
+        if(request.getParameter("units") != null)
+        {
+            units = new String(request.getParameter("units").getBytes("ISO-8859-1"), "UTF-8");
+        }
+        
+        if(request.getParameter("grades") != null)
+        {
+            grades = new String(request.getParameter("grades").getBytes("ISO-8859-1"), "UTF-8");
+        }
+        
+        String sql ="";
+        if(type == "1")
+        {
+            //日常对象
+            sql = "update jxc_next_target set name = " + "'"+name +"'," + " type = " + Integer.parseInt(type)
+                                                        + " where id=" + "'" + id + "'";             
+
+        }else
+        {
+            //非日常对象
+            sql = "update jxc_next_target set name = " + "'"+name +"'," + " type = " + Integer.parseInt(type) +"," + "units = " + "'"+units +"'," + "grades = " + "'"+grades +"'"
+                                                        + " where id=" + "'" + id + "'";           
+        }        
+
+	Utility.getLogger().log(Level.INFO, "target品种更新 id=: " + id + " name= " + name + " type= " + type + " units= " + units + " grades= " + grades);												
+        Utility.getLogger().log(Level.CONFIG, "target品种更新 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
+           Utility.getLogger().log(Level.SEVERE, "target品种更新 error = " + err.getMessage());
             err.printStackTrace();
        }
         //request.getRequestDispatcher("/index_1.html").forward(request,response);
-        response.sendRedirect("index.html?function=listgoods");
+        response.sendRedirect("index.html?function=listtarget");
         
     }
     /**
