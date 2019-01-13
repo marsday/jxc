@@ -193,10 +193,10 @@ desired effect
         <!--<li><a href="index.html"><i class="fa fa-link"></i> <span>客户管理</span></a></li>-->
         <li><a href="index.html"><i class="fa fa-desktop"></i> <span>对象管理</span></a></li> 
 		<li><a href="index.html?function=listcustomer"><i class="fa fa-users"></i> <span>客户管理</span></a></li>
-		<li><a href="index.html?function=listpay"><i class="fa fa-users"></i> <span>支付方式管理</span></a></li>		
-        <li><a href="#"><i class="fa fa-link"></i> <span>日常支出</span></a></li>
-		<li><a href="#"><i class="fa fa-link"></i> <span>日常收入</span></a></li>
-        <li><a href="#"><i class="fa fa-balance-scale"></i> <span>销售管理</span></a></li>
+		<li><a href="index.html?function=listpay"><i class="fa fa-credit-card"></i> <span>支付管理</span></a></li>		
+        <li><a href="index.html?function=listdailyoutput"><i class="fa fa-link"></i> <span>日常支出</span></a></li>
+		<li><a href="index.html?function=listdailyinput"><i class="fa fa-link"></i> <span>日常收入</span></a></li>
+        <li><a href="index.html?function=listsaleinput"><i class="fa fa-balance-scale"></i> <span>销售收入</span></a></li>
 		<li><a href="#"><i class="fa fa-bar-chart"></i> <span>XX统计</span></a></li>	
 		<!--
         <li><a href="index.html"><i class="fa fa-link"></i> <span>货物管理</span></a></li> 
@@ -399,6 +399,22 @@ desired effect
 		
         switch(first)
         {
+            case "preparedailyinput"://日常收入追加
+			{
+				preparedailyinput();
+				break;
+			}
+            case "showdailyinput"://日常收入显示
+			{
+				var id = getUrlVars()["id"]; 
+				showdailyinput(id);
+				break;
+			}			
+			case "listdailyinput"://日常收入一览
+            {
+				listdailyinput();
+                break;
+            }		
             case "preparepay"://支付方式追加
 			{
 				preparepay();

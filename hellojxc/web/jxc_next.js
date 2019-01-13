@@ -54,7 +54,11 @@ function listcommonoperation(type,table)
 		delaction = '/hellojxc/delpay';
 		showaction = 'index.html?function=showpay&&id=';		
 	}
-	
+        else if(type === 'dailyinput')
+	{
+		delaction = '/hellojxc/deldailyinput';
+		showaction = 'index.html?function=showdailyinput&&id=';		
+	}	
 	
 	$("#del").on('click', function(){
 			$("#frm-example").attr("action",delaction);
@@ -172,8 +176,8 @@ function listtarget()
 	
 	if(userType === "0")
 	{
-		//只有admin用户有增删减权限
-		targetval += 	'<a class="btn btn-primary" id="add" href="index.html?function=' + prepareaction + '" role="button">添加</a> ' + "\n" + 
+            //只有admin用户有增删减权限
+            targetval += 	'<a class="btn btn-primary" id="add" href="index.html?function=' + prepareaction + '" role="button">添加</a> ' + "\n" + 
 						' <button  id="del" role="button" class="btn btn-danger">删除</button>' + "\n" + 
 						' <button  id="update" role="button" class="btn btn-primary">更新</button>' + 
 						'<br>' + 
@@ -843,4 +847,163 @@ function showpay(id)
            return false;
         });
     });	
+}
+
+function listdailyinput()
+{
+	var prepareaction= 'preparedailyinput';
+	var listaction='/hellojxc/listdailyinput';
+	
+	$("section.content-header").html(
+            '<h1>' +
+            '日常收入一览' +
+            ' <small style="color:red">红色表示该对应定义已被删除</small>' +
+             '</h1>'
+    ); 
+	
+	var targetval='<form id="frm-example">';
+	
+	targetval += ' <button  id="query" role="button" class="btn btn-primary">查询</button>' + "\n";
+	if(userType === "0")
+	{
+            //只有admin用户有增删减权限
+            targetval += 	'<a class="btn btn-primary" id="add" href="index.html?function=' + prepareaction + '" role="button">添加</a> ' + "\n" + 
+							' <button  id="del" role="button" class="btn btn-danger">删除</button>' + "\n" + 
+							' <button  id="update" role="button" class="btn btn-primary">更新</button>' + 
+							'<br>' + 
+							'<br>';
+	}
+	
+	targetval +=	'<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
+					'<p>结束日期：<input type="text" id="datepicker_end" name="datepicker_end"></p>'+
+					'<br>';
+				 
+	targetval +='<table id="example" class="display select" width="100%" cellspacing="0">' + 
+					' <thead>' + 
+					'   <tr>' + 
+					'     <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
+					'     <th width="5%">ID</th>' + 
+					'     <th>摘要</th>' + 
+					'     <th>对象名称</th>' + 
+					'     <th>支付方式</th>' + 					
+					'     <th>总价</th>' + 
+					'     <th>交易日期</th>' + 
+					'     <th>记录日期</th>' + 			
+					'     <th>备考</th>' + 					
+					'   </tr>' + 
+					'</thead>' + 
+					'<tfoot>' + 
+					'   <tr>' + 
+					'     <th width="5%"></th>' + 
+					'     <th>ID</th>' + 
+					'     <th>摘要</th>' + 
+					'     <th>对象名称</th>' + 
+					'     <th>支付方式</th>' + 					
+					'     <th>总价</th>' + 
+					'     <th>交易日期</th>' + 
+					'     <th>记录日期</th>' + 			
+					'     <th>备考</th>' + 	
+					'   </tr>' + 
+					'</tfoot>' + 
+				'</table>';
+	targetval += '</form>';
+
+	$("#target").html(targetval);
+
+    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth()-6, 1);
+    
+    $("#datepicker_start").datepicker();
+    $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_start").val(ld.getFullYear() + '-' + (ld.getMonth() + 1) + '-' + ld.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+    $("#datepicker_end").datepicker();
+    $("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+	
+    var table;
+    var refresh = function() {
+        var startday=$("#datepicker_start").val();
+        var endday=$("#datepicker_end").val();
+        //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+        table = $('#example').dataTable({
+              searching: false,
+             'ajax': {
+                'url': '/hellojxc/listdailyinput',
+                'type': 'POST'
+             },
+             'fnServerParams':function(aoData){
+               aoData.push(
+                       {
+                         "name": "startday",
+                         "value": startday?startday:null
+                       },
+                       {
+                           "name":"endday",
+                           "value": endday?endday:null
+                        }
+               );  
+             },
+             'columnDefs': [
+                   {
+                       'targets': 0,
+                       'searchable': false,
+                       'orderable': false,
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
+                       }
+                   },
+				   /*
+                   {
+                       'targets': 1,
+					   'visible':false,//隐藏货物ID列
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           return data;
+                       }
+                   },
+				   */
+                   {
+                       'targets': 2,//对象名称
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           if(full[8] != '0')
+								return '<p style="color:red">'+data+'</p>';  
+						   else
+							   return data;
+                       }
+                   },
+                   {
+                       'targets': 4,//支付方式
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           if(full[9] != '0')
+								return '<p style="color:red">'+data+'</p>';  
+						   else
+							   return data;
+                       }
+                   }				   
+               ],
+             'order': [[1, 'asc']]
+           });       
+    }
+    //加载页面时初始化datatable
+    refresh();
+    
+	$("#query").on('click', function(){ 
+		if(table)
+		{
+			table.fnDestroy();
+			refresh();
+		}
+		return false;
+    });
+	 
+    listcommonoperation('dailyinput',table);   	
+}
+function preparedailyinput()
+{
+}
+function showdailyinput(id)
+{
 }
