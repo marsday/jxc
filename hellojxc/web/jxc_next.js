@@ -49,6 +49,10 @@ function listcommonoperation(type,table)
 	{
 		delaction = '/hellojxc/delcustomer';
 		showaction = 'index.html?function=showcustomer&&id=';		
+	}else if(type === 'pay')
+	{
+		delaction = '/hellojxc/delpay';
+		showaction = 'index.html?function=showpay&&id=';		
 	}
 	
 	
@@ -79,7 +83,7 @@ function listcommonoperation(type,table)
 		//}
 		});
 		if(isok == 0)
-		{
+{
 			alert("请选取需要更新的记录");
 			return false;
 		}
@@ -310,6 +314,7 @@ function preparetarget()
 	});
 
 }
+
 function showtarget(id)
 {
     $("section.content-header").html(
@@ -724,4 +729,118 @@ function showcustomer(id)
          });
     // alert("show_updatecustomer");	
 }
+function listpay()
+{
+	var prepareaction= 'preparepay';
+	var listaction='/hellojxc/listpay';
+	
+	$("section.content-header").html(
+            '<h1>' +
+            '支付方式管理' +
+            ' <small>支付方式一览</small>' +
+             '</h1>'
+    ); 
+	
+	var targetval='<form id="frm-example">';
+	
+	if(userType === "0")
+	{
+		//只有admin用户有增删减权限
+		targetval += 	'<a class="btn btn-primary" id="add" href="index.html?function=' + prepareaction + '" role="button">添加</a> ' + "\n" + 
+						' <button  id="del" role="button" class="btn btn-danger">删除</button>' + "\n" + 
+						' <button  id="update" role="button" class="btn btn-primary">更新</button>' + 
+						'<br>' + 
+						'<br>';
+	}
+	targetval +='<table id="example" class="display select" width="100%" cellspacing="0">' + 
+					' <thead>' + 
+					'   <tr>' + 
+					'     <th width="10%><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
+					'     <th width="10%">ID</th>' + 
+					'     <th>名称</th>' + 
+					'   </tr>' + 
+					'</thead>' + 
+					'<tfoot>' + 
+					'   <tr>' + 
+					'     <th width="10%></th>' + 
+					'     <th width="10%>ID</th>' + 		
+					'     <th>名称</th>' + 
+					'   </tr>' + 
+					'</tfoot>' + 
+				'</table>';
+	targetval += '</form>';
 
+	$("#target").html(targetval);
+
+    var table = $('#example').DataTable({
+	   searching: false,
+      'ajax': {
+         'url': listaction
+      },
+      'columnDefs': [
+            {
+                'targets': 0,
+                'searchable': false,
+                'orderable': false,
+                'className': 'dt-body-left',
+                'render': function (data, type, full, meta){
+                    return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
+                }
+            }
+        ],
+      'order': [[1, 'asc']]
+    });	
+	
+	listcommonoperation('pay',table);	
+}
+
+function preparepay()
+{
+	$("section.content-header").html(
+            '<h1>' +
+            '支付方式管理' +
+            ' <small>支付方式添加</small>' +
+             '</h1>'
+    ); 
+		
+	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/addpay" method="POST">'+
+		'<div class="input-group">' + 
+			'<span class="input-group-addon">名称*</span>' +
+			'<input name="name" type="text" class="form-control" style="width:30%" maxlength="20" required>' +
+		'</div>' +
+		'<br>' + 
+		'<button type="submit" class="btn btn-default">提交</button>');	
+}
+
+function showpay(id)
+{
+    $("section.content-header").html(
+            '<h1>' +
+            '支付方式管理' +
+            ' <small>支付方式更新</small>' +
+             '</h1>'
+    ); 
+    	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/updatepay" method="POST">'+
+		//'<input type="hidden" id="id" name="id">' +
+        '<div class="input-group">' + 
+			'<span class="input-group-addon">ID</span>' +
+			'<input id="id" name="id" readonly type="text" class="form-control" style="width:10%">' +
+		'</div>' +	
+		'<br>' +	
+        '<div class="input-group">' + 
+			'<span class="input-group-addon">名称*</span>' +
+			'<input id="name" name="name" type="text" class="form-control" style="width:30%" maxlength="20" required>' +
+		'</div>' +
+		'<br>' +		
+		'<button type="submit" class="btn btn-default">提交</button>');  
+           
+    var geturl = "/hellojxc/getpay?id=" + id;
+    $.getJSON(geturl,function(result){
+        $.each(result, function(i, field){//就一条json数据，每条json数据里也只有一条记录
+            //alert(field[0].name);//id,name,mobile,location,type
+            $("#id").val(field[0].id);
+            $("#name").val(field[0].name);
+           return false;
+        });
+    });	
+}
