@@ -35,8 +35,8 @@ import javax.json.JsonArrayBuilder;
  *
  * @author liqiang
  */
-@WebServlet(name = "customservlet", urlPatterns = {"/listcustomers","/getcustomer","/updatecustomer","/delcustomer","/addcustomer"})
-public class customservlet extends HttpServlet {
+@WebServlet(name = "customerservlet", urlPatterns = {"/listcustomer","/getcustomer","/updatecustomer","/delcustomer","/addcustomer"})
+public class customerservlet extends HttpServlet {
     /*
     private List<Customer> customers = new ArrayList<Customer>();   
     
@@ -85,7 +85,7 @@ public class customservlet extends HttpServlet {
         String[] names = request.getParameterValues("id[]");
         if(names.length > 0)
         {
-            String sql = "update jxc_customer set del_flag = 1 where id in (";
+            String sql = "update jxc_next_customer set del_flag = 1 where id in (";
             int index = 0;
             for(String obj:names)
             {
@@ -102,10 +102,11 @@ public class customservlet extends HttpServlet {
              DBHelper.getDbHelper().executeUpdate(sql);
             }catch(Exception err)
             {
+                Utility.getLogger().log(Level.SEVERE, "客户删除 error = " + err.getMessage());
                 err.printStackTrace();
             }      
         }
-       response.sendRedirect("index.html");
+       response.sendRedirect("index.html?function=listcustomer");
     }    
      private void getcustomer_AJAX(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -119,7 +120,9 @@ public class customservlet extends HttpServlet {
         //{
             input = ids[0];
         //}
-        String sql = "select id, name, mobile,location,type from jxc_customer where id= " + input;
+        String sql = "select id, name, mobile,province,city from jxc_next_customer where id= " + input;
+        Utility.getLogger().log(Level.INFO, "获取指定客户: id= " + input);
+        Utility.getLogger().log(Level.CONFIG, "获取指定客户 sql: " + sql);       
         String json = "{\"data\":[";
         ResultSet result = null;
         try{
@@ -130,16 +133,16 @@ public class customservlet extends HttpServlet {
                 String id = result.getString("id");
                 String name = result.getString("name");
                 String mobile = result.getString("mobile");
-                String location = result.getString("location");
-                String type = result.getString("type");
+                String province = result.getString("province");
+                String city = result.getString("city");
                 
                 //name-value json
                 JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
                 jsonBuilder.add("id", id);
-                jsonBuilder.add("name", name);
-                jsonBuilder.add("mobile", mobile);
-                jsonBuilder.add("location", location);
-                jsonBuilder.add("type", type);
+                jsonBuilder.add("name", name==null?"":name);
+                jsonBuilder.add("mobile", mobile==null?"":mobile);
+                jsonBuilder.add("province", province==null?"":province);
+                jsonBuilder.add("city", city==null?"":city);
                 JsonObject empObj = jsonBuilder.build();
                 
                 StringWriter strWtr = new StringWriter();
@@ -148,22 +151,6 @@ public class customservlet extends HttpServlet {
                 jsonWtr.writeObject(empObj);
                 jsonWtr.close();
                 
-                /*
-                // value array json
-                JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-                arrayBuilder.add(id);
-                arrayBuilder.add(name);
-                arrayBuilder.add(mobile);
-                arrayBuilder.add(location);
-                arrayBuilder.add(type);
-                JsonArray empArray = arrayBuilder.build();
-                
-                StringWriter strWtr = new StringWriter();
-                JsonWriter jsonWtr = Json.createWriter(strWtr);
-                
-                jsonWtr.writeArray(empArray);
-                jsonWtr.close();
-                */
                 if(index !=0)
                     json+=",";
                 
@@ -175,6 +162,7 @@ public class customservlet extends HttpServlet {
                 result.close();
         }catch(Exception err)
         {
+            Utility.getLogger().log(Level.SEVERE, "获取指定客户 error = " + err.getMessage());
             err.printStackTrace();
         }
         json += "]}";
@@ -188,25 +176,27 @@ public class customservlet extends HttpServlet {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
         String name = new String(request.getParameter("name").getBytes("ISO-8859-1"), "UTF-8");
-        String location = new String(request.getParameter("location").getBytes("ISO-8859-1"), "UTF-8");
+        String province = new String(request.getParameter("province").getBytes("ISO-8859-1"), "UTF-8");
         String mobile = new String(request.getParameter("mobile").getBytes("ISO-8859-1"), "UTF-8");
-        String type = new String(request.getParameter("type").getBytes("ISO-8859-1"), "UTF-8");
+        String city = new String(request.getParameter("city").getBytes("ISO-8859-1"), "UTF-8");
         
-        String sql = "insert into jxc_customer (name,mobile,location,type) values(" 
+        String sql = "insert into jxc_next_customer (name,mobile,province,city) values(" 
                 + "'" +  name + "'," 
                 + "'"+ mobile + "',"
-                + "'"+ location + "',"
-                +  type 
+                + "'"+ province + "',"
+                + "'"+ city + "'"
                 + ")";
-
+	Utility.getLogger().log(Level.INFO, "客户增加: name= " + name + " mobile= " + mobile + " province= " + province + " city= " + city);
+        Utility.getLogger().log(Level.CONFIG, "客户增加 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
-            err.printStackTrace();
+           Utility.getLogger().log(Level.SEVERE, "客户增加 error = " + err.getMessage()); 
+           err.printStackTrace();
        }
         //request.getRequestDispatcher("/index_1.html").forward(request,response);
-        response.sendRedirect("index.html");
+        response.sendRedirect("index.html?function=listcustomer");
         
     }
     private void updatecustomer(HttpServletRequest request, HttpServletResponse response)
@@ -215,23 +205,25 @@ public class customservlet extends HttpServlet {
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
         String id = new String(request.getParameter("id").getBytes("ISO-8859-1"), "UTF-8");
         String name = new String(request.getParameter("name").getBytes("ISO-8859-1"), "UTF-8");
-        String location = new String(request.getParameter("location").getBytes("ISO-8859-1"), "UTF-8");
+        String province = new String(request.getParameter("province").getBytes("ISO-8859-1"), "UTF-8");
         String mobile = new String(request.getParameter("mobile").getBytes("ISO-8859-1"), "UTF-8");
-        String type = new String(request.getParameter("type").getBytes("ISO-8859-1"), "UTF-8");
+        String city = new String(request.getParameter("city").getBytes("ISO-8859-1"), "UTF-8");
         
         
-        String sql = "update jxc_customer set name = " + "'"+name+"'," + " mobile = " + "'"+ mobile + "',"
-                                                         + " location = "  + "'"+ location+ "'," + " type = " + type 
+        String sql = "update jxc_next_customer set name = " + "'"+name+"'," + " mobile = " + "'"+ mobile + "',"
+                                                         + " province = "  + "'"+ province+ "'," + " city = " + "'" + city + "'"
                                                         + " where id=" + id; 
-
+        Utility.getLogger().log(Level.INFO, "客户更新 id=: " + id + " name= " + name + " mobile= " + mobile + " province= " + province + " city= " + city);												
+        Utility.getLogger().log(Level.CONFIG, "客户更新 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
+            Utility.getLogger().log(Level.SEVERE, "客户更新 error = " + err.getMessage());          
             err.printStackTrace();
        }
         //request.getRequestDispatcher("/index_1.html").forward(request,response);
-        response.sendRedirect("index.html");
+        response.sendRedirect("index.html?function=listcustomer");
         
     }
     private void sendCustomerList_ajax(HttpServletRequest request,HttpServletResponse response)
@@ -242,7 +234,7 @@ public class customservlet extends HttpServlet {
 
         String json = "{\"data\":[";
      
-        String sql = "select id, name, mobile,location,type from jxc_customer where del_flag=0";
+        String sql = "select id, name, mobile,province,city from jxc_next_customer where del_flag=0";
         ResultSet result = null;
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
@@ -252,31 +244,15 @@ public class customservlet extends HttpServlet {
                 String id = result.getString("id");
                 String name = result.getString("name");
                 String mobile = result.getString("mobile");
-                String location = result.getString("location");
-                String type = result.getString("type");
-                /*
-                //name-value json
-                JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-                jsonBuilder.add("id", id);
-                jsonBuilder.add("name", name);
-                jsonBuilder.add("mobile", mobile);
-                jsonBuilder.add("location", location);
-                jsonBuilder.add("type", type);
-                JsonObject empObj = jsonBuilder.build();
-                
-                StringWriter strWtr = new StringWriter();
-                JsonWriter jsonWtr = Json.createWriter(strWtr);
-                
-                jsonWtr.writeObject(empObj);
-                jsonWtr.close();
-                */
+                String province = result.getString("province");
+                String city = result.getString("city");
                 // value array json
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 arrayBuilder.add(id);
                 arrayBuilder.add(name);
                 arrayBuilder.add(mobile);
-                arrayBuilder.add(location);
-                arrayBuilder.add(type);
+                arrayBuilder.add(province);
+                arrayBuilder.add(city);
                 JsonArray empArray = arrayBuilder.build();
                 
                 StringWriter strWtr = new StringWriter();
@@ -291,10 +267,13 @@ public class customservlet extends HttpServlet {
                             
                 index++;
             }
+            
+            Utility.getLogger().log(Level.CONFIG, "获取客户信息记录数目 = " + index);
             if(result != null)
                 result.close();
         }catch(Exception err)
         {
+            Utility.getLogger().log(Level.SEVERE, "获取客户信息记录数目 error = " + err.getMessage());
             err.printStackTrace();
         }
         json += "]}";
@@ -318,25 +297,9 @@ public class customservlet extends HttpServlet {
             throws ServletException, IOException {
         //登录验证
         if(!Utility.checkSession(request, response))
-            return;
-        /*
-        if(request.getSession() == null || request.getSession().getAttribute("account") == null)
-        {
-            if(request.getHeader("x-requested-with") != null && request.getHeader("x-requested-with").equals("XMLHttpRequest"))
-            {
-                response.sendError(401);
-                response.setStatus(401);
-                response.setHeader("sessionstatus", "timeout");
-            }else
-            {
-                 response.sendRedirect("login.html");
-            }
-            return;
-        }
-        */        
-        
+            return;      
         String uri = request.getRequestURI();
-        if (uri.endsWith("/listcustomers")) {
+        if (uri.endsWith("/listcustomer")) {
             //return JSON
             sendCustomerList_ajax(request,response);
         }else if(uri.endsWith("/getcustomer")) {

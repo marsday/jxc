@@ -192,7 +192,7 @@ desired effect
         -->
         <!--<li><a href="index.html"><i class="fa fa-link"></i> <span>客户管理</span></a></li>-->
         <li><a href="index.html"><i class="fa fa-desktop"></i> <span>对象管理</span></a></li> 
-		<li><a href="#"><i class="fa fa-users"></i> <span>客户管理</span></a></li>
+		<li><a href="index.html?function=listcustomer"><i class="fa fa-users"></i> <span>客户管理</span></a></li>
         <li><a href="#"><i class="fa fa-link"></i> <span>日常支出</span></a></li>
 		<li><a href="#"><i class="fa fa-link"></i> <span>日常收入</span></a></li>
         <li><a href="#"><i class="fa fa-balance-scale"></i> <span>销售管理</span></a></li>
@@ -397,13 +397,29 @@ desired effect
         var first = getUrlVars()["function"]; 
 		
         switch(first)
-        {			
-            case "preparetarget":
+        {	
+            case "preparecustomer"://客户追加
+			{
+				preparecustomer();
+				break;
+			}
+            case "showcustomer"://客户显示
+			{
+				var id = getUrlVars()["id"]; 
+				showcustomer(id);
+				break;
+			}			
+			case "listcustomer"://客户一览
+            {
+				listcustomer();
+                break;
+            }		
+            case "preparetarget"://对象追加
 			{
 				preparetarget();
 				break;
 			}
-            case "showtarget":
+            case "showtarget"://对象显示
 			{
 				var id = getUrlVars()["id"]; 
 				showtarget(id);

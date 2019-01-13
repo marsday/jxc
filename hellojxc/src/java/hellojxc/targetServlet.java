@@ -68,7 +68,6 @@ public class targetServlet extends HttpServlet {
         String json = "{\"data\":[";
      
         String sql = "select id, name, type,units,grades from jxc_next_target where del_flag=0";
-        Utility.getLogger().log(Level.CONFIG, "获取货物品种list sql: " + sql);
         ResultSet result = null;
         int index = 0;       
         try{
@@ -366,7 +365,7 @@ public class targetServlet extends HttpServlet {
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
-           Utility.getLogger().log(Level.SEVERE, "target品种更新 error = " + err.getMessage());
+            Utility.getLogger().log(Level.SEVERE, "target品种更新 error = " + err.getMessage());
             err.printStackTrace();
        }
         //request.getRequestDispatcher("/index_1.html").forward(request,response);
