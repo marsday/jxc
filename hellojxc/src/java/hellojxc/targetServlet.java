@@ -282,9 +282,9 @@ public class targetServlet extends HttpServlet {
         String units = "";
         String grades = "";
         
-        if(request.getParameter("units") != null)
+        if(request.getParameter("allunits") != null)
         {
-            units = new String(request.getParameter("units").getBytes("ISO-8859-1"), "UTF-8");
+            units = new String(request.getParameter("allunits").getBytes("ISO-8859-1"), "UTF-8");
         }
         
         if(request.getParameter("grades") != null)

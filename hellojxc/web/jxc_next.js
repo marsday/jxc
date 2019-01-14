@@ -151,10 +151,13 @@ function listcommonoperation(type,table)
 		}else
 		{
 			var mymessage=confirm("你确定要删除所选记录吗？");
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 			if(mymessage==false)
-			{
-				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+			{				
 				return false;//返回false，取消submit
+			}else
+			{
+				return true;
 			}
 		}
 	});		
@@ -273,7 +276,8 @@ function preparetarget()
              '</h1>'
     ); 
 		
-	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/addtarget" method="POST">'+
+	$("#target").html('<form id="frm-target" class="bs-example bs-example-form" role="form" action="/hellojxc/addtarget" method="POST">'+
+		'<input type="hidden" id="allunits" name="allunits">' +
 		'<div class="input-group">' + 
 			'<span class="input-group-addon">名称*</span>' +
 			'<input name="name" type="text" class="form-control" style="width:30%" maxlength="20" required>' +
@@ -284,9 +288,12 @@ function preparetarget()
 			'<select name="type" class="selectpicker" data-style="btn-info" ></select>' +
          '</div>' +  
 		'<br>' +
-		'<div class="input-group">' + 
-			'<span class="input-group-addon">单位</span>' +
-			'<input id="units" name="units" type="text" class="form-control" style="width:30%" maxlength="200" placeholder="单位1,单位2,单位3" required>' +
+		'<div id="InputsWrapper"> '+
+			'<button  id="AddMoreFileBox" role="button" class="btn btn-info">+</button>' + 
+			'<div class="input-group">' + 
+				'<span class="input-group-addon">单位_1</span>' +
+				'<input id="unit_1" name="unit_1" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
+			'</div>' +
 		'</div>' +
 		'<br>' +  	
 		'<div class="input-group">' + 
@@ -295,6 +302,54 @@ function preparetarget()
 		'</div>' +
 		'<br>' +
 		'<button type="submit" class="btn btn-default">提交</button>');
+	//动态增加[单位]输入
+	var MaxInputs = 8;
+	var CurtInputs = 1;
+	var InputsWrapper  = $("#InputsWrapper"); //Input boxes wrapper ID
+	var AddButton    = $("#AddMoreFileBox"); //Add button ID
+	var x = InputsWrapper.length; //initlal text box count			
+	$(AddButton).click(function (e) //on add input button click
+	{
+		if(x <= MaxInputs) //max input box allowed
+		{
+		  CurtInputs++; //text box added increment
+		  x++; //text box increment
+		  //add input box
+		  $(InputsWrapper).append(			
+				'<div class="input-group">' + 
+				'<span class="input-group-addon">单位_' + x + '</span>' +
+				'<input id="unit_' + x + '" name="unit_' + x + '" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
+				'<a href="#" id="removeclass" rel="external nofollow" class="removeclass"><button role="button" class="btn btn-primary">删除</button></a>'+
+				'</div>');
+		}
+		return false;
+	});
+
+	//响应[删除]按钮
+	$("body").on("click","#removeclass", function(e){ //user click on remove text
+		if( x > 1 ) {
+			$(this).parent('div').remove(); //remove text box
+			x--; //decrement textbox
+		}
+		return false;
+	});
+	
+	//提交时合并所有单位值到hidden控件
+	$('#frm-target').on('submit', function(e){
+		var sum='';
+		var index=0;		
+		$("input[id^='unit']").each(function(){
+		
+			if($(this).val()!=""){
+				//sum=parseInt(sum)+parseInt($(this).val());
+				if(index !=0)
+					sum+='-';
+				sum += $(this).val();
+				index++;
+			}
+		});
+		$('#allunits').val(sum);
+   });
         
     $('.selectpicker').selectpicker();
 	$('.selectpicker').append("<option value=\"0\" selected=\"selected\" >销售对象</option>");
@@ -308,11 +363,11 @@ function preparetarget()
 		var selected = $(e.currentTarget).val();
 		if(selected === "1")
 		{
-			$("#units").attr("disabled","true");
+			$("input[id^='unit']").attr("disabled","true");
 			$("#grades").attr("disabled","true");
 		}else
 		{
-			$("#units").removeAttr("disabled");
+			$("input[id^='unit']").removeAttr("disabled");
 			$("#grades").removeAttr("disabled");
 		}
 	});
@@ -953,7 +1008,6 @@ function listdailyinput()
                            return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
                        }
                    },
-				   /*
                    {
                        'targets': 1,
 					   'visible':false,//隐藏货物ID列
@@ -962,7 +1016,6 @@ function listdailyinput()
                            return data;
                        }
                    },
-				   */
                    {
                        'targets': 2,//对象名称
                        'className': 'dt-body-left',
