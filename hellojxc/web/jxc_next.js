@@ -278,6 +278,7 @@ function preparetarget()
 		
 	$("#target").html('<form id="frm-target" class="bs-example bs-example-form" role="form" action="/hellojxc/addtarget" method="POST">'+
 		'<input type="hidden" id="allunits" name="allunits">' +
+		'<input type="hidden" id="allgrades" name="allgrades">' +
 		'<div class="input-group">' + 
 			'<span class="input-group-addon">名称*</span>' +
 			'<input name="name" type="text" class="form-control" style="width:30%" maxlength="20" required>' +
@@ -288,36 +289,37 @@ function preparetarget()
 			'<select name="type" class="selectpicker" data-style="btn-info" ></select>' +
          '</div>' +  
 		'<br>' +
-		'<div id="InputsWrapper"> '+
-			'<button  id="AddMoreFileBox" role="button" class="btn btn-info">+</button>' + 
+		'<div id="InputUnitsWrapper"> '+
+			'<button  id="AddMoreUnitBox" role="button" class="btn btn-info">+</button>' + 
 			'<div class="input-group">' + 
-				'<span class="input-group-addon">单位_1</span>' +
+				'<span class="input-group-addon">单位</span>' +
 				'<input id="unit_1" name="unit_1" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
 			'</div>' +
 		'</div>' +
-		'<br>' +  	
-		'<div class="input-group">' + 
-			'<span class="input-group-addon">级别</span>' +
-			'<input id="grades" name="grades" type="text" class="form-control" style="width:30%" maxlength="200" placeholder="级别1,级别2,级别3" required>' +
+		'<br>' + 
+		'<div id="InputGradesWrapper"> '+
+			'<button  id="AddMoreGradeBox" role="button" class="btn btn-info">+</button>' + 
+			'<div class="input-group">' + 
+				'<span class="input-group-addon">级别</span>' +
+				'<input id="grade_1" name="grade_1" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
+			'</div>' +
 		'</div>' +
 		'<br>' +
 		'<button type="submit" class="btn btn-default">提交</button>');
-	//动态增加[单位]输入
 	var MaxInputs = 8;
-	var CurtInputs = 1;
-	var InputsWrapper  = $("#InputsWrapper"); //Input boxes wrapper ID
-	var AddButton    = $("#AddMoreFileBox"); //Add button ID
-	var x = InputsWrapper.length; //initlal text box count			
-	$(AddButton).click(function (e) //on add input button click
+	//动态增加[单位]输入
+	var InputUnitsWrapper  = $("#InputUnitsWrapper"); //Input boxes wrapper ID
+	var AddMoreUnitBox    = $("#AddMoreUnitBox"); //Add button ID
+	var x = InputUnitsWrapper.length; //initlal text box count			
+	$(AddMoreUnitBox).click(function (e) //on add input button click
 	{
 		if(x <= MaxInputs) //max input box allowed
 		{
-		  CurtInputs++; //text box added increment
 		  x++; //text box increment
 		  //add input box
-		  $(InputsWrapper).append(			
+		  $(InputUnitsWrapper).append(			
 				'<div class="input-group">' + 
-				'<span class="input-group-addon">单位_' + x + '</span>' +
+				'<span class="input-group-addon">单位</span>' +
 				'<input id="unit_' + x + '" name="unit_' + x + '" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
 				'<a href="#" id="removeclass" rel="external nofollow" class="removeclass"><button role="button" class="btn btn-primary">删除</button></a>'+
 				'</div>');
@@ -333,22 +335,67 @@ function preparetarget()
 		}
 		return false;
 	});
-	
+
+	//动态增加[级别]输入
+	var InputGradesWrapper  = $("#InputGradesWrapper"); //Input boxes wrapper ID
+	var AddMoreGradeBox    = $("#AddMoreGradeBox"); //Add button ID
+	var y = InputGradesWrapper.length; //initlal text box count			
+	$(AddMoreGradeBox).click(function (e) //on add input button click
+	{
+		if(y <= MaxInputs) //max input box allowed
+		{
+		  y++; //text box increment
+		  //add input box
+		  $(InputGradesWrapper).append(			
+				'<div class="input-group">' + 
+				'<span class="input-group-addon">级别</span>' +
+				'<input id="grade_' + y + '" name="grade_' + y + '" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
+				'<a href="#" id="removegradeclass" rel="external nofollow" class="removegradeclass"><button role="button" class="btn btn-primary">删除</button></a>'+
+				'</div>');
+		}
+		return false;
+	});
+
+
+	//响应[删除]按钮
+	$("body").on("click","#removegradeclass", function(e){ //user click on remove text
+		if( y > 1 ) {
+			$(this).parent('div').remove(); //remove text box
+			y--; //decrement textbox
+		}
+		return false;
+	});
+
 	//提交时合并所有单位值到hidden控件
 	$('#frm-target').on('submit', function(e){
-		var sum='';
+		//统计所有"单位"
+		var sum_unit='';
 		var index=0;		
 		$("input[id^='unit']").each(function(){
 		
 			if($(this).val()!=""){
-				//sum=parseInt(sum)+parseInt($(this).val());
 				if(index !=0)
-					sum+='-';
-				sum += $(this).val();
+					sum_unit+='-';
+				sum_unit += $(this).val();
 				index++;
 			}
 		});
-		$('#allunits').val(sum);
+		$('#allunits').val(sum_unit);
+		
+		//统计所有"规格"
+		var sum_grade='';
+		index=0;		
+		$("input[id^='grade']").each(function(){
+		
+			if($(this).val()!=""){
+				if(index !=0)
+					sum_grade+='-';
+				sum_grade += $(this).val();
+				index++;
+			}
+		});		
+		
+		$('#allgrades').val(sum_grade);
    });
         
     $('.selectpicker').selectpicker();
@@ -364,11 +411,11 @@ function preparetarget()
 		if(selected === "1")
 		{
 			$("input[id^='unit']").attr("disabled","true");
-			$("#grades").attr("disabled","true");
+			$("input[id^='grade']").attr("disabled","true");
 		}else
 		{
 			$("input[id^='unit']").removeAttr("disabled");
-			$("#grades").removeAttr("disabled");
+			$("input[id^='grade']").removeAttr("disabled");
 		}
 	});
 
@@ -382,8 +429,11 @@ function showtarget(id)
             ' <small>对象更新</small>' +
              '</h1>'
     ); 
-    	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/updatetarget" method="POST">'+
-		//'<input type="hidden" id="id" name="id">' +
+
+
+    	$("#target").html('<form id="frm-target" class="bs-example bs-example-form" role="form" action="/hellojxc/updatetarget" method="POST">'+
+		'<input type="hidden" id="allunits" name="allunits">' +
+		'<input type="hidden" id="allgrades" name="allgrades">'+		
         '<div class="input-group">' + 
 			'<span class="input-group-addon">ID</span>' +
 			'<input id="id" name="id" readonly type="text" class="form-control" style="width:10%">' +
@@ -399,26 +449,163 @@ function showtarget(id)
 			'<select id="slk" name="type" class="selectpicker" data-style="btn-info" ></select>' +
                  '</div>' +                   
 		'<br>' +
-		'<div class="input-group">' + 
-			'<span class="input-group-addon">单位</span>' +
-			'<input id="units" name="units" type="text" class="form-control" style="width:30%" maxlength="200" placeholder="单位1,单位2,单位3" required>' +
+		'<div id="InputUnitsWrapper"> '+
+			'<button  id="AddMoreUnitBox" role="button" class="btn btn-info">+</button>' + 
+			'<div class="input-group">' + 
+				'<span class="input-group-addon">单位</span>' +
+				'<input id="unit_1" name="unit_1" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
+			'</div>' +
 		'</div>' +
-		'<br>' +  	
-		'<div class="input-group">' + 
-			'<span class="input-group-addon">级别</span>' +
-			'<input id="grades" name="grades" type="text" class="form-control" style="width:30%" maxlength="200" placeholder="级别1,级别2,级别3" required>' +
+		'<br>' + 
+		'<div id="InputGradesWrapper"> '+
+			'<button  id="AddMoreGradeBox" role="button" class="btn btn-info">+</button>' + 
+			'<div class="input-group">' + 
+				'<span class="input-group-addon">级别</span>' +
+				'<input id="grade_1" name="grade_1" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
+			'</div>' +
 		'</div>' +
 		'<br>' +		
 		'<button type="submit" class="btn btn-default">提交</button>');  
-           
+	var MaxInputs = 8;
+	//动态增加[单位]输入
+	var InputUnitsWrapper  = $("#InputUnitsWrapper"); //Input boxes wrapper ID
+	var AddMoreUnitBox    = $("#AddMoreUnitBox"); //Add button ID
+	var x = InputUnitsWrapper.length; //initlal text box count			
+	$(AddMoreUnitBox).click(function (e) //on add input button click
+	{
+		if(x <= MaxInputs) //max input box allowed
+		{
+		  x++; //text box increment
+		  //add input box
+		  $(InputUnitsWrapper).append(			
+				'<div class="input-group">' + 
+				'<span class="input-group-addon">单位</span>' +
+				'<input id="unit_' + x + '" name="unit_' + x + '" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
+				'<a href="#" id="removeclass" rel="external nofollow" class="removeclass"><button role="button" class="btn btn-primary">删除</button></a>'+
+				'</div>');
+		}
+		return false;
+	});
+
+	//响应[删除]按钮
+	$("body").on("click","#removeclass", function(e){ //user click on remove text
+		if( x > 1 ) {
+			$(this).parent('div').remove(); //remove text box
+			x--; //decrement textbox
+		}
+		return false;
+	});
+	//动态增加[级别]输入
+	var InputGradesWrapper  = $("#InputGradesWrapper"); //Input boxes wrapper ID
+	var AddMoreGradeBox    = $("#AddMoreGradeBox"); //Add button ID
+	var y = InputGradesWrapper.length; //initlal text box count			
+	$(AddMoreGradeBox).click(function (e) //on add input button click
+	{
+		if(y <= MaxInputs) //max input box allowed
+		{
+		  y++; //text box increment
+		  //add input box
+		  $(InputGradesWrapper).append(			
+				'<div class="input-group">' + 
+				'<span class="input-group-addon">级别</span>' +
+				'<input id="grade_' + y + '" name="grade_' + y + '" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
+				'<a href="#" id="removegradeclass" rel="external nofollow" class="removegradeclass"><button role="button" class="btn btn-primary">删除</button></a>'+
+				'</div>');
+		}
+		return false;
+	});
+
+
+	//响应[删除]按钮
+	$("body").on("click","#removegradeclass", function(e){ //user click on remove text
+		if( y > 1 ) {
+			$(this).parent('div').remove(); //remove text box
+			y--; //decrement textbox
+		}
+		return false;
+	});
+
+	//提交时合并所有单位值到hidden控件
+	$('#frm-target').on('submit', function(e){
+		//统计所有"单位"
+		var sum_unit='';
+		var index=0;		
+		$("input[id^='unit']").each(function(){
+		
+			if($(this).val()!=""){
+				if(index !=0)
+					sum_unit+='-';
+				sum_unit += $(this).val();
+				index++;
+			}
+		});
+		$('#allunits').val(sum_unit);
+		
+		//统计所有"规格"
+		var sum_grade='';
+		index=0;		
+		$("input[id^='grade']").each(function(){
+		
+			if($(this).val()!=""){
+				if(index !=0)
+					sum_grade+='-';
+				sum_grade += $(this).val();
+				index++;
+			}
+		});		
+		
+		$('#allgrades').val(sum_grade);
+   });
+ 	
     var geturl = "/hellojxc/gettarget?id=" + id;
         $.getJSON(geturl,function(result){
             $.each(result, function(i, field){//就一条json数据，每条json数据里也只有一条记录
                 //alert(field[0].name);//id,name,mobile,location,type
                 $("#id").val(field[0].id);
                 $("#name").val(field[0].name);
-				$("#units").val(field[0].units);
-				$("#grades").val(field[0].grades);
+				//$("#units").val(field[0].units);
+				//$("#grades").val(field[0].grades);
+				var units = field[0].units.split('-');
+				for(var i = 0 ; i < units.length; i++)
+				{
+					if(i === 0)
+					{
+						$("#unit_1").val(units[i]);
+					}else if(i != 0 && x <= MaxInputs)
+					{
+						x++; //text box increment
+						//add input box
+						var newunit = 'unit_' + x;
+						$(InputUnitsWrapper).append(			
+								'<div class="input-group">' + 
+								'<span class="input-group-addon">单位</span>' +
+								'<input id="'+ newunit + '" name="' + newunit + '" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
+								'<a href="#" id="removeclass" rel="external nofollow" class="removeclass"><button role="button" class="btn btn-primary">删除</button></a>'+
+								'</div>');
+						$('#' + newunit).val(units[i]);
+					}
+				}
+				
+				var grades = field[0].grades.split('-');
+				for(var i = 0 ; i < grades.length; i++)
+				{
+					if(i === 0)
+					{
+						$("#grade_1").val(grades[i]);
+					}else if(i != 0 && y <= MaxInputs)
+					{
+						y++; //text box increment
+						//add input box
+						var newunit = 'grade_' + y;
+						$(InputGradesWrapper).append(			
+								'<div class="input-group">' + 
+								'<span class="input-group-addon">级别</span>' +
+								'<input id="'+ newunit + '" name="' + newunit + '" type="text" class="form-control" style="width:10%" maxlength="200" required>' +
+								'<a href="#" id="removegradeclass" rel="external nofollow" class="removegradeclass"><button role="button" class="btn btn-primary">删除</button></a>'+
+								'</div>');
+						$('#' + newunit).val(grades[i]);
+					}
+				}
 				
                 $('.selectpicker').selectpicker();               
                 if(field[0].type === '0')
@@ -433,8 +620,9 @@ function showtarget(id)
                     $('.selectpicker').append("<option value=\"1\" selected=\"selected\" >日常对象</option>");  
 					$('.selectpicker').append("<option value=\"2\">两者兼有</option>");	
 					
-					$("#units").attr("disabled","true");
-					$("#grades").attr("disabled","true");
+					$("input[id^='unit']").attr("disabled","true");
+					$("input[id^='grade']").attr("disabled","true");					
+					
                 }else
 				{
 					$('.selectpicker').append("<option value=\"0\">销售对象</option>");
@@ -448,12 +636,12 @@ function showtarget(id)
 					var selected = $(e.currentTarget).val();
 					if(selected === "1")
 					{
-						$("#units").attr("disabled","true");
-						$("#grades").attr("disabled","true");
+						$("input[id^='unit']").attr("disabled","true");
+						$("input[id^='grade']").attr("disabled","true");
 					}else
 					{
-						$("#units").removeAttr("disabled");
-						$("#grades").removeAttr("disabled");
+						$("input[id^='unit']").removeAttr("disabled");
+						$("input[id^='grade']").removeAttr("disabled");
 					}
 				}); 
                return false;
