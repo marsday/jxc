@@ -30,9 +30,14 @@ import javax.json.JsonArrayBuilder;
  *
  * @author marsday
  */
-@WebServlet(name = "targetServlet", urlPatterns = {"/listtarget","/addtarget","/deltarget","/updatetarget","/gettarget"})
+@WebServlet(name = "targetServlet", urlPatterns = {"/listtarget","/listsaleanddailyouputtarget","/listdailyinputtarget","/addtarget","/deltarget","/updatetarget","/gettarget"})
 public class targetServlet extends HttpServlet {
-
+    public enum TargetType
+    {
+        SALE_AND_DAILY_OUTPUT_TARGET,
+        DAILY_INPUT_TARGET,
+        BOTH_TARGET
+    }
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -59,15 +64,28 @@ public class targetServlet extends HttpServlet {
         }
     }
     
-    private void listoperation(HttpServletRequest request,HttpServletResponse response)
+    private void listoperation(HttpServletRequest request,HttpServletResponse response, TargetType querytype)
             throws IOException, ServletException {
         
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
 
         String json = "{\"data\":[";
-     
-        String sql = "select id, name, type,units,grades from jxc_next_target where del_flag=0";
+        
+        String sql;
+        if(querytype == TargetType.SALE_AND_DAILY_OUTPUT_TARGET)
+        {
+            //销售对象
+            sql = "select id, name, type,units,grades from jxc_next_target where del_flag=0 and (type = 0 or type = 2)"; 
+        }else if(querytype == TargetType.DAILY_INPUT_TARGET)
+        {
+            //日常对象
+            sql = "select id, name, type,units,grades from jxc_next_target where del_flag=0 and (type = 1 or type = 2)";  
+        }else
+        {
+           sql = "select id, name, type,units,grades from jxc_next_target where del_flag=0"; 
+        }
+
         ResultSet result = null;
         int index = 0;       
         try{
@@ -119,7 +137,7 @@ public class targetServlet extends HttpServlet {
         writer.flush();
  
     }
-    
+ 
     private void getoperation(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
          
@@ -203,8 +221,13 @@ public class targetServlet extends HttpServlet {
         String uri = request.getRequestURI();
         if (uri.endsWith("/listtarget")) {
             //return JSON
-            listoperation(request,response);
-        }else if(uri.endsWith("/gettarget")) {
+            listoperation(request,response,TargetType.BOTH_TARGET);
+        }else if(uri.endsWith("/listsaleanddailyouputtarget")) {
+            listoperation(request,response,TargetType.SALE_AND_DAILY_OUTPUT_TARGET);
+        }else if(uri.endsWith("/listdailyinputtarget")) {
+            listoperation(request,response,TargetType.DAILY_INPUT_TARGET);
+        }
+        else if(uri.endsWith("/gettarget")) {
             getoperation(request,response);
         }
         else

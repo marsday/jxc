@@ -71,11 +71,11 @@ public class dailyinputservlet extends HttpServlet {
 
         String json = "{\"data\":[";
      
-        String sql = "select a.id, a.title, b.name as target_name, c.name as pay_name, a.price, a.operationtime, a.recordtime, "
-                                +  "a.refer, b.del_flag as target_del_flag, c.del_flag as pay_del_flag " 
+        String sql = "select a.id as id, a.title as title, b.name as target_name, c.name as pay_name, a.price as price, a.operationtime as operationtime, a.recordtime as recordtime, "
+                                +  "a.refer as refer, b.del_flag as target_del_flag, c.del_flag as pay_del_flag " 
                                 +  "from jxc_next_daily_input as a, jxc_next_target as b , jxc_next_pay as c "
-                                +  "where a.buytime >= '"+ datepicker_start + "'"
-                                +  " and a.buytime <= '"+ datepicker_end + "'"
+                                +  "where a.operationtime >= '"+ datepicker_start + "'"
+                                +  " and a.operationtime <= '"+ datepicker_end + "'"
                                 +  " and a.target_id = b.id and a.pay_id = c.id and a.del_flag = 0";
 
         Utility.getLogger().log(Level.INFO, "查询日常收入记录");
@@ -88,14 +88,14 @@ public class dailyinputservlet extends HttpServlet {
             {
                 String id = result.getString("id");
                 String title = result.getString("title");
-                String target_name = String.valueOf(result.getInt("target_name"));
-                String pay_name = String.valueOf(result.getInt("pay_name"));
+                String target_name = result.getString("target_name");
+                String pay_name = result.getString("pay_name");
                 String price = String.valueOf(result.getInt("price"));
                 String operationtime = result.getDate("operationtime").toString();
                 String recordtime = result.getDate("recordtime").toString();
                 String refer = result.getString("refer");                
-                String target_del_flag = result.getString("target_del_flag");
-                String pay_del_flag = result.getString("pay_del_flag");
+                String target_del_flag =  String.valueOf(result.getInt("target_del_flag"));
+                String pay_del_flag = String.valueOf(result.getInt("pay_del_flag"));
                 // value array json
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 arrayBuilder.add(id);
@@ -269,14 +269,14 @@ public class dailyinputservlet extends HttpServlet {
             throws ServletException, IOException {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
+        String title = new String(request.getParameter("title").getBytes("ISO-8859-1"), "UTF-8"); 
         String target_id = new String(request.getParameter("target_id").getBytes("ISO-8859-1"), "UTF-8");
         String pay_id = new String(request.getParameter("pay_id").getBytes("ISO-8859-1"), "UTF-8");
         String price = new String(request.getParameter("price").getBytes("ISO-8859-1"), "UTF-8");
         String operationtime = new String(request.getParameter("operationtime").getBytes("ISO-8859-1"), "UTF-8");
-        String title = new String(request.getParameter("title").getBytes("ISO-8859-1"), "UTF-8"); 
-        String refer = new String(request.getParameter("refer").getBytes("ISO-8859-1"), "UTF-8");
-       
-        
+        String refer=""; 
+        if(request.getParameter("refer") != null)
+               refer  = new String(request.getParameter("refer").getBytes("ISO-8859-1"), "UTF-8");
         //当前日期即为记录日期
         java.util.Date ud = new java.util.Date();
         Date date = new Date(ud.getTime());
@@ -312,11 +312,11 @@ public class dailyinputservlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
             
-        String[] names = request.getParameterValues("id");
+        String[] ids = request.getParameterValues("id");
         String input;
         //if(ids.length > 0)
         //{
-            input = new String( names[0].getBytes("ISO-8859-1"), "UTF-8");
+            input = new String( ids[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
         String sql = "select id, title, target_id, pay_id, price, operationtime, recordtime, refer from jxc_next_daily_input where id= " + "'" + input + "'";
 	Utility.getLogger().log(Level.INFO, "获取指定日常收入 id= " + input);

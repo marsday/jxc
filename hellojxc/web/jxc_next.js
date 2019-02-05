@@ -252,9 +252,9 @@ function listtarget()
                 'className': 'dt-body-left',
                 'render': function (data, type, full, meta){
                     if(data === "0")
-                        return "销售对象";
+                        return "销售和日常支出对象";
                     else if (data === "1")
-                        return "日常对象";
+                        return "日常收入对象";
 					else
 						return "两者兼有";
                 }
@@ -399,8 +399,8 @@ function preparetarget()
    });
         
     $('.selectpicker').selectpicker();
-	$('.selectpicker').append("<option value=\"0\" selected=\"selected\" >销售对象</option>");
-	$('.selectpicker').append("<option value=\"1\">日常对象</option>");
+	$('.selectpicker').append("<option value=\"0\" selected=\"selected\" >销售和日常支出对象</option>");
+	$('.selectpicker').append("<option value=\"1\">日常收入对象</option>");
 	$('.selectpicker').append("<option value=\"2\">两者兼有</option>");
 	
 	$('.selectpicker').selectpicker('refresh');
@@ -610,14 +610,14 @@ function showtarget(id)
                 $('.selectpicker').selectpicker();               
                 if(field[0].type === '0')
                 {
-                    $('.selectpicker').append("<option value=\"0\" selected=\"selected\" >销售对象</option>");
-                    $('.selectpicker').append("<option value=\"1\">日常对象</option>");
+                    $('.selectpicker').append("<option value=\"0\" selected=\"selected\" >销售和日常支出对象</option>");
+                    $('.selectpicker').append("<option value=\"1\">日常收入对象</option>");
 					$('.selectpicker').append("<option value=\"2\">两者兼有</option>");
                 }
                 else if(field[0].type === '1')
                 {
-                    $('.selectpicker').append("<option value=\"0\">销售对象</option>");
-                    $('.selectpicker').append("<option value=\"1\" selected=\"selected\" >日常对象</option>");  
+                    $('.selectpicker').append("<option value=\"0\">销售和日常支出对象</option>");
+                    $('.selectpicker').append("<option value=\"1\" selected=\"selected\" >日常收入对象</option>");  
 					$('.selectpicker').append("<option value=\"2\">两者兼有</option>");	
 					
 					$("input[id^='unit']").attr("disabled","true");
@@ -625,8 +625,8 @@ function showtarget(id)
 					
                 }else
 				{
-					$('.selectpicker').append("<option value=\"0\">销售对象</option>");
-					$('.selectpicker').append("<option value=\"1\">日常对象</option>");
+					$('.selectpicker').append("<option value=\"0\">销售和日常支出对象</option>");
+					$('.selectpicker').append("<option value=\"1\">日常收入对象</option>");
 					$('.selectpicker').append("<option value=\"2\" selected=\"selected\">两者兼有</option>");
 				}
                 $('.selectpicker').selectpicker('refresh');
@@ -1125,7 +1125,7 @@ function listdailyinput()
 					' <thead>' + 
 					'   <tr>' + 
 					'     <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
-					'     <th width="5%">ID</th>' + 
+					//'     <th width="5%">ID</th>' + 
 					'     <th>摘要</th>' + 
 					'     <th>对象名称</th>' + 
 					'     <th>支付方式</th>' + 					
@@ -1138,7 +1138,7 @@ function listdailyinput()
 					'<tfoot>' + 
 					'   <tr>' + 
 					'     <th width="5%"></th>' + 
-					'     <th>ID</th>' + 
+					//'     <th>ID</th>' + 
 					'     <th>摘要</th>' + 
 					'     <th>对象名称</th>' + 
 					'     <th>支付方式</th>' + 					
@@ -1196,6 +1196,7 @@ function listdailyinput()
                            return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
                        }
                    },
+				   /*
                    {
                        'targets': 1,
 					   'visible':false,//隐藏货物ID列
@@ -1204,6 +1205,7 @@ function listdailyinput()
                            return data;
                        }
                    },
+				   */
                    {
                        'targets': 2,//对象名称
                        'className': 'dt-body-left',
@@ -1215,7 +1217,7 @@ function listdailyinput()
                        }
                    },
                    {
-                       'targets': 4,//支付方式
+                       'targets': 3,//支付方式
                        'className': 'dt-body-left',
                        'render': function (data, type, full, meta){
                            if(full[9] != '0')
@@ -1244,6 +1246,80 @@ function listdailyinput()
 }
 function preparedailyinput()
 {
+    $("section.content-header").html(
+        '<h1>' +
+        '日常收入管理' +
+        ' <small>日常收入添加</small>' +
+         '</h1>'
+    ); 
+
+	$("#target").html('<form class="bs-example bs-example-form" role="form" action="/hellojxc/adddailyinput" method="POST">'+
+		'<div class="input-group">' + 
+			'<span class="input-group-addon">摘要*</span>' +
+			'<input name="title" type="text" class="form-control" style="width:30%" required>' +
+		'</div>' +
+		'<br>' +
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">关联对象</span>' +
+			'<select name="target_id" class="selectpicker_target" data-style="btn-info"></select>' +
+        '</div>' +  
+		'<br>' +   	
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">支付方式</span>' +
+			'<select name="pay_id" class="selectpicker_pay" data-style="btn-info"></select>' +
+        '</div>' +  
+		'<br>' +  		
+		'<div class="input-group">' +
+			'<span class="input-group-addon">价格</span>' +
+			'<input name="price" type="number" class="form-control" style="width:30%" digits required>' +
+		'</div>' + 
+		'<br>' + 
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">交易日期</span>' +
+			'<input name="operationtime" id="operationtime"  type="text" class="form-control" style="width:28%">' +
+		'</div>' + 
+		'<br>' +  		
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">备注信息</span>' +
+			'<textarea name="refer" class="form-control" style="width:30%"></textarea>' +
+		'</div>' + 
+		'<br>' + 		
+		'<button type="submit" class="btn btn-default">提交</button>');	
+		
+        //初始化交易日期：默认为当天
+        var d = new Date();
+        $("#operationtime").datepicker();
+        $("#operationtime").datepicker("option", "dateFormat", "yy-mm-dd");
+        $("#operationtime").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });	
+
+		
+        //获取关联日常管理对象
+        $.getJSON('/hellojxc/listdailyinputtarget',function(result){
+            $('.selectpicker_target').selectpicker();
+            for(var i=0;i<result.data.length;i++)
+            {
+                if(i===0)
+                    $('.selectpicker_target').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][2] +"</option>");
+                else
+                    $('.selectpicker_target').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+            }
+            $('.selectpicker_target').selectpicker('refresh');
+            $('.selectpicker_target').selectpicker('render');
+        });
+
+        //获取支付方式
+        $.getJSON('/hellojxc/listpay',function(result){
+            $('.selectpicker_pay').selectpicker();
+            for(var i=0;i<result.data.length;i++)
+            {
+                if(i===0)
+                    $('.selectpicker_pay').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][2] +"</option>");
+                else
+                    $('.selectpicker_pay').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+            }
+            $('.selectpicker_pay').selectpicker('refresh');
+            $('.selectpicker_pay').selectpicker('render');
+        });			
 }
 function showdailyinput(id)
 {
