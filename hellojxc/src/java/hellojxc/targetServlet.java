@@ -30,14 +30,8 @@ import javax.json.JsonArrayBuilder;
  *
  * @author marsday
  */
-@WebServlet(name = "targetServlet", urlPatterns = {"/listtarget","/listsaleanddailyouputtarget","/listdailyinputtarget","/addtarget","/deltarget","/updatetarget","/gettarget"})
+@WebServlet(name = "targetServlet", urlPatterns = {"/listtarget","/listdailyinputtarget","/listdailyoutputtarget","/listsalesinputtarget","/addtarget","/deltarget","/updatetarget","/gettarget"})
 public class targetServlet extends HttpServlet {
-    public enum TargetType
-    {
-        SALE_AND_DAILY_OUTPUT_TARGET,
-        DAILY_INPUT_TARGET,
-        BOTH_TARGET
-    }
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -64,7 +58,7 @@ public class targetServlet extends HttpServlet {
         }
     }
     
-    private void listoperation(HttpServletRequest request,HttpServletResponse response, TargetType querytype)
+    private void listoperation(HttpServletRequest request,HttpServletResponse response, int querytype)
             throws IOException, ServletException {
         
         response.setContentType("application/json");
@@ -72,29 +66,38 @@ public class targetServlet extends HttpServlet {
 
         String json = "{\"data\":[";
         
-        String sql;
-        if(querytype == TargetType.SALE_AND_DAILY_OUTPUT_TARGET)
-        {
-            //销售对象
-            sql = "select id, name, type,units,grades from jxc_next_target where del_flag=0 and (type = 0 or type = 2)"; 
-        }else if(querytype == TargetType.DAILY_INPUT_TARGET)
-        {
-            //日常对象
-            sql = "select id, name, type,units,grades from jxc_next_target where del_flag=0 and (type = 1 or type = 2)";  
-        }else
-        {
-           sql = "select id, name, type,units,grades from jxc_next_target where del_flag=0"; 
-        }
-
+        String  sql = "select id, name, type,units,grades from jxc_next_target where del_flag=0"; 
+        
         ResultSet result = null;
         int index = 0;       
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
             while(result.next())
             {
+                int org_type = result.getInt("type");
+                if(querytype == TargetType.SALES_INPUT)
+                {
+                    if((org_type & (int)TargetType.SALES_INPUT) != TargetType.SALES_INPUT)
+                    {
+                        continue;
+                    }
+                }else if(querytype == TargetType.DAILY_INPUT)
+                {
+                    if((org_type & (int)TargetType.DAILY_INPUT) != TargetType.DAILY_INPUT)
+                    {
+                        continue;
+                    }                    
+                }else if(querytype == TargetType.DAILY_OUTPUT)
+                {
+                     if((org_type & (int)TargetType.DAILY_OUTPUT) != TargetType.DAILY_OUTPUT)
+                    {
+                        continue;
+                    }                     
+                }
+                
                 String id = result.getString("id");
                 String name = result.getString("name");
-                String type = result.getString("type");
+                String type = String.valueOf(org_type);
                 String units = result.getString("units");
                 String grades = result.getString("grades");
                 
@@ -220,12 +223,13 @@ public class targetServlet extends HttpServlet {
         
         String uri = request.getRequestURI();
         if (uri.endsWith("/listtarget")) {
-            //return JSON
-            listoperation(request,response,TargetType.BOTH_TARGET);
-        }else if(uri.endsWith("/listsaleanddailyouputtarget")) {
-            listoperation(request,response,TargetType.SALE_AND_DAILY_OUTPUT_TARGET);
+            listoperation(request,response,TargetType.ALL);
         }else if(uri.endsWith("/listdailyinputtarget")) {
-            listoperation(request,response,TargetType.DAILY_INPUT_TARGET);
+            listoperation(request,response,TargetType.DAILY_INPUT);
+        }else if(uri.endsWith("/listdailyoutputtarget")) {
+            listoperation(request,response,TargetType.DAILY_OUTPUT);
+        }else if(uri.endsWith("/listsalesinputtarget")) {
+            listoperation(request,response,TargetType.SALES_INPUT);
         }
         else if(uri.endsWith("/gettarget")) {
             getoperation(request,response);
@@ -301,39 +305,36 @@ public class targetServlet extends HttpServlet {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
         String name = new String(request.getParameter("name").getBytes("ISO-8859-1"), "UTF-8");
-        String type = new String(request.getParameter("type").getBytes("ISO-8859-1"), "UTF-8");
+        String[] types = request.getParameterValues("types");//new String(request.getParameter("types").getBytes("ISO-8859-1"), "UTF-8");
+        int type=0;
+        for(String obj:types)
+        {
+            type += Integer.parseInt(obj);
+        }
+        
         String units = "";
         String grades = "";
         
-        if(request.getParameter("allunits") != null)
+        if((type & TargetType.SALES_INPUT) == TargetType.SALES_INPUT)
         {
-            units = new String(request.getParameter("allunits").getBytes("ISO-8859-1"), "UTF-8");
+            if(request.getParameter("allunits") != null)
+            {
+                units = new String(request.getParameter("allunits").getBytes("ISO-8859-1"), "UTF-8");
+            }
+
+            if(request.getParameter("allgrades") != null)
+            {
+                grades = new String(request.getParameter("allgrades").getBytes("ISO-8859-1"), "UTF-8");
+            }       
         }
         
-        if(request.getParameter("allgrades") != null)
-        {
-            grades = new String(request.getParameter("allgrades").getBytes("ISO-8859-1"), "UTF-8");
-        }       
-
-        String sql ="";
-        if(type == "1")
-        {
-            //日常对象
-             sql = "insert into jxc_next_target (name,type) values(" 
+        String sql = "insert into jxc_next_target (name,type,units,grades) values(" 
                     + "'" +  name + "'," 
-                    +  Integer.parseInt(type)
-                    + ")";              
-
-        }else
-        {
-            //非日常对象
-            sql = "insert into jxc_next_target (name,type,units,grades) values(" 
-                    + "'" +  name + "'," 
-                    +  Integer.parseInt(type)+ "," 
+                    +  String.valueOf(type)+ "," 
                     + "'" +  units + "',"
                     + "'" +  grades + "'"
-                    + ")";        
-        }
+                    + ")";  
+
 	Utility.getLogger().log(Level.INFO, "target品种增加: name= " + name + " type= " + type + " units= " + units + " grades= " + grades);
         Utility.getLogger().log(Level.CONFIG, "target品种增加 sql: " + sql);
         
@@ -354,33 +355,31 @@ public class targetServlet extends HttpServlet {
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
         String id = new String(request.getParameter("id").getBytes("ISO-8859-1"), "UTF-8");
         String name = new String(request.getParameter("name").getBytes("ISO-8859-1"), "UTF-8");
-        String type = new String(request.getParameter("type").getBytes("ISO-8859-1"), "UTF-8"); 
+        String[] types = request.getParameterValues("types");//new String(request.getParameter("type").getBytes("ISO-8859-1"), "UTF-8"); 
+        int type=0;
+        for(String obj:types)
+        {
+            type += Integer.parseInt(obj);
+        }
+        
         String units = "";
         String grades = "";
         
-        if(request.getParameter("allunits") != null)
+        if((type & TargetType.SALES_INPUT) == TargetType.SALES_INPUT)
         {
-            units = new String(request.getParameter("allunits").getBytes("ISO-8859-1"), "UTF-8");
-        }
-        
-        if(request.getParameter("allgrades") != null)
-        {
-            grades = new String(request.getParameter("allgrades").getBytes("ISO-8859-1"), "UTF-8");
-        }
-        
-        String sql ="";
-        if(type == "1")
-        {
-            //日常对象
-            sql = "update jxc_next_target set name = " + "'"+name +"'," + " type = " + Integer.parseInt(type)
-                                                        + " where id=" + "'" + id + "'";             
+            if(request.getParameter("allunits") != null)
+            {
+                units = new String(request.getParameter("allunits").getBytes("ISO-8859-1"), "UTF-8");
+            }
 
-        }else
-        {
-            //非日常对象
-            sql = "update jxc_next_target set name = " + "'"+name +"'," + " type = " + Integer.parseInt(type) +"," + "units = " + "'"+units +"'," + "grades = " + "'"+grades +"'"
-                                                        + " where id=" + "'" + id + "'";           
-        }        
+            if(request.getParameter("allgrades") != null)
+            {
+                grades = new String(request.getParameter("allgrades").getBytes("ISO-8859-1"), "UTF-8");
+            }
+        }
+        
+        String sql = "update jxc_next_target set name = " + "'"+name +"'," + " type = " + String.valueOf(type) +"," + "units = " + "'"+units +"'," + "grades = " + "'"+grades +"'"
+                                                        + " where id=" + "'" + id + "'";             
 
 	Utility.getLogger().log(Level.INFO, "target品种更新 id=: " + id + " name= " + name + " type= " + type + " units= " + units + " grades= " + grades);												
         Utility.getLogger().log(Level.CONFIG, "target品种更新 sql: " + sql);

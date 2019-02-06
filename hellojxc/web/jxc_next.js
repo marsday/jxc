@@ -231,7 +231,9 @@ function listtarget()
                 'targets': 3,
                 'className': 'dt-body-left',
                 'render': function (data, type, full, meta){
-                    if(full[5] === '1')
+					var type = Number.parseInt(full[5]);
+					var a = type&1;
+                    if(a != 1)//非销售收入对象
 						return '-';  
 				   else
 					   return data;
@@ -241,7 +243,9 @@ function listtarget()
                 'targets': 4,
                 'className': 'dt-body-left',
                 'render': function (data, type, full, meta){
-                    if(full[5] === '1')
+					var type = Number.parseInt(full[5]);
+					var a = type&1;
+                    if(a != 1)//非销售收入对象
 						return '-';  
 				   else
 					   return data;
@@ -251,12 +255,18 @@ function listtarget()
                 'targets': 5,
                 'className': 'dt-body-left',
                 'render': function (data, type, full, meta){
-                    if(data === "0")
-                        return "销售和日常支出对象";
-                    else if (data === "1")
-                        return "日常收入对象";
-					else
-						return "两者兼有";
+					var newdata = Number.parseInt(data);
+					var rtn="";
+					var a = newdata&1;
+					var b = newdata&2;
+					var c = newdata&4;
+					if(a === 1)
+						rtn = "|销入";
+					if(b === 2)
+						rtn += "|日入";
+					if(c === 4)
+						rtn += "|日出";	
+					return rtn;
                 }
              }
         ],
@@ -286,7 +296,7 @@ function preparetarget()
 		'<br>' +                
         '<div class="input-group">' +	
 			'<span class="input-group-addon">对象类型</span>' +
-			'<select name="type" class="selectpicker" data-style="btn-info" ></select>' +
+			'<select name="types" class="selectpicker" multiple data-style="btn-info" ></select>' +
          '</div>' +  
 		'<br>' +
 		'<div id="InputUnitsWrapper"> '+
@@ -368,47 +378,57 @@ function preparetarget()
 
 	//提交时合并所有单位值到hidden控件
 	$('#frm-target').on('submit', function(e){
-		//统计所有"单位"
-		var sum_unit='';
-		var index=0;		
-		$("input[id^='unit']").each(function(){
-		
-			if($(this).val()!=""){
-				if(index !=0)
-					sum_unit+='-';
-				sum_unit += $(this).val();
-				index++;
-			}
-		});
-		$('#allunits').val(sum_unit);
-		
-		//统计所有"规格"
-		var sum_grade='';
-		index=0;		
-		$("input[id^='grade']").each(function(){
-		
-			if($(this).val()!=""){
-				if(index !=0)
-					sum_grade+='-';
-				sum_grade += $(this).val();
-				index++;
-			}
-		});		
+		var selectedtypes = $('.selectpicker').val();
+		if(selectedtypes.length === 0)
+		{
+			alert("请至少选项一项对象类型");
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+			return false;//返回false，取消submit
+		}
+		if($.inArray("1",selectedtypes) != -1)//判断是否选择了销售对象
+		{
+			//统计所有"单位"
+			var sum_unit='';
+			var index=0;		
+			$("input[id^='unit']").each(function(){
+			
+				if($(this).val()!=""){
+					if(index !=0)
+						sum_unit+='-';
+					sum_unit += $(this).val();
+					index++;
+				}
+			});
+			$('#allunits').val(sum_unit);
+			
+			//统计所有"规格"
+			var sum_grade='';
+			index=0;		
+			$("input[id^='grade']").each(function(){
+			
+				if($(this).val()!=""){
+					if(index !=0)
+						sum_grade+='-';
+					sum_grade += $(this).val();
+					index++;
+				}
+			});
+		}		
 		
 		$('#allgrades').val(sum_grade);
    });
         
     $('.selectpicker').selectpicker();
-	$('.selectpicker').append("<option value=\"0\" selected=\"selected\" >销售和日常支出对象</option>");
-	$('.selectpicker').append("<option value=\"1\">日常收入对象</option>");
-	$('.selectpicker').append("<option value=\"2\">两者兼有</option>");
+	$('.selectpicker').append("<option value=\"1\" selected=\"selected\" >销售收入对象</option>");
+	$('.selectpicker').append("<option value=\"2\">日常收入对象</option>");
+	$('.selectpicker').append("<option value=\"4\">日常支出对象</option>");
 	
 	$('.selectpicker').selectpicker('refresh');
     $('.selectpicker').selectpicker('render');
 	
 	$('.selectpicker').on('changed.bs.select', function (e, clickedIndex, newValue, oldValue) {
 		var selected = $(e.currentTarget).val();
-		if(selected === "1")
+		if($.inArray("1",selected) === -1)//判断是否选择了销售对象
 		{
 			$("input[id^='unit']").attr("disabled","true");
 			$("input[id^='grade']").attr("disabled","true");
@@ -446,7 +466,7 @@ function showtarget(id)
 		'<br>' +
 		'<div class="input-group">' +	
 			'<span class="input-group-addon">对象类型</span>' +
-			'<select id="slk" name="type" class="selectpicker" data-style="btn-info" ></select>' +
+			'<select id="slk" name="types" class="selectpicker" multiple data-style="btn-info" ></select>' +
                  '</div>' +                   
 		'<br>' +
 		'<div id="InputUnitsWrapper"> '+
@@ -527,34 +547,45 @@ function showtarget(id)
 
 	//提交时合并所有单位值到hidden控件
 	$('#frm-target').on('submit', function(e){
-		//统计所有"单位"
-		var sum_unit='';
-		var index=0;		
-		$("input[id^='unit']").each(function(){
+		var selectedtypes = $('.selectpicker').val();
+		if(selectedtypes.length === 0)
+		{
+			alert("请至少选项一项对象类型");
+			event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+			return false;//返回false，取消submit
+		}
 		
-			if($(this).val()!=""){
-				if(index !=0)
-					sum_unit+='-';
-				sum_unit += $(this).val();
-				index++;
-			}
-		});
-		$('#allunits').val(sum_unit);
-		
-		//统计所有"规格"
-		var sum_grade='';
-		index=0;		
-		$("input[id^='grade']").each(function(){
-		
-			if($(this).val()!=""){
-				if(index !=0)
-					sum_grade+='-';
-				sum_grade += $(this).val();
-				index++;
-			}
-		});		
-		
-		$('#allgrades').val(sum_grade);
+		if($.inArray("1",selectedtypes) != -1)//判断是否选择了销售对象
+		{
+			//统计所有"单位"
+			var sum_unit='';
+			var index=0;		
+			$("input[id^='unit']").each(function(){
+			
+				if($(this).val()!=""){
+					if(index !=0)
+						sum_unit+='-';
+					sum_unit += $(this).val();
+					index++;
+				}
+			});
+			$('#allunits').val(sum_unit);
+			
+			//统计所有"规格"
+			var sum_grade='';
+			index=0;		
+			$("input[id^='grade']").each(function(){
+			
+				if($(this).val()!=""){
+					if(index !=0)
+						sum_grade+='-';
+					sum_grade += $(this).val();
+					index++;
+				}
+			});		
+			
+			$('#allgrades').val(sum_grade);
+		}
    });
  	
     var geturl = "/hellojxc/gettarget?id=" + id;
@@ -607,34 +638,36 @@ function showtarget(id)
 					}
 				}
 				
-                $('.selectpicker').selectpicker();               
-                if(field[0].type === '0')
-                {
-                    $('.selectpicker').append("<option value=\"0\" selected=\"selected\" >销售和日常支出对象</option>");
-                    $('.selectpicker').append("<option value=\"1\">日常收入对象</option>");
-					$('.selectpicker').append("<option value=\"2\">两者兼有</option>");
-                }
-                else if(field[0].type === '1')
-                {
-                    $('.selectpicker').append("<option value=\"0\">销售和日常支出对象</option>");
-                    $('.selectpicker').append("<option value=\"1\" selected=\"selected\" >日常收入对象</option>");  
-					$('.selectpicker').append("<option value=\"2\">两者兼有</option>");	
-					
-					$("input[id^='unit']").attr("disabled","true");
-					$("input[id^='grade']").attr("disabled","true");					
-					
-                }else
+                $('.selectpicker').selectpicker();
+				var type = Number.parseInt(field[0].type);
+				var a = type&1;
+				var b = type&2;
+				var c = type&4;	
+				if(a === 1)
+					$('.selectpicker').append("<option value=\"1\" selected=\"selected\" >销售收入对象</option>");
+				else
 				{
-					$('.selectpicker').append("<option value=\"0\">销售和日常支出对象</option>");
-					$('.selectpicker').append("<option value=\"1\">日常收入对象</option>");
-					$('.selectpicker').append("<option value=\"2\" selected=\"selected\">两者兼有</option>");
+					$('.selectpicker').append("<option value=\"1\">销售收入对象</option>");
+					$("input[id^='unit']").attr("disabled","true");
+					$("input[id^='grade']").attr("disabled","true");						
 				}
+				
+				if(b === 2)
+					$('.selectpicker').append("<option value=\"2\" selected=\"selected\" >日常收入对象</option>");
+				else
+					$('.selectpicker').append("<option value=\"2\">日常收入对象</option>");					
+				
+				if(c === 4)
+					$('.selectpicker').append("<option value=\"4\" selected=\"selected\" >日常支出对象</option>");
+				else
+					$('.selectpicker').append("<option value=\"4\">日常支出对象</option>");			
+
                 $('.selectpicker').selectpicker('refresh');
                 $('.selectpicker').selectpicker('render');                
  
 				$('.selectpicker').on('changed.bs.select', function (e, clickedIndex, newValue, oldValue) {
 					var selected = $(e.currentTarget).val();
-					if(selected === "1")
+					if($.inArray("1",selected))//判断是否选择了销售对象
 					{
 						$("input[id^='unit']").attr("disabled","true");
 						$("input[id^='grade']").attr("disabled","true");
