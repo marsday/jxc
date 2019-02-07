@@ -60,7 +60,7 @@ function listcommonoperation(type,table)
 		showaction = 'index.html?function=showdailyinput&&id=';		
 	}else if(type === 'dailyoutput')
 	{
-		delaction = '/hellojxc/dailyoutput';
+		delaction = '/hellojxc/deldailyoutput';
 		showaction = 'index.html?function=showdailyoutput&&id=';		
 	}else if(type === 'salesinput')
 	{
@@ -1467,3 +1467,339 @@ function showdailyinput(id)
 				});
 	   });		
 }
+
+function listdailyoutput()
+{
+	var prepareaction= 'preparedailyoutput';
+	var listaction='/hellojxc/listdailyoutput';
+	
+	$("section.content-header").html(
+            '<h1>' +
+            '日常支出一览' +
+            ' <small style="color:red">红色表示未支付</small>' +
+             '</h1>'
+    ); 
+	
+	var targetval='<form id="frm-example">';
+	
+	targetval += ' <button  id="query" role="button" class="btn btn-primary">查询</button>' + "\n";
+	if(userType === "0")
+	{
+            //只有admin用户有增删减权限
+            targetval += 	'<a class="btn btn-primary" id="add" href="index.html?function=' + prepareaction + '" role="button">添加</a> ' + "\n" + 
+							' <button  id="del" role="button" class="btn btn-danger">删除</button>' + "\n" + 
+							' <button  id="update" role="button" class="btn btn-primary">更新</button>' + 
+							'<br>' + 
+							'<br>';
+	}
+	
+	targetval +=	'<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
+					'<p>结束日期：<input type="text" id="datepicker_end" name="datepicker_end"></p>'+
+					'<br>';
+				 
+	targetval +='<table id="example" class="display select" width="100%" cellspacing="0">' + 
+					' <thead>' + 
+					'   <tr>' + 
+					'     <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
+					//'     <th width="5%">ID</th>' + 
+					'     <th>摘要</th>' + 
+					'     <th>对象名称</th>' + 
+					'     <th>支付方式</th>' + 					
+					'     <th>总价</th>' + 
+					'     <th>交易日期</th>' + 
+					'     <th>记录日期</th>' + 			
+					'     <th>备考</th>' + 					
+					'   </tr>' + 
+					'</thead>' + 
+					'<tfoot>' + 
+					'   <tr>' + 
+					'     <th width="5%"></th>' + 
+					//'     <th>ID</th>' + 
+					'     <th>摘要</th>' + 
+					'     <th>对象名称</th>' + 
+					'     <th>支付方式</th>' + 					
+					'     <th>总价</th>' + 
+					'     <th>交易日期</th>' + 
+					'     <th>记录日期</th>' + 			
+					'     <th>备考</th>' + 	
+					'   </tr>' + 
+					'</tfoot>' + 
+				'</table>';
+	targetval += '</form>';
+
+	$("#target").html(targetval);
+
+    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth()-6, 1);
+    
+    $("#datepicker_start").datepicker();
+    $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_start").val(ld.getFullYear() + '-' + (ld.getMonth() + 1) + '-' + ld.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+    $("#datepicker_end").datepicker();
+    $("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+	
+    var table;
+    var refresh = function() {
+        var startday=$("#datepicker_start").val();
+        var endday=$("#datepicker_end").val();
+        //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+        table = $('#example').dataTable({
+              searching: false,
+             'ajax': {
+                'url': '/hellojxc/listdailyoutput',
+                'type': 'POST'
+             },
+             'fnServerParams':function(aoData){
+               aoData.push(
+                       {
+                         "name": "startday",
+                         "value": startday?startday:null
+                       },
+                       {
+                           "name":"endday",
+                           "value": endday?endday:null
+                        }
+               );  
+             },
+             'columnDefs': [
+                   {
+                       'targets': 0,
+                       'searchable': false,
+                       'orderable': false,
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
+                       }
+                   },
+				   /*
+                   {
+                       'targets': 1,
+					   'visible':false,//隐藏货物ID列
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           return data;
+                       }
+                   },
+				   */
+                   {
+                       'targets': 2,//对象名称
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           if(full[8] != '0')//判断对象是否删除
+								return '<p style="color:blue">'+data+'</p>';  
+						   else
+							   return data;
+                       }
+                   },
+                   {
+                       'targets': 3,//支付方式
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+						   if(data === '未支付')//判断是否未支付
+							   return '<p style="color:red">'+data+'</p>'; 
+                           if(full[9] != '0')//判断支付方式是否删除
+								return '<p style="color:blue">'+data+'</p>';  
+						   else
+							   return data;
+                       }
+                   }				   
+               ],
+             'order': [[1, 'asc']]
+           });       
+    }
+    //加载页面时初始化datatable
+    refresh();
+    
+	$("#query").on('click', function(){ 
+		if(table)
+		{
+			table.fnDestroy();
+			refresh();
+		}
+		return false;
+    });
+	 
+    listcommonoperation('dailyoutput',table);   	
+}
+function preparedailyoutput()
+{
+    $("section.content-header").html(
+        '<h1>' +
+        '日常支出管理' +
+        ' <small>日常支出添加</small>' +
+         '</h1>'
+    ); 
+
+	$("#target").html('<form id="frm-target" class="bs-example bs-example-form" role="form" action="/hellojxc/adddailyoutput" method="POST">'+
+		'<div class="input-group">' + 
+			'<span class="input-group-addon">摘要*</span>' +
+			'<input name="title" type="text" class="form-control" style="width:30%" required>' +
+		'</div>' +
+		'<br>' +
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">关联对象</span>' +
+			'<select name="target_id" class="selectpicker" data-style="btn-info"></select>' +
+        '</div>' +  
+		'<br>' +   	
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">支付方式</span>' +
+			'<select name="pay_id" class="selectpicker_pay" data-style="btn-info"></select>' +
+        '</div>' +  
+		'<br>' +  		
+		'<div class="input-group">' +
+			'<span class="input-group-addon">价格</span>' +
+			'<input name="price" type="number" class="form-control" style="width:30%" digits required>' +
+		'</div>' + 
+		'<br>' + 
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">交易日期</span>' +
+			'<input name="operationtime" id="operationtime"  type="text" class="form-control" style="width:28%">' +
+		'</div>' + 
+		'<br>' +  		
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">备注信息</span>' +
+			'<textarea name="refer" class="form-control" style="width:30%"></textarea>' +
+		'</div>' + 
+		'<br>' + 		
+		'<button type="submit" class="btn btn-default">提交</button>');	
+		
+        //初始化交易日期：默认为当天
+        var d = new Date();
+        $("#operationtime").datepicker();
+        $("#operationtime").datepicker("option", "dateFormat", "yy-mm-dd");
+        $("#operationtime").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });	
+		
+		$('#frm-target').on('submit', function(e){
+			var selected = $('.selectpicker').val();
+			if(selected === null || selected.length === 0)
+			{
+				alert("请至少选项一项对象类型");
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+				return false;//返回false，取消submit
+			}
+		});
+		
+        //获取关联日常管理对象
+		$('.selectpicker').selectpicker();
+        $.getJSON('/hellojxc/listdailyoutputtarget',function(result){
+
+            for(var i=0;i<result.data.length;i++)
+            {
+                if(i===0)
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][2] +"</option>");
+                else
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+            }
+        });
+        $('.selectpicker').selectpicker('refresh');
+        $('.selectpicker').selectpicker('render');
+			
+        //获取支付方式
+		$('.selectpicker_pay').selectpicker();
+		$('.selectpicker_pay').append("<option value=\"0\" selected=\"selected\">未支付</option>");
+        $.getJSON('/hellojxc/listpay',function(result){
+            for(var i=0;i<result.data.length;i++)
+            {
+				$('.selectpicker_pay').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+            }
+        });	
+		$('.selectpicker_pay').selectpicker('refresh');
+		$('.selectpicker_pay').selectpicker('render');		
+}
+function showdailyoutput(id)
+{
+	    $("section.content-header").html(
+        '<h1>' +
+        '日常支出管理' +
+        ' <small>日常支出更新</small>' +
+         '</h1>'
+    );
+	$("#target").html('<form id="frm-target" class="bs-example bs-example-form" role="form" action="/hellojxc/updatedailyoutput" method="POST">'+
+		'<input type="hidden" id="id" name="id">' +
+		'<div class="input-group">' + 
+			'<span class="input-group-addon">摘要*</span>' +
+			'<input id="title" name="title" type="text" class="form-control" style="width:30%" required>' +
+		'</div>' +
+		'<br>' +
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">关联对象</span>' +
+			'<select id="target_id" name="target_id" class="selectpicker" data-style="btn-info"></select>' +
+        '</div>' +  
+		'<br>' +   	
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">支付方式</span>' +
+			'<select id="pay_id" name="pay_id" class="selectpicker_pay" data-style="btn-info"></select>' +
+        '</div>' +  
+		'<br>' +  		
+		'<div class="input-group">' +
+			'<span class="input-group-addon">价格</span>' +
+			'<input id="price" name="price" type="number" class="form-control" style="width:30%" digits required>' +
+		'</div>' + 
+		'<br>' + 
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">交易日期</span>' +
+			'<input id="operationtime" name="operationtime" id="operationtime"  type="text" class="form-control" style="width:28%">' +
+		'</div>' + 
+		'<br>' +  		
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">备注信息</span>' +
+			'<textarea id="refer" name="refer" class="form-control" style="width:30%"></textarea>' +
+		'</div>' + 
+		'<br>' + 		
+		'<button type="submit" class="btn btn-default">提交</button>');	
+		
+		$('#frm-target').on('submit', function(e){
+			var selected = $('.selectpicker').val();
+			if(selected === null || selected.length === 0)
+			{
+				alert("请至少选项一项对象类型");
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+				return false;//返回false，取消submit
+			}
+		});
+		
+        //获取关联日常管理对象
+		$('.selectpicker').selectpicker();
+        $.getJSON('/hellojxc/listdailyoutputtarget',function(result){
+            for(var i=0;i<result.data.length;i++)
+            {
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+            }
+        });
+        $('.selectpicker').selectpicker('refresh');
+        $('.selectpicker').selectpicker('render');
+			
+        //获取支付方式
+		$('.selectpicker_pay').selectpicker();
+		$('.selectpicker_pay').append("<option value=\"0\">未支付</option>");
+        $.getJSON('/hellojxc/listpay',function(result){
+            for(var i=0;i<result.data.length;i++)
+            {
+				$('.selectpicker_pay').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+            }
+        });	
+		$('.selectpicker_pay').selectpicker('refresh');
+		$('.selectpicker_pay').selectpicker('render');
+
+		var geturl = "/hellojxc/getdailyoutput?id=" + id;
+		$.getJSON(geturl,function(result){
+				$.each(result, function(i, field){//就一条json数据，每条json数据里也只有一条记录
+					$("#id").val(field[0].id);
+					$("#title").val(field[0].title);  
+					//对象选择
+					$(".selectpicker").selectpicker('val',field[0].target_id);
+					$('.selectpicker').selectpicker('refresh');
+					//支付方式选择
+					$(".selectpicker_pay").selectpicker('val',field[0].pay_id);
+					$('.selectpicker_pay').selectpicker('refresh');		
+					
+					$("#price").val(field[0].price);
+					$("#operationtime").val(field[0].operationtime).datepicker({ dateFormat: 'yy-mm-dd' });//购买时间
+					$("#refer").val(field[0].refer);
+					
+				   return false;
+				});
+	   });		
+}
+
