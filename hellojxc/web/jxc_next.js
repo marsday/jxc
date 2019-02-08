@@ -1339,7 +1339,7 @@ function preparedailyinput()
 			var selected = $('.selectpicker').val();
 			if(selected === null || selected.length === 0)
 			{
-				alert("请至少选项一项对象类型");
+				alert("请选择一项关联对象");
 				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 				return false;//返回false，取消submit
 			}
@@ -1418,7 +1418,7 @@ function showdailyinput(id)
 			var selected = $('.selectpicker').val();
 			if(selected === null || selected.length === 0)
 			{
-				alert("请至少选项一项对象类型");
+				alert("请选择一项关联对象");
 				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 				return false;//返回false，取消submit
 			}
@@ -1674,7 +1674,7 @@ function preparedailyoutput()
 			var selected = $('.selectpicker').val();
 			if(selected === null || selected.length === 0)
 			{
-				alert("请至少选项一项对象类型");
+				alert("请选择一项关联对象");
 				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 				return false;//返回false，取消submit
 			}
@@ -1753,7 +1753,7 @@ function showdailyoutput(id)
 			var selected = $('.selectpicker').val();
 			if(selected === null || selected.length === 0)
 			{
-				alert("请至少选项一项对象类型");
+				alert("请选择一项关联对象");
 				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
 				return false;//返回false，取消submit
 			}
@@ -1801,5 +1801,543 @@ function showdailyoutput(id)
 				   return false;
 				});
 	   });		
+}
+
+function listsalesinput()
+{
+	var prepareaction= 'preparesalesinput';
+	var listaction='/hellojxc/listsalesinput';
+	
+	$("section.content-header").html(
+            '<h1>' +
+            '销售收入一览' +
+            ' <small style="color:red">红色表示未支付</small>' +
+             '</h1>'
+    ); 
+	
+	var targetval='<form id="frm-example">';
+	
+	targetval += ' <button  id="query" role="button" class="btn btn-primary">查询</button>' + "\n";
+	if(userType === "0")
+	{
+            //只有admin用户有增删减权限
+            targetval += 	'<a class="btn btn-primary" id="add" href="index.html?function=' + prepareaction + '" role="button">添加</a> ' + "\n" + 
+							' <button  id="del" role="button" class="btn btn-danger">删除</button>' + "\n" + 
+							' <button  id="update" role="button" class="btn btn-primary">更新</button>' + 
+							'<br>' + 
+							'<br>';
+	}
+	
+	targetval +=	'<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
+					'<p>结束日期：<input type="text" id="datepicker_end" name="datepicker_end"></p>'+
+					'<br>';
+				 
+	targetval +='<table id="example" class="display select" width="100%" cellspacing="0">' + 
+					' <thead>' + 
+					'   <tr>' + 
+					'     <th><input type="checkbox" name="select_all" value="1" id="example-select-all"></th>' + 
+					'     <th>对象名称</th>' + 
+					'     <th>支付方式</th>' + 	
+					'     <th>客户名称</th>' + 							
+					'     <th>总价</th>' + 
+					'     <th>数量</th>' + 					
+					'     <th>单位</th>' + 		
+					'     <th>等级</th>' + 						
+					'     <th>交易日期</th>' + 
+					'     <th>记录日期</th>' + 			
+					'     <th>备考</th>' + 					
+					'   </tr>' + 
+					'</thead>' + 
+					'<tfoot>' + 
+					'   <tr>' + 
+					'     <th width="5%"></th>' + 
+					'     <th>对象名称</th>' + 
+					'     <th>支付方式</th>' + 	
+					'     <th>客户名称</th>' + 							
+					'     <th>总价</th>' + 
+					'     <th>数量</th>' + 					
+					'     <th>单位</th>' + 		
+					'     <th>等级</th>' + 						
+					'     <th>交易日期</th>' + 
+					'     <th>记录日期</th>' + 			
+					'     <th>备考</th>' + 		
+					'   </tr>' + 
+					'</tfoot>' + 
+				'</table>';
+	targetval += '</form>';
+
+	$("#target").html(targetval);
+
+    var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth()-6, 1);
+    
+    $("#datepicker_start").datepicker();
+    $("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_start").val(ld.getFullYear() + '-' + (ld.getMonth() + 1) + '-' + ld.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+    
+    $("#datepicker_end").datepicker();
+    $("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+	
+    var table;
+    var refresh = function() {
+        var startday=$("#datepicker_start").val();
+        var endday=$("#datepicker_end").val();
+        //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+        table = $('#example').dataTable({
+              searching: false,
+             'ajax': {
+                'url': '/hellojxc/listsalesinput',
+                'type': 'POST'
+             },
+             'fnServerParams':function(aoData){
+               aoData.push(
+                       {
+                         "name": "startday",
+                         "value": startday?startday:null
+                       },
+                       {
+                           "name":"endday",
+                           "value": endday?endday:null
+                        }
+               );  
+             },
+             'columnDefs': [
+                   {
+                       'targets': 0,
+                       'searchable': false,
+                       'orderable': false,
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           return '<input type="checkbox" name="id[]" value="' + $('<div/>').text(data).html() + '">';
+                       }
+                   },
+                   {
+                       'targets': 1,//对象名称
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           if(full[11] != '0')//判断对象是否删除
+								return '<p style="color:blue">'+data+'</p>';  
+						   else
+							   return data;
+                       }
+                   },
+                   {
+                       'targets': 2,//支付方式
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+						   if(data === '未支付')//判断是否未支付
+							   return '<p style="color:red">'+data+'</p>'; 
+                           if(full[12] != '0')//判断支付方式是否删除
+								return '<p style="color:blue">'+data+'</p>';  
+						   else
+							   return data;
+                       }
+                   },
+                   {
+                       'targets': 3,//客户名称
+                       'className': 'dt-body-left',
+                       'render': function (data, type, full, meta){
+                           if(full[13] != '0')//判断客户是否删除
+								return '<p style="color:blue">'+data+'</p>';  
+						   else
+							   return data;
+                       }
+                   }				   
+               ],
+             'order': [[1, 'asc']]
+           });       
+    }
+    //加载页面时初始化datatable
+    refresh();
+    
+	$("#query").on('click', function(){ 
+		if(table)
+		{
+			table.fnDestroy();
+			refresh();
+		}
+		return false;
+    });
+	 
+    listcommonoperation('salesinput',table);   	
+}
+function preparesalesinput()
+{
+    $("section.content-header").html(
+        '<h1>' +
+        '销售收入管理' +
+        ' <small>销售收入添加</small>' +
+         '</h1>'
+    ); 
+
+	$("#target").html('<form id="frm-target" class="bs-example bs-example-form" role="form" action="/hellojxc/addsalesinput" method="POST">'+
+		'<div class="input-group">' + 
+			'<span class="input-group-addon">客户名称</span>' +
+			'<select name="customer_id" class="selectpicker_customer" data-live-search="true" data-style="btn-info"></select>' +
+		'</div>' +
+		'<br>' +
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">关联对象</span>' +
+			'<select name="target_id" class="selectpicker" data-style="btn-info"></select>' +
+        '</div>' +  
+		'<br>' +   	
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">支付方式</span>' +
+			'<select name="pay_id" class="selectpicker_pay" data-style="btn-info"></select>' +
+        '</div>' +  
+		'<br>' +  		
+		'<div class="input-group">' +
+			'<span class="input-group-addon">价格</span>' +
+			'<input name="price" type="number" class="form-control" style="width:30%" digits required>' +
+		'</div>' + 
+		'<br>' + 
+		'<div class="input-group">' +
+			'<span class="input-group-addon">数量</span>' +
+			'<input name="volume" type="number" class="form-control" style="width:30%" digits required>' +
+		'</div>' + 
+		'<br>' + 
+		'<div class="input-group">' +
+			'<span class="input-group-addon">单位</span>' +
+			'<select name="unit" class="selectpicker_unit" data-style="btn-info"></select>' +
+		'</div>' + 
+		'<br>' + 	
+		'<div class="input-group">' +
+			'<span class="input-group-addon">等级</span>' +
+			'<select name="grade" class="selectpicker_grade" data-style="btn-info"></select>' +
+		'</div>' + 
+		'<br>' + 		
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">交易日期</span>' +
+			'<input name="operationtime" id="operationtime"  type="text" class="form-control" style="width:28%">' +
+		'</div>' + 
+		'<br>' +  		
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">备注信息</span>' +
+			'<textarea name="refer" class="form-control" style="width:30%"></textarea>' +
+		'</div>' + 
+		'<br>' + 		
+		'<button type="submit" class="btn btn-default">提交</button>');	
+		
+        //初始化交易日期：默认为当天
+        var d = new Date();
+        $("#operationtime").datepicker();
+        $("#operationtime").datepicker("option", "dateFormat", "yy-mm-dd");
+        $("#operationtime").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });	
+		
+		$('#frm-target').on('submit', function(e){
+			var selectedTarget = $(".selectpicker").val();
+			if(selectedTarget === null || selectedTarget.length === 0)
+			{
+				alert("请选择一项关联对象");
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+				return false;//返回false，取消submit
+			}
+			
+			var selectedCustomer = $(".selectpicker_customer").val();
+			if(selectedCustomer === null || selectedCustomer.length === 0)
+			{
+				alert("请选择一项客户");
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+				return false;//返回false，取消submit
+			}				
+		});
+		
+		//获取关联客户对象
+		$('.selectpicker_customer').selectpicker();
+        $.getJSON('/hellojxc/listcustomer',function(result){
+
+            for(var i=0;i<result.data.length;i++)
+            {
+                if(i===0)
+                    $('.selectpicker_customer').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][1] +"</option>");
+                else
+                    $('.selectpicker_customer').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
+            }
+        });
+        $('.selectpicker_customer').selectpicker('refresh');
+        $('.selectpicker_customer').selectpicker('render');
+		
+		var m_units = new Map();
+		var m_grades = new Map();
+        //获取关联日常管理对象
+		$('.selectpicker').selectpicker();
+        $.getJSON('/hellojxc/listsalesinputtarget',function(result){
+
+            for(var i=0;i<result.data.length;i++)
+            {
+				//units 3,grades 4
+				m_units.set(result.data[i][0],result.data[i][3]);
+				m_grades.set(result.data[i][0],result.data[i][4]);
+                if(i===0)
+				{
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][2] +"</option>");
+				}
+                else
+				{
+                    $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+				}
+            }
+        });
+        $('.selectpicker').selectpicker('refresh');
+        $('.selectpicker').selectpicker('render');
+		
+		//初始化单位
+		$('.selectpicker_unit').selectpicker();
+		
+		var refreshunits = function(currenttarget) {
+			//var currenttarget = $('.selectpicker').val();
+			var currentunits = m_units.get(currenttarget);
+			var units = currentunits.split('-');
+			$('.selectpicker_unit').empty();
+			for(var i = 0 ; i < units.length; i++)
+			{
+				if(i ===0)
+					$('.selectpicker_unit').append("<option value=\""+units[i]+"\" selected=\"selected\">"+ units[i] +"</option>");
+				else
+					$('.selectpicker_unit').append("<option value=\""+units[i]+"\">"+ units[i] +"</option>");
+				
+			}
+			
+			$('.selectpicker_unit').selectpicker('refresh');
+			$('.selectpicker_unit').selectpicker('render');		
+		};
+		refreshunits($('.selectpicker').val());
+		
+		//初始化等级
+		$('.selectpicker_grade').selectpicker();
+		var refreshgrades = function(currenttarget) {
+			var currenttarget = $('.selectpicker').val();
+			var currentgrades = m_grades.get(currenttarget);
+			var grades = currentgrades.split('-');
+			$('.selectpicker_grade').empty();
+			for(var i = 0 ; i < grades.length; i++)
+			{
+				if(i ===0)
+					$('.selectpicker_grade').append("<option value=\""+grades[i]+"\" selected=\"selected\">"+ grades[i] +"</option>");
+				else
+					$('.selectpicker_grade').append("<option value=\""+grades[i]+"\">"+ grades[i] +"</option>");
+				
+			}
+			
+			$('.selectpicker_grade').selectpicker('refresh');
+			$('.selectpicker_grade').selectpicker('render');		
+		};	
+		refreshgrades($('.selectpicker').val());	
+	
+		//对象和等级，单位的联动
+		$('.selectpicker').on('changed.bs.select', function (e, clickedIndex, newValue, oldValue) {
+			var selected = $(e.currentTarget).val();
+			refreshunits(selected);
+			refreshgrades(selected);
+		});		
+
+			
+        //获取支付方式
+		$('.selectpicker_pay').selectpicker();
+		$('.selectpicker_pay').append("<option value=\"0\" selected=\"selected\">未支付</option>");
+        $.getJSON('/hellojxc/listpay',function(result){
+            for(var i=0;i<result.data.length;i++)
+            {
+				$('.selectpicker_pay').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+            }
+        });	
+		$('.selectpicker_pay').selectpicker('refresh');
+		$('.selectpicker_pay').selectpicker('render');		
+}
+
+function showsalesinput(id)
+{
+	    $("section.content-header").html(
+        '<h1>' +
+        '销售收入管理' +
+        ' <small>销售收入更新</small>' +
+         '</h1>'
+    );
+	$("#target").html('<form id="frm-target" class="bs-example bs-example-form" role="form" action="/hellojxc/updatesalesinput" method="POST">'+
+		'<input type="hidden" id="id" name="id">' +
+		'<div class="input-group">' + 
+			'<span class="input-group-addon">客户名称</span>' +
+			'<select name="customer_id" class="selectpicker_customer" data-live-search="true" data-style="btn-info"></select>' +
+		'</div>' +
+		'<br>' +
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">关联对象</span>' +
+			'<select id="target_id" name="target_id" class="selectpicker" data-style="btn-info"></select>' +
+        '</div>' +  
+		'<br>' +   	
+        '<div class="input-group">' +	
+			'<span class="input-group-addon">支付方式</span>' +
+			'<select id="pay_id" name="pay_id" class="selectpicker_pay" data-style="btn-info"></select>' +
+        '</div>' +  
+		'<br>' +  		
+		'<div class="input-group">' +
+			'<span class="input-group-addon">价格</span>' +
+			'<input id="price" name="price" type="number" class="form-control" style="width:30%" digits required>' +
+		'</div>' + 
+		'<br>' + 
+		'<div class="input-group">' +
+			'<span class="input-group-addon">数量</span>' +
+			'<input id="volume" name="volume" type="number" class="form-control" style="width:30%" digits required>' +
+		'</div>' + 
+		'<br>' + 
+		'<div class="input-group">' +
+			'<span class="input-group-addon">单位</span>' +
+			'<select name="unit" class="selectpicker_unit" data-style="btn-info"></select>' +
+		'</div>' + 
+		'<br>' + 	
+		'<div class="input-group">' +
+			'<span class="input-group-addon">等级</span>' +
+			'<select name="grade" class="selectpicker_grade" data-style="btn-info"></select>' +
+		'</div>' + 
+		'<br>' + 		
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">交易日期</span>' +
+			'<input id="operationtime" name="operationtime" id="operationtime"  type="text" class="form-control" style="width:28%">' +
+		'</div>' + 
+		'<br>' +  		
+ 		'<div class="input-group">' +
+			'<span class="input-group-addon">备注信息</span>' +
+			'<textarea id="refer" name="refer" class="form-control" style="width:30%"></textarea>' +
+		'</div>' + 
+		'<br>' + 		
+		'<button type="submit" class="btn btn-default">提交</button>');	
+		
+		$('#frm-target').on('submit', function(e){
+			var selectedTarget = $(".selectpicker").val();
+			if(selectedTarget === null || selectedTarget.length === 0)
+			{
+				alert("请选择一项关联对象");
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+				return false;//返回false，取消submit
+			}
+			
+			var selectedCustomer = $(".selectpicker_customer").val();
+			if(selectedCustomer === null || selectedCustomer.length === 0)
+			{
+				alert("请选择一项客户");
+				event.preventDefault();//必须调用，否则即使返回false，submit事件还会被触发一次，导致alert出现2次
+				return false;//返回false，取消submit
+			}
+		});
+		
+		//获取关联客户对象
+		$('.selectpicker_customer').selectpicker();
+        $.getJSON('/hellojxc/listcustomer',function(result){
+
+            for(var i=0;i<result.data.length;i++)
+            {
+                if(i===0)
+                    $('.selectpicker_customer').append("<option value=\""+result.data[i][0]+"\" selected=\"selected\">"+ result.data[i][1] +"</option>");
+                else
+                    $('.selectpicker_customer').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][1] +"</option>");
+            }
+        });
+        $('.selectpicker_customer').selectpicker('refresh');
+        $('.selectpicker_customer').selectpicker('render');
+		
+		var m_units = new Map();
+		var m_grades = new Map();
+        //获取关联日常管理对象
+		$('.selectpicker').selectpicker();
+        $.getJSON('/hellojxc/listsalesinputtarget',function(result){
+            for(var i=0;i<result.data.length;i++)
+            {
+				//units 3,grades 4
+				m_units.set(result.data[i][0],result.data[i][3]);
+				m_grades.set(result.data[i][0],result.data[i][4]);
+                $('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+            }
+        });
+        $('.selectpicker').selectpicker('refresh');
+        $('.selectpicker').selectpicker('render');
+			
+        //获取支付方式
+		$('.selectpicker_pay').selectpicker();
+		$('.selectpicker_pay').append("<option value=\"0\">未支付</option>");
+        $.getJSON('/hellojxc/listpay',function(result){
+            for(var i=0;i<result.data.length;i++)
+            {
+				$('.selectpicker_pay').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+            }
+        });	
+		$('.selectpicker_pay').selectpicker('refresh');
+		$('.selectpicker_pay').selectpicker('render');
+		
+		//初始化单位
+		$('.selectpicker_unit').selectpicker();
+		var refreshunits = function(currenttarget) {
+			//var currenttarget = $('.selectpicker').val();
+			var currentunits = m_units.get(currenttarget);
+			var units = currentunits.split('-');
+			$('.selectpicker_unit').empty();
+			for(var i = 0 ; i < units.length; i++)
+			{
+				if(i ===0)
+					$('.selectpicker_unit').append("<option value=\""+units[i]+"\" selected=\"selected\">"+ units[i] +"</option>");
+				else
+					$('.selectpicker_unit').append("<option value=\""+units[i]+"\">"+ units[i] +"</option>");
+				
+			}
+			
+			$('.selectpicker_unit').selectpicker('refresh');
+			$('.selectpicker_unit').selectpicker('render');		
+		};
+		
+		//初始化等级
+		$('.selectpicker_grade').selectpicker();
+		var refreshgrades = function(currenttarget) {
+			var currenttarget = $('.selectpicker').val();
+			var currentgrades = m_grades.get(currenttarget);
+			var grades = currentgrades.split('-');
+			$('.selectpicker_grade').empty();
+			for(var i = 0 ; i < grades.length; i++)
+			{
+				if(i ===0)
+					$('.selectpicker_grade').append("<option value=\""+grades[i]+"\" selected=\"selected\">"+ grades[i] +"</option>");
+				else
+					$('.selectpicker_grade').append("<option value=\""+grades[i]+"\">"+ grades[i] +"</option>");
+				
+			}
+			
+			$('.selectpicker_grade').selectpicker('refresh');
+			$('.selectpicker_grade').selectpicker('render');		
+		};	
+		
+		var geturl = "/hellojxc/getsalesinput?id=" + id;
+		$.getJSON(geturl,function(result){
+				$.each(result, function(i, field){//就一条json数据，每条json数据里也只有一条记录
+					$("#id").val(field[0].id);
+					//对象选择
+					$(".selectpicker").selectpicker('val',field[0].target_id);
+					$('.selectpicker').selectpicker('refresh');
+					//单位和等级与对象的管理的联动
+					var currenttarget = $('.selectpicker').val();
+					refreshunits(currenttarget);
+					refreshgrades(currenttarget);
+					$(".selectpicker_unit").selectpicker('val',field[0].unit);
+					$(".selectpicker_grade").selectpicker('val',field[0].grade);
+					
+					//支付方式选择
+					$(".selectpicker_pay").selectpicker('val',field[0].pay_id);
+					$('.selectpicker_pay').selectpicker('refresh');		
+					
+					//客户选择
+					$(".selectpicker_customer").val(field[0].customer_id);  
+					$('.selectpicker_customer').selectpicker('refresh');	
+					
+					$("#price").val(field[0].price);
+					$("#volume").val(field[0].volume);
+					$("#operationtime").val(field[0].operationtime).datepicker({ dateFormat: 'yy-mm-dd' });//购买时间
+					$("#refer").val(field[0].refer);
+					
+				   return false;
+				});
+	   });
+		//对象和等级，单位的联动
+		$('.selectpicker').on('changed.bs.select', function (e, clickedIndex, newValue, oldValue) {
+			var selected = $(e.currentTarget).val();
+			refreshunits(selected);
+			refreshgrades(selected);
+		});
 }
 

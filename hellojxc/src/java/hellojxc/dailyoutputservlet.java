@@ -81,7 +81,7 @@ public class dailyoutputservlet extends HttpServlet {
         //查询未支付数据
         String sql2 = "select a.id as id, a.title as title, b.name as target_name, '未支付' as pay_name, a.price as price, a.operationtime as operationtime, a.recordtime as recordtime, "
                                 +  "a.refer as refer, b.del_flag as target_del_flag, 0 as pay_del_flag " 
-                                +  "from jxc_next_daily_output as a, jxc_next_target as b , jxc_next_pay as c "
+                                +  "from jxc_next_daily_output as a, jxc_next_target as b  "
                                 +  "where a.operationtime >= '"+ datepicker_start + "'"
                                 +  " and a.operationtime <= '"+ datepicker_end + "'"
                                 +  " and a.target_id = b.id and a.pay_id = 0 and a.del_flag = 0";

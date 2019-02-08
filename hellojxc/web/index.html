@@ -399,6 +399,22 @@ desired effect
 		
         switch(first)
         {
+            case "preparesalesinput"://销售收入追加
+			{
+				preparesalesinput();
+				break;
+			}
+            case "showsalesinput"://销售收入显示
+			{
+				var id = getUrlVars()["id"]; 
+				showsalesinput(id);
+				break;
+			}			
+			case "listsalesinput"://销售收入一览
+            {
+				listsalesinput();
+                break;
+            }
             case "preparedailyoutput"://日常支出追加
 			{
 				preparedailyoutput();

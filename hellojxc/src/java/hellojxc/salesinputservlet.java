@@ -31,8 +31,8 @@ import javax.servlet.http.HttpSession;
  *
  * @author marsday
  */
-@WebServlet(name = "dailyinputservlet", urlPatterns = {"/listdailyinput","/adddailyinput","/deldailyinput","/updatedailyinput","/getdailyinput"})
-public class dailyinputservlet extends HttpServlet {
+@WebServlet(name = "salesinputservlet", urlPatterns = {"/listsalesinput","/addsalesinput","/delsalesinput","/updatesalesinput","/getsalesinput"})
+public class salesinputservlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -72,22 +72,23 @@ public class dailyinputservlet extends HttpServlet {
         String json = "{\"data\":[";
      
         //查询已支付数据
-        String sql1 = "select a.id as id, a.title as title, b.name as target_name, c.name as pay_name, a.price as price, a.operationtime as operationtime, a.recordtime as recordtime, "
-                                +  "a.refer as refer, b.del_flag as target_del_flag, c.del_flag as pay_del_flag " 
-                                +  "from jxc_next_daily_input as a, jxc_next_target as b , jxc_next_pay as c "
+        String sql1 = "select a.id as id,  b.name as target_name, c.name as pay_name, d.name as customer_name, a.price as price, a.volume as volume, a.unit as unit, a.grade as grade, a.operationtime as operationtime, a.recordtime as recordtime, "
+                                +  "a.refer as refer, b.del_flag as target_del_flag, c.del_flag as pay_del_flag, d.del_flag as customer_del_flag " 
+                                +  "from jxc_next_sales_input as a, jxc_next_target as b , jxc_next_pay as c,jxc_next_customer as d "
                                 +  "where a.operationtime >= '"+ datepicker_start + "'"
                                 +  " and a.operationtime <= '"+ datepicker_end + "'"
-                                +  " and a.target_id = b.id and a.pay_id = c.id and a.del_flag = 0";
+                                +  " and a.target_id = b.id and a.pay_id = c.id and a.customer_id = d.id and a.del_flag = 0";
         //查询未支付数据
-        String sql2 = "select a.id as id, a.title as title, b.name as target_name, '未支付' as pay_name, a.price as price, a.operationtime as operationtime, a.recordtime as recordtime, "
-                                +  "a.refer as refer, b.del_flag as target_del_flag, 0 as pay_del_flag " 
-                                +  "from jxc_next_daily_input as a, jxc_next_target as b "
+        String sql2 = "select a.id as id,  b.name as target_name, '未支付' as pay_name, d.name as customer_name, a.price as price, a.volume as volume,a.unit as unit, a.grade as grade, a.operationtime as operationtime, a.recordtime as recordtime, "
+                                +  "a.refer as refer, b.del_flag as target_del_flag, 0 as pay_del_flag, d.del_flag as customer_del_flag " 
+                                +  "from jxc_next_sales_input as a, jxc_next_target as b ,jxc_next_customer as d "
                                 +  "where a.operationtime >= '"+ datepicker_start + "'"
                                 +  " and a.operationtime <= '"+ datepicker_end + "'"
-                                +  " and a.target_id = b.id and a.pay_id = 0 and a.del_flag = 0";
+                                +  " and a.target_id = b.id and a.pay_id = 0 and a.customer_id = d.id and a.del_flag = 0";
+ 
         String sql = sql1 + " union " + sql2;
-        Utility.getLogger().log(Level.INFO, "查询日常收入记录");
-        Utility.getLogger().log(Level.CONFIG, "查询日常收入记录 sql: " + sql);
+        Utility.getLogger().log(Level.INFO, "查询销售收入记录");
+        Utility.getLogger().log(Level.CONFIG, "查询销售收入记录 sql: " + sql);
         ResultSet result = null;
         try{
             result = DBHelper.getDbHelper().executeQuery(sql);
@@ -95,27 +96,35 @@ public class dailyinputservlet extends HttpServlet {
             while(result.next())
             {
                 String id = result.getString("id");
-                String title = result.getString("title");
                 String target_name = result.getString("target_name");
                 String pay_name = result.getString("pay_name");
+                String customer_name = result.getString("customer_name");               
                 String price = String.valueOf(result.getInt("price"));
+                String volume = String.valueOf(result.getInt("volume"));
+                String unit = result.getString("unit");
+                String grade = result.getString("grade");           
                 String operationtime = result.getDate("operationtime").toString();
                 String recordtime = result.getDate("recordtime").toString();
                 String refer = result.getString("refer");                
                 String target_del_flag =  String.valueOf(result.getInt("target_del_flag"));
                 String pay_del_flag = String.valueOf(result.getInt("pay_del_flag"));
+                String customer_del_flag = String.valueOf(result.getInt("customer_del_flag"));
                 // value array json
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-                arrayBuilder.add(id);
-                arrayBuilder.add(title);               
+                arrayBuilder.add(id);            
                 arrayBuilder.add(target_name);
                 arrayBuilder.add(pay_name);
+                arrayBuilder.add(customer_name);
                 arrayBuilder.add(price);
+                arrayBuilder.add(volume);
+                arrayBuilder.add(unit);
+                arrayBuilder.add(grade);
                 arrayBuilder.add(operationtime);
                 arrayBuilder.add(recordtime);
                 arrayBuilder.add(refer==null?"":refer);               
                 arrayBuilder.add(target_del_flag);
                 arrayBuilder.add(pay_del_flag);
+                arrayBuilder.add(customer_del_flag);
                 
                 JsonArray empArray = arrayBuilder.build();
                 
@@ -135,7 +144,7 @@ public class dailyinputservlet extends HttpServlet {
                 result.close();
         }catch(Exception err)
         {
-            Utility.getLogger().log(Level.SEVERE, "查询日常收入记录 error = " + err.getMessage());
+            Utility.getLogger().log(Level.SEVERE, "查询销售收入记录 error = " + err.getMessage());
 			err.printStackTrace();
         }
         json += "]}";
@@ -162,7 +171,7 @@ public class dailyinputservlet extends HttpServlet {
         if(!Utility.checkSession(request, response))
             return;
         String uri = request.getRequestURI();
-        if(uri.endsWith("/getdailyinput")) {
+        if(uri.endsWith("/getsalesinput")) {
             getoperation(request,response);
         }
         else
@@ -184,14 +193,14 @@ public class dailyinputservlet extends HttpServlet {
         if(!Utility.checkSession(request, response))
             return;
         String uri = request.getRequestURI();
-        if (uri.endsWith("/listdailyinput")) {
+        if (uri.endsWith("/listsalesinput")) {
             //return JSON
             listoperation(request,response);
-        }else if(uri.endsWith("/adddailyinput")) {
+        }else if(uri.endsWith("/addsalesinput")) {
             addoperation(request,response);
-        }else if(uri.endsWith("/updatedailyinput")) {
+        }else if(uri.endsWith("/updatesalesinput")) {
             updateoperation(request,response);
-        }else if(uri.endsWith("/deldailyinput")) {
+        }else if(uri.endsWith("/delsalesinput")) {
             deloperation(request,response);
         }
         else
@@ -204,7 +213,7 @@ public class dailyinputservlet extends HttpServlet {
         String idlist="";
         if(names.length > 0)
         {
-            String sql = "update jxc_next_daily_input set del_flag = 1 where id in (";
+            String sql = "update jxc_next_sales_input set del_flag = 1 where id in (";
             int index = 0;
             for(String obj:names)
             {
@@ -220,17 +229,17 @@ public class dailyinputservlet extends HttpServlet {
 
             }
             sql += ")";
-            Utility.getLogger().log(Level.INFO, "日常收入删除 idlist: " + idlist);
-            Utility.getLogger().log(Level.CONFIG, "日常收入删除 sql: " + sql);
+            Utility.getLogger().log(Level.INFO, "销售收入删除 idlist: " + idlist);
+            Utility.getLogger().log(Level.CONFIG, "销售收入删除 sql: " + sql);
             try{
                 DBHelper.getDbHelper().executeUpdate(sql);
             }catch(Exception err)
             {
-		Utility.getLogger().log(Level.SEVERE, "日常会搜如删除 error = " + err.getMessage());
+		Utility.getLogger().log(Level.SEVERE, "销售收入删除 error = " + err.getMessage());
                 err.printStackTrace();
             }      
         }
-       response.sendRedirect("index.html?function=listdailyinput");
+       response.sendRedirect("index.html?function=listsalesinput");
     } 
         
     private void updateoperation(HttpServletRequest request, HttpServletResponse response)
@@ -238,10 +247,13 @@ public class dailyinputservlet extends HttpServlet {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
         String id = new String(request.getParameter("id").getBytes("ISO-8859-1"), "UTF-8");
-        String title = new String(request.getParameter("title").getBytes("ISO-8859-1"), "UTF-8");
+        String customer_id = new String(request.getParameter("customer_id").getBytes("ISO-8859-1"), "UTF-8");
         String target_id = new String(request.getParameter("target_id").getBytes("ISO-8859-1"), "UTF-8");
         String pay_id = new String(request.getParameter("pay_id").getBytes("ISO-8859-1"), "UTF-8");   
         String price = new String(request.getParameter("price").getBytes("ISO-8859-1"), "UTF-8"); 
+        String volume = new String(request.getParameter("volume").getBytes("ISO-8859-1"), "UTF-8");
+        String unit = new String(request.getParameter("unit").getBytes("ISO-8859-1"), "UTF-8");
+        String grade = new String(request.getParameter("grade").getBytes("ISO-8859-1"), "UTF-8");
         String operationtime = new String(request.getParameter("operationtime").getBytes("ISO-8859-1"), "UTF-8"); 
         String refer = new String(request.getParameter("refer").getBytes("ISO-8859-1"), "UTF-8"); 
         
@@ -251,25 +263,28 @@ public class dailyinputservlet extends HttpServlet {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String recordtime = sdf.format(date);
         
-        String sql = "update jxc_next_daily_input set target_id = " + target_id +","
+        String sql = "update jxc_next_sales_input set target_id = " + target_id +","
                                                         + " pay_id= " + pay_id + ","
-                                                        + " title= " + "'" + title + "'," 
+                                                        + " customer_id= " +  customer_id + "," 
                                                         + " price= " + price +"," 
+                                                        + " volume= " + volume +"," 
+                                                        + " unit= " + "'"+ unit + "',"
+                                                        + " grade= " + "'"+ grade + "',"
                                                         + " operationtime= " + "'"+ operationtime + "',"
                                                         + " recordtime= " + "'"+ recordtime + "',"
                                                         + " refer= " + "'"+ refer + "'"
                                                         + " where id="  +  id; 
-	Utility.getLogger().log(Level.INFO, "日常收入更新 id= " + id);
-	Utility.getLogger().log(Level.CONFIG, "日常收入更新 sql: " + sql);
+	Utility.getLogger().log(Level.INFO, "销售收入更新 id= " + id);
+	Utility.getLogger().log(Level.CONFIG, "销售收入更新 sql: " + sql);
        try{
          DBHelper.getDbHelper().executeUpdate(sql);
        }catch(Exception err)
        {
-            Utility.getLogger().log(Level.SEVERE, "更新日常收入 error = " + err.getMessage());
+            Utility.getLogger().log(Level.SEVERE, "更新销售收入 error = " + err.getMessage());
             err.printStackTrace();
        }
         //request.getRequestDispatcher("/index_1.html").forward(request,response);
-        response.sendRedirect("index.html?function=listdailyinput");
+        response.sendRedirect("index.html?function=listsalesinput");
         
     }
         
@@ -277,10 +292,13 @@ public class dailyinputservlet extends HttpServlet {
             throws ServletException, IOException {
         //html:utf-8 --> http:ISO-8859-1 --> servlet:utf-8
         //byte[] orgname = request.getParameter("name").getBytes("ISO-8859-1");
-        String title = new String(request.getParameter("title").getBytes("ISO-8859-1"), "UTF-8"); 
+        String customer_id = new String(request.getParameter("customer_id").getBytes("ISO-8859-1"), "UTF-8"); 
         String target_id = new String(request.getParameter("target_id").getBytes("ISO-8859-1"), "UTF-8");
         String pay_id = new String(request.getParameter("pay_id").getBytes("ISO-8859-1"), "UTF-8");
         String price = new String(request.getParameter("price").getBytes("ISO-8859-1"), "UTF-8");
+        String volume = new String(request.getParameter("volume").getBytes("ISO-8859-1"), "UTF-8");
+        String unit = new String(request.getParameter("unit").getBytes("ISO-8859-1"), "UTF-8");
+        String grade = new String(request.getParameter("grade").getBytes("ISO-8859-1"), "UTF-8");
         String operationtime = new String(request.getParameter("operationtime").getBytes("ISO-8859-1"), "UTF-8");
         String refer=""; 
         if(request.getParameter("refer") != null)
@@ -291,26 +309,29 @@ public class dailyinputservlet extends HttpServlet {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String recordtime = sdf.format(date);
         
-        String sql = "insert into jxc_next_daily_input (title,target_id,pay_id,price,operationtime,recordtime,refer) values(" 
-                +  "'" +  title  + "',"   
+        String sql = "insert into jxc_next_sales_input (customer_id,target_id,pay_id,price,volume,unit,grade,operationtime,recordtime,refer) values(" 
+                +  customer_id  + ","   
                 +  target_id + "," 
                 +  pay_id + ","
                 +  price  + ","
+                +  volume  + ","
+                +  "'" + unit + "'," 
+                +  "'" + grade + "'," 
                 +  "'" + operationtime + "'," 
                 +  "'" +  recordtime  + "',"   
                 +  "'"  +  refer  + "'"  
                 + ")";
 	
-        Utility.getLogger().log(Level.INFO, "日常收入添加 target_id=" + target_id + " pay_id=" + pay_id + " price=" + price + " title=" + title + " operationtime=" + operationtime + " refer=" + refer);		
-        Utility.getLogger().log(Level.CONFIG, "日常收入添加 sql: " + sql);
+        Utility.getLogger().log(Level.INFO, " 销售收入添加 target_id=" + target_id + " pay_id=" + pay_id  + " customer_id=" + customer_id+ " price=" + price + " volume=" + volume + " unit=" + unit  + " grade=" + grade + " operationtime=" + operationtime + " refer=" + refer);		
+        Utility.getLogger().log(Level.CONFIG, "销售收入添加 sql: " + sql);
         try{
             DBHelper.getDbHelper().executeUpdate(sql);
         }catch(Exception err)
         {
-            Utility.getLogger().log(Level.SEVERE, "日常收入添加 error = " + err.getMessage());
+            Utility.getLogger().log(Level.SEVERE, "销售收入添加 error = " + err.getMessage());
             err.printStackTrace();
         }
-        response.sendRedirect("index.html?function=listdailyinput");
+        response.sendRedirect("index.html?function=listsalesinput");
         
     }
     
@@ -326,9 +347,9 @@ public class dailyinputservlet extends HttpServlet {
         //{
             input = new String( ids[0].getBytes("ISO-8859-1"), "UTF-8");
         //}
-        String sql = "select id, title, target_id, pay_id, price, operationtime, recordtime, refer from jxc_next_daily_input where id= " + "'" + input + "'";
-	Utility.getLogger().log(Level.INFO, "获取指定日常收入 id= " + input);
-        Utility.getLogger().log(Level.CONFIG, "获取指定日常收入 sql: " + sql);
+        String sql = "select id, customer_id, pay_id,target_id, price, volume, unit,grade,operationtime, recordtime, refer from jxc_next_sales_input where id= " + "'" + input + "'";
+	Utility.getLogger().log(Level.INFO, "获取指定销售收入 id= " + input);
+        Utility.getLogger().log(Level.CONFIG, "获取指定销售收入 sql: " + sql);
         String json = "{\"data\":[";
         ResultSet result = null;
         try{
@@ -339,9 +360,12 @@ public class dailyinputservlet extends HttpServlet {
                 String id = result.getString("id");
                 String target_id = String.valueOf(result.getInt("target_id"));
                 String pay_id = String.valueOf(result.getInt("pay_id"));
+                String customer_id = String.valueOf(result.getInt("customer_id"));
                 String price = String.valueOf(result.getInt("price"));
+                String volume = String.valueOf(result.getInt("volume"));
+                String unit = result.getString("unit");
+                String grade = result.getString("grade");
                 String operationtime = result.getString("operationtime");
-                String title = result.getString("title");
                 String refer = result.getString("refer");
                 
                 //name-value json
@@ -349,9 +373,12 @@ public class dailyinputservlet extends HttpServlet {
                 jsonBuilder.add("id", id);
                 jsonBuilder.add("target_id", target_id);
                 jsonBuilder.add("pay_id", pay_id);
+                jsonBuilder.add("customer_id", customer_id);
                 jsonBuilder.add("price", price);
+                jsonBuilder.add("volume", volume);
+                jsonBuilder.add("unit", unit);
+                jsonBuilder.add("grade", grade);
                 jsonBuilder.add("operationtime", operationtime);
-                jsonBuilder.add("title", title);
                 jsonBuilder.add("refer", refer==null?"":refer);
                 JsonObject empObj = jsonBuilder.build();
                 
@@ -369,12 +396,12 @@ public class dailyinputservlet extends HttpServlet {
                 index++;
             }
             if(index == 0)
-                Utility.getLogger().log(Level.SEVERE, "没有获取到指定日常收入记录: sql=" + sql);			
+                Utility.getLogger().log(Level.SEVERE, "没有获取到指定销售收入记录: sql=" + sql);			
             if(result != null)
                 result.close();
         }catch(Exception err)
         {
-            Utility.getLogger().log(Level.SEVERE, "获取指定日常收入记录 error = " + err.getMessage());
+            Utility.getLogger().log(Level.SEVERE, "获取指定销售收入记录 error = " + err.getMessage());
             err.printStackTrace();
         }
         json += "]}";
