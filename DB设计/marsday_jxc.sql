@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50561
 File Encoding         : 65001
 
-Date: 2019-02-07 07:10:42
+Date: 2019-02-08 16:55:03
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -34,11 +34,6 @@ CREATE TABLE `jxc_input` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Records of jxc_input
--- ----------------------------
-INSERT INTO `jxc_input` VALUES ('1', '1', '00000000999', '00000003000', '2019-01-06', '2019-01-06', '小李', '', '', '0');
-
--- ----------------------------
 -- Table structure for jxc_next_customer
 -- ----------------------------
 DROP TABLE IF EXISTS `jxc_next_customer`;
@@ -51,13 +46,6 @@ CREATE TABLE `jxc_next_customer` (
   `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
   PRIMARY KEY (`id`,`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of jxc_next_customer
--- ----------------------------
-INSERT INTO `jxc_next_customer` VALUES ('1', '陈老板', '12323123123', '重庆', '万州', '0');
-INSERT INTO `jxc_next_customer` VALUES ('2', '李老板', 'adsf', '上海', '卢湾', '0');
-INSERT INTO `jxc_next_customer` VALUES ('3', 'dff', '18912233544', '上海', '黄浦', '1');
 
 -- ----------------------------
 -- Table structure for jxc_next_daily_input
@@ -74,12 +62,24 @@ CREATE TABLE `jxc_next_daily_input` (
   `refer` varchar(255) DEFAULT NULL,
   `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COMMENT='日常收入';
 
 -- ----------------------------
--- Records of jxc_next_daily_input
+-- Table structure for jxc_next_daily_output
 -- ----------------------------
-INSERT INTO `jxc_next_daily_input` VALUES ('1', '马路拆迁', '3', '1', '00000000000000020000', '2019-02-04', '2019-02-05', '', '0');
+DROP TABLE IF EXISTS `jxc_next_daily_output`;
+CREATE TABLE `jxc_next_daily_output` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `target_id` bigint(20) NOT NULL,
+  `pay_id` bigint(20) NOT NULL,
+  `price` int(20) unsigned zerofill NOT NULL,
+  `operationtime` date NOT NULL,
+  `recordtime` date NOT NULL,
+  `refer` varchar(255) DEFAULT NULL,
+  `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='日常支出';
 
 -- ----------------------------
 -- Table structure for jxc_next_pay
@@ -93,12 +93,24 @@ CREATE TABLE `jxc_next_pay` (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Records of jxc_next_pay
+-- Table structure for jxc_next_sales_input
 -- ----------------------------
-INSERT INTO `jxc_next_pay` VALUES ('1', '公共卡', '0');
-INSERT INTO `jxc_next_pay` VALUES ('2', '马永华', '1');
-INSERT INTO `jxc_next_pay` VALUES ('3', '小马', '0');
-INSERT INTO `jxc_next_pay` VALUES ('4', '小李', '0');
+DROP TABLE IF EXISTS `jxc_next_sales_input`;
+CREATE TABLE `jxc_next_sales_input` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `target_id` bigint(20) NOT NULL,
+  `pay_id` bigint(20) NOT NULL,
+  `customer_id` bigint(20) NOT NULL,
+  `price` int(20) unsigned zerofill NOT NULL,
+  `volume` int(20) NOT NULL,
+  `unit` varchar(255) NOT NULL,
+  `grade` varchar(255) NOT NULL,
+  `operationtime` date NOT NULL,
+  `recordtime` date NOT NULL,
+  `refer` varchar(255) DEFAULT NULL,
+  `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='销售收入';
 
 -- ----------------------------
 -- Table structure for jxc_next_target
@@ -112,14 +124,7 @@ CREATE TABLE `jxc_next_target` (
   `grades` varchar(255) DEFAULT NULL,
   `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of jxc_next_target
--- ----------------------------
-INSERT INTO `jxc_next_target` VALUES ('1', '蟹', '5', '只-盒', '1级-2级', '0');
-INSERT INTO `jxc_next_target` VALUES ('2', '鱼', '1', '条-箱', '1级', '0');
-INSERT INTO `jxc_next_target` VALUES ('3', '桃', '1', '只-箱', '1级-2级', '0');
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for jxc_next_user
@@ -134,12 +139,6 @@ CREATE TABLE `jxc_next_user` (
   `del_flag` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`name_en`,`name_ch`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
-
--- ----------------------------
--- Records of jxc_next_user
--- ----------------------------
-INSERT INTO `jxc_next_user` VALUES ('xiaoli', '小李', '123456', '0', '', '0');
-INSERT INTO `jxc_next_user` VALUES ('xiaoma', '小马', '123456', '1', '', '0');
 
 -- ----------------------------
 -- Table structure for jxc_output
@@ -158,7 +157,3 @@ CREATE TABLE `jxc_output` (
   `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of jxc_output
--- ----------------------------

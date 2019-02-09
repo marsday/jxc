@@ -2147,7 +2147,7 @@ function preparesalesinput()
 
 function showsalesinput(id)
 {
-	    $("section.content-header").html(
+	$("section.content-header").html(
         '<h1>' +
         '销售收入管理' +
         ' <small>销售收入更新</small>' +
@@ -2341,3 +2341,187 @@ function showsalesinput(id)
 		});
 }
 
+function analysistarget()
+{
+	$("section.content-header").html(
+        '<h1>' +
+		'管理对象资金出入统计' +
+		' <small style="color:blue">利润 = 销售收入 + 日常收入-日常支出</small>' +
+         '</h1>'
+	);
+		
+	$("#target").html('<form id="frm-example">'+
+	' <button  id="query" role="button" class="btn btn-primary">查询</button>' + 
+	'<br>' + 
+	'<br>' + 
+	'<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
+	'<p>结束日期：<input type="text" id="datepicker_end" name="datepicker_end"></p>'+
+	'<br>' + 
+	'<div class="input-group">' +	
+		'<span class="input-group-addon">对象名称</span>' +
+		'<select id="targetid" name="targetid" class="selectpicker" data-style="btn-info"></select>' +
+	'</div>' + 	
+	'<br>' + 		
+	' <table id="example" class="display select" width="100%" cellspacing="0">' + 
+	' <thead>' + 
+	'   <tr>' + 
+	'     <th>序号</th>' + 
+	'     <th>对象名称</th>' + 
+	'     <th>日常支出总计</th>' + 
+	'     <th>日常收入总计</th>' + 
+	'     <th>销售收入总计</th>' + 
+	'     <th>利润总计</th>' + 	
+	'   </tr>' + 
+	'</thead>' + 
+	'<tfoot>' + 
+	'   <tr>' + 
+	'     <th>序号</th>' + 
+	'     <th>对象名称</th>' + 
+	'     <th>日常支出总计</th>' + 
+	'     <th>日常收入总计</th>' + 
+	'     <th>销售收入总计</th>' + 
+	'     <th>利润总计</th>' +     
+	'   </tr>' + 
+	'</tfoot>' + 
+	 '</table>' + 
+	'</form>'
+	);
+
+	//获取货物名称列表
+	$.getJSON('/hellojxc/listtarget',function(result){
+		$('.selectpicker').selectpicker();
+		//默认选择所有对象
+		$('.selectpicker').append("<option value=\"all\" selected=\"selected\">all</option>");
+		for(var i=0;i<result.data.length;i++)
+		{
+			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+		}
+		$('.selectpicker').selectpicker('refresh');
+		$('.selectpicker').selectpicker('render');
+	});
+		
+	var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth()-6, 1);
+
+	$("#datepicker_start").datepicker();
+	$("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
+	$("#datepicker_start").val(ld.getFullYear() + '-' + (ld.getMonth() + 1) + '-' + ld.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+
+	$("#datepicker_end").datepicker();
+	$("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
+	$("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+
+	var table;
+	var refresh = function() {
+		var startday=$("#datepicker_start").val();
+		var endday=$("#datepicker_end").val();
+		var target_id=$("#targetid").val();
+		//DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+		table = $('#example').dataTable({
+			searching: false,
+			'ajax': {
+				'url': '/hellojxc/finabytarget',
+				'type': 'POST'
+			},
+			'fnServerParams':function(aoData){
+			aoData.push(
+					{
+						"name": "startday",
+						"value": startday?startday:null
+					},
+					{
+						"name":"endday",
+						"value": endday?endday:null
+					},
+					{
+						"name":"target_id",
+						"value":target_id
+					}
+			);  
+			},
+			'order': [[0, 'asc']]
+		});  
+
+		//获取DataTable的查询结果json数据
+		var api_table = $('#example').DataTable();
+		var json = api_table.ajax.json();
+		var name_array=new Array(json.data.length); 
+		var daily_out_price=new Array(json.data.length);
+		var daily_int_price=new Array(json.data.length); 
+		var sales_int_price=new Array(json.data.length);
+		var net_price=new Array(json.data.length); 		
+		for(var i=0;i<json.data.length;i++)
+		{
+			name_array[i] = json.data[i][1];
+			daily_out_price[i] = json.data[i][2];
+			daily_int_price[i] = json.data[i][3];
+			sales_int_price[i] = json.data[i][4];
+			net_price[i] = json.data[i][5];
+		}
+
+		$("#charttarget").attr("style","width: 600px;height:400px;");
+
+		// 基于准备好的dom，初始化echarts实例
+		var myChart = echarts.init(document.getElementById('charttarget'));
+
+		// 指定图表的配置项和数据
+		var option = {
+			title: {
+				text: '对象资金出入一览'
+			},
+			tooltip: {},
+			legend: {
+				data:['日常支出','日常收入','销售收入','利润']
+			},
+			xAxis: {
+				data: name_array//["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+			},
+			yAxis: {},
+			series: [
+				{
+					name: '日常支出',
+					type: 'bar',
+					data: daily_out_price//[5, 20, 36, 10, 10, 20]
+				},
+				{
+					name: '日常收入',
+					type: 'bar',
+					data: daily_int_price//[5, 20, 36, 10, 10, 20]
+				},
+				{
+					name: '销售收入',
+					type: 'bar',
+					data: sales_int_price//[5, 20, 36, 10, 10, 20]
+				},
+				{
+					name: '利润',
+					type: 'bar',
+					data: net_price//[5, 20, 36, 10, 10, 20]
+				},								
+			]
+		};
+
+		// 使用刚指定的配置项和数据显示图表。
+		myChart.setOption(option); 			
+	}
+	//加载页面时初始化datatable
+	refresh();	
+	
+	$("#query").on('click', function(){ 
+	if(table)
+	{
+		table.fnDestroy();
+		refresh();
+	}
+	return false;
+	});	
+
+}
+
+function analysispay()
+{
+	$("section.content-header").html(
+        '<h1>' +
+        '支付方式资金出入统计' +
+         '</h1>'
+    );	
+}
