@@ -28,14 +28,8 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author marsday
  */
-@WebServlet(name = "analysisServlet", urlPatterns = {"/finabytarget","/finabypay"})
+@WebServlet(name = "analysisreportServlet", urlPatterns = {"/finabytarget","/finabypay"})
 public class analysisreportServlet extends HttpServlet {
-    public class FinaVolume {
-        public String goodsname;       
-        public int in_volume;    
-        public int out_volume;
-        public int net_volume;
-    };
     public class FinaPrice {
         public String targetname;       
         public int daily_in_price;    
@@ -293,93 +287,151 @@ public class analysisreportServlet extends HttpServlet {
    private void finabypayOperation(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
     /*
-    select operator,sum(price)as in_volume from jxc_input where del_flag=0 and operator in (select name_ch from jxc_user where del_flag = 0 ) group by operator
-    select operator,sum(price)as out_volume from jxc_output where del_flag=0 and operator in (select name_ch from jxc_user where del_flag = 0 ) group by operator 
-       */ 
-    /*
+    //所有的
+    select a.name as pay_name, sum(b.price)as daily_in_price 
+    from jxc_next_pay as a, jxc_next_daily_input as b
+    where a.id = b.pay_id and b.del_flag = 0 group by pay_name
+
+    //指定的(已支付)
+    select a.name as pay_name, sum(b.price)as daily_in_price 
+    from jxc_next_pay as a, jxc_next_daily_input as b 
+    where a.id = b.pay_id and b.del_flag = 0 and b.pay_id = 1
+
+    //指定的(未支付)
+    select '未支付' as pay_name, sum(price)as daily_in_price 
+    from jxc_next_daily_input  
+    where del_flag = 0 and pay_id = 0
+     */ 
+
         String startday = new String(request.getParameter("startday").getBytes("UTF-8"), "UTF-8");
         String endday = new String(request.getParameter("endday").getBytes("UTF-8"), "UTF-8");
-        String user_names = new String(request.getParameter("usernames").getBytes("UTF-8"), "UTF-8");
+        String pay_id = new String(request.getParameter("pay_id").getBytes("UTF-8"), "UTF-8");
         
-        String input_sql;
-        String output_sql;
+        //日常收入
+        String daily_in_sql = "select a.name as pay_name, sum(b.price)as daily_in_price from jxc_next_pay as a, jxc_next_daily_input as b where"
+                    + " operationtime >= '"+ startday + "'"
+                    + " and operationtime <= '"+ endday + "'"
+                    + "and a.id = b.pay_id and b.del_flag = 0 ";
+        //日常支出
+        String daily_out_sql = "select a.name as pay_name, sum(b.price)as daily_out_price from jxc_next_pay as a, jxc_next_daily_output as b where"
+                    + " operationtime >= '"+ startday + "'"
+                    + " and operationtime <= '"+ endday + "'"
+                    + "and a.id = b.pay_id and b.del_flag = 0 "; 
+        //销售收入   
+        String sales_in_sql = "select a.name as pay_name, sum(b.price)as sales_in_price from jxc_next_pay as a, jxc_next_sales_input as b where"
+                    + " operationtime >= '"+ startday + "'"
+                    + " and operationtime <= '"+ endday + "'"
+                    + "and a.id = b.pay_id and b.del_flag = 0 "; 
 
-        if(user_names.equals("all"))
-        {
-            input_sql = "select operator,sum(price)as in_price from jxc_input where"
-                    + " buytime >= '"+ startday + "'"
-                    + " and buytime <= '"+ endday + "'"
-                    + "and del_flag=0 and operator in (select name_ch from jxc_user where del_flag = 0 )  group by operator";
-            output_sql = "select operator,sum(price)as out_price from jxc_output where" 
-                    + " buytime >= '"+ startday + "'"
-                    + " and buytime <= '"+ endday + "'"                    
-                    +" and del_flag=0 and operator in (select name_ch from jxc_user where del_flag = 0 ) group by operator";
-        }else
-        {
-            input_sql = "select operator,sum(price)as in_price from jxc_input where "
-                    + " buytime >= '"+ startday + "'"
-                    + " and buytime <= '"+ endday + "'"                    
-                    +" and del_flag=0 and operator = '" +user_names+ "'";
-            output_sql = "select operator,sum(price)as out_price from jxc_output where "
-                   + " buytime >= '"+ startday + "'"
-                   + " and buytime <= '"+ endday + "'"                        
-                   +" and del_flag=0 and operator = '" +user_names+ "'";
-        }
- 
+        //日常收入（未支付）
+        String  daily_in_sql_nopay = "select '未支付' as pay_name, sum(price)as daily_in_price from jxc_next_daily_input  where del_flag = 0 and pay_id = 0";
+        //日常支出未支付）
+        String  daily_out_sql_nopay =  "select '未支付' as pay_name, sum(price)as daily_out_price from jxc_next_daily_output  where del_flag = 0 and pay_id = 0";
+        //销售收入未支付）
+        String  sales_in_sql_nopay =  "select '未支付' as pay_name, sum(price)as sales_in_price from jxc_next_sales_input  where del_flag = 0 and pay_id = 0";
+
+         if(pay_id.equals("all"))
+         {
+             //包含未支付
+            daily_in_sql += "group by pay_name" + " union " + daily_in_sql_nopay;
+            daily_out_sql += "group by pay_name"+ " union " + daily_out_sql_nopay;
+            sales_in_sql += "group by pay_name"+ " union " + sales_in_sql_nopay;
+         }else if(pay_id.equals("0"))
+         {
+             //日常收入
+             daily_in_sql = daily_in_sql_nopay;
+             //日常支出
+             daily_out_sql =  daily_out_sql_nopay;
+             //销售收入
+             sales_in_sql = sales_in_sql_nopay;
+         }else{
+            daily_in_sql += "and b.pay_id =" + pay_id;
+            daily_out_sql += "and b.pay_id =" + pay_id;
+            sales_in_sql += "and b.pay_id =" + pay_id;
+         } 
+
         Map store = new HashMap();
-        //获取进货金额(负数)
-        ResultSet in_result = null;
+        //获取日常收入
+        ResultSet daily_in_result = null;
         try{
-            in_result = DBHelper.getDbHelper().executeQuery(input_sql);
-            while(in_result.next())
+            daily_in_result = DBHelper.getDbHelper().executeQuery(daily_in_sql);
+            while(daily_in_result.next())
             {
-                String name = in_result.getString("operator");
-                int price = in_result.getInt("in_price");
+                String name = daily_in_result.getString("pay_name");
+                int price = daily_in_result.getInt("daily_in_price");
                 FinaUser detail = new FinaUser();
-                detail.username = name;
-                detail.in_price = price;
-                detail.out_price = 0;
-                detail.net_price = detail.out_price - detail.in_price;;
+                detail.payname = name;
+                detail.daily_in_price = price;
+                detail.daily_out_price = 0;
+                detail.sales_in_price = 0;
                 store.put(name,detail);
             }
-            if(in_result != null)
-                in_result.close();            
+            if(daily_in_result != null)
+                daily_in_result.close();            
         }catch(Exception err)
         {
             err.printStackTrace();
         }
-
-        //获取出货金额(正数),更新净收入
-        ResultSet out_result = null;
+        
+        //获取日常支出
+       ResultSet daily_out_result = null;
         try{
-            out_result = DBHelper.getDbHelper().executeQuery(output_sql);
-            while(out_result.next())
+            daily_out_result = DBHelper.getDbHelper().executeQuery(daily_out_sql);
+            while(daily_out_result.next())
             {
-                String name = out_result.getString("operator");
-                int price = out_result.getInt("out_price"); 
+                String name = daily_out_result.getString("pay_name");
+                int price = daily_out_result.getInt("daily_out_price"); 
                 if(store.containsKey(name))
                 {
-                    //已有进货信息，更新存货量
                     FinaUser detail = (FinaUser)store.get(name);
-                    detail.out_price = price;
-                    detail.net_price = detail.out_price - detail.in_price;
+                    detail.daily_out_price = price;
                     store.put(name, detail);
                 }else
                 {
                     FinaUser detail = new FinaUser();
-                    detail.username = name;
-                    detail.in_price = 0;
-                    detail.out_price = price;
-                    detail.net_price = detail.out_price - detail.in_price;
+                    detail.payname = name;
+                    detail.daily_in_price = 0;
+                    detail.daily_out_price = price;
+                    detail.sales_in_price = 0;
                    store.put(name,detail); 
                 }
             }             
-            if(out_result != null)
-                out_result.close();             
+            if(daily_out_result != null)
+                daily_out_result.close();             
         }catch(Exception err)
         {
             err.printStackTrace();
-        }
+        } 
+
+        //获取销售收入
+       ResultSet sales_in_result = null;
+        try{
+            sales_in_result = DBHelper.getDbHelper().executeQuery(sales_in_sql);
+            while(sales_in_result.next())
+            {
+                String name = sales_in_result.getString("pay_name");
+                int price = sales_in_result.getInt("sales_in_price"); 
+                if(store.containsKey(name))
+                {
+                    FinaUser detail = (FinaUser)store.get(name);
+                    detail.sales_in_price = price;
+                    store.put(name, detail);
+                }else
+                {
+                    FinaUser detail = new FinaUser();
+                    detail.payname = name;
+                    detail.daily_in_price = 0;
+                    detail.daily_out_price = 0;
+                    detail.sales_in_price = price;
+                   store.put(name,detail); 
+                }
+            }             
+            if(sales_in_result != null)
+                sales_in_result.close();             
+        }catch(Exception err)
+        {
+            err.printStackTrace();
+        }    
         
         String json = "{\"data\":[";
         Iterator iter = store.keySet().iterator();
@@ -387,12 +439,14 @@ public class analysisreportServlet extends HttpServlet {
         while (iter.hasNext()) {
             String name = (String)iter.next();
             FinaUser detail = (FinaUser)store.get(name);
-
+            detail.net_price =  detail.daily_in_price +  detail.sales_in_price - detail.daily_out_price;
+            
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
             arrayBuilder.add(String.valueOf(index));
             arrayBuilder.add(name);
-            arrayBuilder.add(String.valueOf(detail.in_price));
-            arrayBuilder.add(String.valueOf(detail.out_price));
+            arrayBuilder.add(String.valueOf(detail.daily_out_price));
+            arrayBuilder.add(String.valueOf(detail.daily_in_price));
+            arrayBuilder.add(String.valueOf(detail.sales_in_price));
             arrayBuilder.add(String.valueOf(detail.net_price));
             
             JsonArray empArray = arrayBuilder.build();
@@ -412,8 +466,7 @@ public class analysisreportServlet extends HttpServlet {
         response.setCharacterEncoding("utf-8");        
         PrintWriter writer = response.getWriter();
         writer.println(json);
-        writer.flush();      
-    */
+        writer.flush();
     }
        
    /**

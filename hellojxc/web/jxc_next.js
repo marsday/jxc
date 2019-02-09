@@ -2521,7 +2521,365 @@ function analysispay()
 {
 	$("section.content-header").html(
         '<h1>' +
-        '支付方式资金出入统计' +
+		'支付方式资金出入统计' +
+		' <small style="color:blue">利润 = 销售收入 + 日常收入 - 日常支出</small>' +
          '</h1>'
-    );	
+	);	
+
+	$("#target").html('<form id="frm-example">'+
+		' <button  id="query" role="button" class="btn btn-primary">查询</button>' + 
+		'<br>' + 
+		'<br>' + 
+		'<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
+		'<p>结束日期：<input type="text" id="datepicker_end" name="datepicker_end"></p>'+
+		'<br>' + 
+		'<div class="input-group">' +	
+			'<span class="input-group-addon">支付账号</span>' +
+			'<select id="pay_id" name="pay_id" class="selectpicker" data-style="btn-info"></select>' +
+		'</div>' + 	
+		'<br>' + 		
+		' <table id="example" class="display select" width="100%" cellspacing="0">' + 
+		' <thead>' + 
+		'   <tr>' + 
+		'     <th>序号</th>' + 
+		'     <th>支付账号</th>' + 
+		'     <th>日常支出</th>' + 
+		'     <th>日常收入</th>' + 
+		'     <th>销售收入</th>' + 
+		'     <th>利润</th>' + 		
+		'   </tr>' + 
+		'</thead>' + 
+		'<tfoot>' + 
+		'   <tr>' + 
+		'     <th>序号</th>' + 
+		'     <th>支付账号</th>' + 
+		'     <th>日常支出</th>' + 
+		'     <th>日常收入</th>' + 
+		'     <th>销售收入</th>' + 
+		'     <th>利润</th>' + 	       
+		'   </tr>' + 
+		'</tfoot>' + 
+		'</table>' + 
+		'</form>'
+	);
+	$("#chartsrow").html(
+		'	<div class="col-md-6">' +
+		'		  <div class="box box-primary">' +
+		'			<div class="box-header with-border">' +
+		'			  <h3 class="box-title">收支一览(柱状图)</h3>' +
+		'			  <div class="box-tools pull-right">' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>' +
+		'				</button>' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>' +
+		'			  </div>' +
+		'			</div>' +
+		'			<div class="box-body" style="display: block;">' +
+		'			  <div id="charttarget1">' +
+		'			  </div>' +
+		'			</div>' +
+		'		  </div>' +
+		'		  <div class="box box-danger">' +
+		'			<div class="box-header with-border">' +
+		'			  <h3 class="box-title">日常支出统计(饼状图)</h3>' +
+		'			  <div class="box-tools pull-right">' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>' +
+		'				</button>' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>' +
+		'			  </div>' +
+		'			</div>' +
+		'			<div class="box-body" style="display: block;">' +
+		'			  <div id="charttarget2">' +
+		'			  </div>' +
+		'			</div>' +
+		'		  </div>' +
+		'	</div>' +
+		'	<div class="col-md-6">' +
+		'		  <div class="box box-info">' +
+		'			<div class="box-header with-border">' +
+		'			  <h3 class="box-title">日常收入统计(饼状图)</h3>' +
+		'			  <div class="box-tools pull-right">' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>' +
+		'				</button>' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>' +
+		'			  </div>' +
+		'			</div>' +
+		'			<div class="box-body">' +
+		'			  <div id="charttarget3">' +
+		'			  </div>' +
+		'			</div>' +
+		'		  </div>' +
+		'		  <div class="box box-danger">' +
+		'			<div class="box-header with-border">' +
+		'			  <h3 class="box-title">销售收入统计(饼状图)</h3>' +
+		'			  <div class="box-tools pull-right">' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>' +
+		'				</button>' +
+		'				<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>' +
+		'			  </div>' +
+		'			</div>' +
+		'			<div class="box-body" style="display: block;">' +
+		'			  <div id="charttarget4">' +
+		'			  </div>' +
+		'			</div>' +
+		'		  </div>' +	
+		'	</div>'
+	);
+
+	//获取支付方式名称列表
+	$.getJSON('/hellojxc/listpay',function(result){
+		$('.selectpicker').selectpicker();
+		$('.selectpicker').append("<option value=\"all\" selected=\"selected\">all</option>");
+		$('.selectpicker').append("<option value=\"0\">未支付</option>");
+		for(var i=0;i<result.data.length;i++)
+		{
+			$('.selectpicker').append("<option value=\""+result.data[i][0]+"\">"+ result.data[i][2] +"</option>");
+		}
+		$('.selectpicker').selectpicker('refresh');
+		$('.selectpicker').selectpicker('render');
+	});
+		
+	var d = new Date(), ld = new Date(d.getFullYear(), d.getMonth()-6, 1);
+
+	$("#datepicker_start").datepicker();
+	$("#datepicker_start").datepicker("option", "dateFormat", "yy-mm-dd");
+	$("#datepicker_start").val(ld.getFullYear() + '-' + (ld.getMonth() + 1) + '-' + ld.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+
+	$("#datepicker_end").datepicker();
+	$("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
+	$("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
+
+	var table;
+	var refresh = function() {
+		var startday=$("#datepicker_start").val();
+		var endday=$("#datepicker_end").val();
+		var pay_id=$("#pay_id").val();
+		//DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+		table = $('#example').dataTable({
+			searching: false,
+			'ajax': {
+				'url': '/hellojxc/finabypay',
+				'type': 'POST'
+			},
+			'fnServerParams':function(aoData){
+			aoData.push(
+					{
+						"name": "startday",
+						"value": startday?startday:null
+					},
+					{
+						"name":"endday",
+						"value": endday?endday:null
+					},
+					{
+						"name":"pay_id",
+						"value":pay_id
+					}
+			);  
+			},
+			'order': [[0, 'asc']]
+		});  
+
+		//计算饼状图所需数据
+		var api_table = $('#example').DataTable();
+		var json = api_table.ajax.json();
+		var name_array=new Array(json.data.length); 
+		var daily_out_array=new Array(json.data.length); 
+		var daily_in_array=new Array(json.data.length); 
+		var sales_in_array=new Array(json.data.length); 
+		var net_array=new Array(json.data.length);
+		for(var i=0;i<json.data.length;i++)
+		{
+			name_array[i] = json.data[i][1];
+			daily_out_array[i] = json.data[i][2];
+			daily_in_array[i] = json.data[i][3];
+			sales_in_array[i] = json.data[i][3];
+			net_array[i] = json.data[i][5];
+		}
+		
+		$("#charttarget1").attr("style","width: 600px;height:400px;");
+		
+		// 基于准备好的dom，初始化echarts实例
+		var myChart1 = echarts.init(document.getElementById('charttarget1'));
+
+		// 指定图表的配置项和数据
+		var option1 = {			
+			title: {
+				text: '收支一览'
+			},
+			
+			tooltip: {},
+			legend: {
+				data:['日常支出','日常收入','销售收入','净收入']
+			},
+			xAxis: {
+				data: name_array
+			},
+			yAxis: {},
+			series: [
+			{
+				name: '日常支出',
+				type: 'bar',
+				data: daily_out_array
+			},
+			{
+				name: '日常收入',
+				type: 'bar',
+				data: daily_in_array
+			},
+			{
+				name: '销售收入',
+				type: 'bar',
+				data: sales_in_array
+			},			
+						{
+				name: '净收入',
+				type: 'bar',
+				data: net_array
+			}
+			]
+		};
+		myChart1.setOption(option1); 
+		
+		
+		//计算饼状图所需数据
+		var daily_out_seriesData=[];
+		var daily_in_seriesData=[];
+		var sales_in_seriesData=[];
+		for(var i=0;i<name_array.length;i++)
+		{ 
+			var obj1=new Object();
+			obj1.name=name_array[i];
+			obj1.value=daily_out_array[i];
+			daily_out_seriesData[i]=obj1;
+
+			var obj2=new Object();
+			obj2.name=name_array[i];
+			obj2.value=daily_in_array[i];
+			daily_in_seriesData[i]=obj2;
+			
+			var obj3=new Object();
+			obj3.name=name_array[i];
+			obj3.value=sales_in_array[i];
+			sales_in_seriesData[i]=obj3;			
+		}
+
+	$("#charttarget2").attr("style","width: 600px;height:400px;");
+		var myCharts2 = echarts.init(document.getElementById('charttarget2'));
+		var option2 = {
+			title : {
+					text: '日常支出统计',
+					//subtext: '纯属虚构',
+					x:'center'
+				},
+				tooltip : {
+					trigger: 'item',
+					formatter: "{a} <br/>{b} : {c} ({d}%)"
+				},
+				legend: {
+					orient: 'vertical',
+					left: 'left',
+					data: name_array
+				},
+				series : [
+					{
+						name: '日常支出统计',
+						type: 'pie',
+						radius : '55%',
+						center: ['50%', '60%'],
+						data: daily_out_seriesData,
+						itemStyle: {
+							emphasis: {
+								shadowBlur: 10,
+								shadowOffsetX: 0,
+								shadowColor: 'rgba(0, 0, 0, 0.5)'
+							}
+						}
+					}
+				]			
+		};
+		myCharts2.setOption(option2);	
+
+		$("#charttarget3").attr("style","width: 600px;height:400px;");
+		var myCharts3 = echarts.init(document.getElementById('charttarget3'));
+		var option3 = {
+			title : {
+					text: '日常收入统计',
+					//subtext: '纯属虚构',
+					x:'center'
+				},
+				tooltip : {
+					trigger: 'item',
+					formatter: "{a} <br/>{b} : {c} ({d}%)"
+				},
+				legend: {
+					orient: 'vertical',
+					left: 'left',
+					data: name_array
+				},
+				series : [
+					{
+						name: '日常收入统计',
+						type: 'pie',
+						radius : '55%',
+						center: ['50%', '60%'],
+						data: daily_in_seriesData,
+						itemStyle: {
+							emphasis: {
+								shadowBlur: 10,
+								shadowOffsetX: 0,
+								shadowColor: 'rgba(0, 0, 0, 0.5)'
+							}
+						}
+					}
+				]			
+		};
+		myCharts3.setOption(option3);		
+
+	$("#charttarget4").attr("style","width: 600px;height:400px;");
+		var myCharts4 = echarts.init(document.getElementById('charttarget4'));
+		var option4 = {
+			title : {
+					text: '销售收入统计',
+					//subtext: '纯属虚构',
+					x:'center'
+				},
+				tooltip : {
+					trigger: 'item',
+					formatter: "{a} <br/>{b} : {c} ({d}%)"
+				},
+				legend: {
+					orient: 'vertical',
+					left: 'left',
+					data: name_array
+				},
+				series : [
+					{
+						name: '销售收入统计',
+						type: 'pie',
+						radius : '55%',
+						center: ['50%', '60%'],
+						data: sales_in_seriesData,
+						itemStyle: {
+							emphasis: {
+								shadowBlur: 10,
+								shadowOffsetX: 0,
+								shadowColor: 'rgba(0, 0, 0, 0.5)'
+							}
+						}
+					}
+				]			
+		};
+		myCharts4.setOption(option4);		
+	}
+	//加载页面时初始化datatable
+	refresh();	
+
+	$("#query").on('click', function(){ 
+	if(table)
+	{
+		table.fnDestroy();
+		refresh();
+	}
+	return false;
+	});	
 }
