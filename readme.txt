@@ -5,7 +5,7 @@
 1：安装jdk
 	安装jdk 或者 jre 1.8.0_91，配置JAVA_HOME
 	
-	结合代码设置 logging.properties
+	[logging.properties设置log记录等级没有效果，所以使用代码调整log等级，不再配置logging.properties]
 	
 2：安装DB
 	安装 mysql 5.5.61 root/123456

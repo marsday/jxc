@@ -2452,7 +2452,7 @@ function analysistarget()
 		for(var i=0;i<json.data.length;i++)
 		{
 			name_array[i] = json.data[i][1];
-			daily_out_price[i] = json.data[i][2];
+			daily_out_price[i] = -json.data[i][2];
 			daily_int_price[i] = json.data[i][3];
 			sales_int_price[i] = json.data[i][4];
 			net_price[i] = json.data[i][5];
@@ -2578,25 +2578,11 @@ function analysispay()
 		'			  </div>' +
 		'			</div>' +
 		'		  </div>' +
-		'		  <div class="box box-danger">' +
-		'			<div class="box-header with-border">' +
-		'			  <h3 class="box-title">日常支出统计(饼状图)</h3>' +
-		'			  <div class="box-tools pull-right">' +
-		'				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>' +
-		'				</button>' +
-		'				<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>' +
-		'			  </div>' +
-		'			</div>' +
-		'			<div class="box-body" style="display: block;">' +
-		'			  <div id="charttarget2">' +
-		'			  </div>' +
-		'			</div>' +
-		'		  </div>' +
 		'	</div>' +
 		'	<div class="col-md-6">' +
-		'		  <div class="box box-info">' +
+		'		  <div class="box box-primary">' +
 		'			<div class="box-header with-border">' +
-		'			  <h3 class="box-title">日常收入统计(饼状图)</h3>' +
+		'			  <h3 class="box-title">利润统计(饼状图)</h3>' +
 		'			  <div class="box-tools pull-right">' +
 		'				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>' +
 		'				</button>' +
@@ -2604,25 +2590,11 @@ function analysispay()
 		'			  </div>' +
 		'			</div>' +
 		'			<div class="box-body">' +
-		'			  <div id="charttarget3">' +
+		'			  <div id="charttarget2">' +
 		'			  </div>' +
 		'			</div>' +
 		'		  </div>' +
-		'		  <div class="box box-danger">' +
-		'			<div class="box-header with-border">' +
-		'			  <h3 class="box-title">销售收入统计(饼状图)</h3>' +
-		'			  <div class="box-tools pull-right">' +
-		'				<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>' +
-		'				</button>' +
-		'				<button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>' +
-		'			  </div>' +
-		'			</div>' +
-		'			<div class="box-body" style="display: block;">' +
-		'			  <div id="charttarget4">' +
-		'			  </div>' +
-		'			</div>' +
-		'		  </div>' +	
-		'	</div>'
+		'	</div>' 	
 	);
 
 	//获取支付方式名称列表
@@ -2690,9 +2662,9 @@ function analysispay()
 		for(var i=0;i<json.data.length;i++)
 		{
 			name_array[i] = json.data[i][1];
-			daily_out_array[i] = json.data[i][2];
+			daily_out_array[i] = -json.data[i][2];
 			daily_in_array[i] = json.data[i][3];
-			sales_in_array[i] = json.data[i][3];
+			sales_in_array[i] = json.data[i][4];
 			net_array[i] = json.data[i][5];
 		}
 		
@@ -2745,6 +2717,7 @@ function analysispay()
 		var daily_out_seriesData=[];
 		var daily_in_seriesData=[];
 		var sales_in_seriesData=[];
+		var net_in_seriesData=[];
 		for(var i=0;i<name_array.length;i++)
 		{ 
 			var obj1=new Object();
@@ -2760,14 +2733,19 @@ function analysispay()
 			var obj3=new Object();
 			obj3.name=name_array[i];
 			obj3.value=sales_in_array[i];
-			sales_in_seriesData[i]=obj3;			
+			sales_in_seriesData[i]=obj3;
+
+			var obj4=new Object();
+			obj4.name=name_array[i];
+			obj4.value=net_array[i];
+			net_in_seriesData[i]=obj4;			
 		}
 
-	$("#charttarget2").attr("style","width: 600px;height:400px;");
+		$("#charttarget2").attr("style","width: 600px;height:400px;");
 		var myCharts2 = echarts.init(document.getElementById('charttarget2'));
 		var option2 = {
 			title : {
-					text: '日常支出统计',
+					text: '利润统计',
 					//subtext: '纯属虚构',
 					x:'center'
 				},
@@ -2782,11 +2760,11 @@ function analysispay()
 				},
 				series : [
 					{
-						name: '日常支出统计',
+						name: '利润统计',
 						type: 'pie',
 						radius : '55%',
 						center: ['50%', '60%'],
-						data: daily_out_seriesData,
+						data: net_in_seriesData,
 						itemStyle: {
 							emphasis: {
 								shadowBlur: 10,
@@ -2798,78 +2776,6 @@ function analysispay()
 				]			
 		};
 		myCharts2.setOption(option2);	
-
-		$("#charttarget3").attr("style","width: 600px;height:400px;");
-		var myCharts3 = echarts.init(document.getElementById('charttarget3'));
-		var option3 = {
-			title : {
-					text: '日常收入统计',
-					//subtext: '纯属虚构',
-					x:'center'
-				},
-				tooltip : {
-					trigger: 'item',
-					formatter: "{a} <br/>{b} : {c} ({d}%)"
-				},
-				legend: {
-					orient: 'vertical',
-					left: 'left',
-					data: name_array
-				},
-				series : [
-					{
-						name: '日常收入统计',
-						type: 'pie',
-						radius : '55%',
-						center: ['50%', '60%'],
-						data: daily_in_seriesData,
-						itemStyle: {
-							emphasis: {
-								shadowBlur: 10,
-								shadowOffsetX: 0,
-								shadowColor: 'rgba(0, 0, 0, 0.5)'
-							}
-						}
-					}
-				]			
-		};
-		myCharts3.setOption(option3);		
-
-	$("#charttarget4").attr("style","width: 600px;height:400px;");
-		var myCharts4 = echarts.init(document.getElementById('charttarget4'));
-		var option4 = {
-			title : {
-					text: '销售收入统计',
-					//subtext: '纯属虚构',
-					x:'center'
-				},
-				tooltip : {
-					trigger: 'item',
-					formatter: "{a} <br/>{b} : {c} ({d}%)"
-				},
-				legend: {
-					orient: 'vertical',
-					left: 'left',
-					data: name_array
-				},
-				series : [
-					{
-						name: '销售收入统计',
-						type: 'pie',
-						radius : '55%',
-						center: ['50%', '60%'],
-						data: sales_in_seriesData,
-						itemStyle: {
-							emphasis: {
-								shadowBlur: 10,
-								shadowOffsetX: 0,
-								shadowColor: 'rgba(0, 0, 0, 0.5)'
-							}
-						}
-					}
-				]			
-		};
-		myCharts4.setOption(option4);		
 	}
 	//加载页面时初始化datatable
 	refresh();	

@@ -10,28 +10,10 @@ Target Server Type    : MYSQL
 Target Server Version : 50561
 File Encoding         : 65001
 
-Date: 2019-02-08 16:55:03
+Date: 2019-02-09 22:28:25
 */
 
 SET FOREIGN_KEY_CHECKS=0;
-
--- ----------------------------
--- Table structure for jxc_input
--- ----------------------------
-DROP TABLE IF EXISTS `jxc_input`;
-CREATE TABLE `jxc_input` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `goods_id` bigint(20) NOT NULL,
-  `volume` int(11) unsigned zerofill NOT NULL,
-  `price` int(11) unsigned zerofill NOT NULL,
-  `buytime` date DEFAULT NULL,
-  `recordtime` date DEFAULT NULL,
-  `operator` varchar(255) DEFAULT '',
-  `customer_info` varchar(512) DEFAULT '',
-  `refer` varchar(512) DEFAULT '',
-  `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for jxc_next_customer
@@ -45,7 +27,7 @@ CREATE TABLE `jxc_next_customer` (
   `city` varchar(255) DEFAULT NULL,
   `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
   PRIMARY KEY (`id`,`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for jxc_next_daily_input
@@ -62,7 +44,7 @@ CREATE TABLE `jxc_next_daily_input` (
   `refer` varchar(255) DEFAULT NULL,
   `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COMMENT='日常收入';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='日常收入';
 
 -- ----------------------------
 -- Table structure for jxc_next_daily_output
@@ -79,7 +61,7 @@ CREATE TABLE `jxc_next_daily_output` (
   `refer` varchar(255) DEFAULT NULL,
   `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='日常支出';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='日常支出';
 
 -- ----------------------------
 -- Table structure for jxc_next_pay
@@ -110,7 +92,7 @@ CREATE TABLE `jxc_next_sales_input` (
   `refer` varchar(255) DEFAULT NULL,
   `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='销售收入';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='销售收入';
 
 -- ----------------------------
 -- Table structure for jxc_next_target
@@ -124,7 +106,7 @@ CREATE TABLE `jxc_next_target` (
   `grades` varchar(255) DEFAULT NULL,
   `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for jxc_next_user
@@ -139,21 +121,3 @@ CREATE TABLE `jxc_next_user` (
   `del_flag` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`name_en`,`name_ch`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
-
--- ----------------------------
--- Table structure for jxc_output
--- ----------------------------
-DROP TABLE IF EXISTS `jxc_output`;
-CREATE TABLE `jxc_output` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `goods_id` bigint(20) NOT NULL,
-  `volume` int(11) unsigned zerofill NOT NULL,
-  `price` int(11) unsigned zerofill NOT NULL,
-  `buytime` date DEFAULT NULL,
-  `recordtime` date DEFAULT NULL,
-  `operator` varchar(255) DEFAULT '',
-  `customer_info` varchar(512) DEFAULT '',
-  `refer` varchar(512) DEFAULT '',
-  `del_flag` tinyint(1) unsigned zerofill DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;

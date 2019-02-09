@@ -48,15 +48,17 @@ public class Utility {
     {
         if(logger == null)
         {
+            //System.setProperty("java.util.logging.config.file","logging.properties"); //没有效果
             logger = Logger.getLogger("jxc");
-
+            //调整log记录等级
+            //logger.setLevel(Level.CONFIG);
             StringBuffer logpath = new StringBuffer();
             logpath.append("c:\\hellojxclogs");
             File file = new File(logpath.toString());
             if(!file.exists())
                 file.mkdir();
             
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd-HHmmss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
             logpath = logpath.append("\\jxc_" + sdf.format(new Date()) + ".log");
             try{
                 FileHandler filehandler = new FileHandler(logpath.toString(),true);
