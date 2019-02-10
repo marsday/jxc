@@ -127,7 +127,7 @@ public class loginServlet extends HttpServlet {
                 Timestamp now = new Timestamp(System.currentTimeMillis());
                 DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                 String strLastLogin = sdf.format(now);
-                String updatesql = "update jxc_user set last_login = "+ "'"+ strLastLogin + "'"
+                String updatesql = "update jxc_next_user set last_login = "+ "'"+ strLastLogin + "'"
                                     + " where name_en='" + user + "'"+" and del_flag=0";
                 try{
                     DBHelper.getDbHelper().executeUpdate(updatesql);
@@ -312,7 +312,7 @@ public class loginServlet extends HttpServlet {
         String newpassword1 = request.getParameter("newpassword1");
         String newpassword2 = request.getParameter("newpassword2");
         
-        String sql = "update jxc_user set password='"  + newpassword1 +"' where name_en='"+name_en + "' and name_ch='" + name_ch + "' and password='" + oldpassword +"'";
+        String sql = "update jxc_next_user set password='"  + newpassword1 +"' where name_en='"+name_en + "' and name_ch='" + name_ch + "' and password='" + oldpassword +"'";
         int result = 0;
         try{
             result = DBHelper.getDbHelper().executeUpdate(sql);
