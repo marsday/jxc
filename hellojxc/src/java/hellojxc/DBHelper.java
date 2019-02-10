@@ -28,7 +28,7 @@ public class DBHelper {
     /**
      * 登录密码
      */
-    private static final String PASSWORD = "123456";
+    private static final String PASSWORD = "123789";
     
     private static Connection connection = null;
     private static Statement statement = null;

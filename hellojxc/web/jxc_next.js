@@ -2361,6 +2361,29 @@ function analysistarget()
 		'<span class="input-group-addon">对象名称</span>' +
 		'<select id="targetid" name="targetid" class="selectpicker" data-style="btn-info"></select>' +
 	'</div>' + 	
+	'<br>' + 
+	' <table id="detail" class="display select" width="100%" cellspacing="0">' + 
+	' <thead>' + 
+	'   <tr>' + 
+	'     <th>序号</th>' + 
+	'     <th>对象名称</th>' + 
+	'     <th>日常支出</th>' + 
+	'     <th>日常收入</th>' + 
+	'     <th>销售收入</th>' + 
+	'     <th>交易日期</th>' + 		
+	'   </tr>' + 
+	'</thead>' + 
+	'<tfoot>' + 
+	'   <tr>' + 
+	'     <th>序号</th>' + 
+	'     <th>对象名称</th>' + 
+	'     <th>日常支出</th>' + 
+	'     <th>日常收入</th>' + 
+	'     <th>销售收入</th>' +   
+	'     <th>交易日期</th>' + 		
+	'   </tr>' + 
+	'</tfoot>' + 
+	 '</table>' + 		
 	'<br>' + 		
 	' <table id="example" class="display select" width="100%" cellspacing="0">' + 
 	' <thead>' + 
@@ -2410,6 +2433,39 @@ function analysistarget()
 	$("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
 	$("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
 
+	var tabledetail;
+	var refreshdetail = function() {
+		var startday=$("#datepicker_start").val();
+		var endday=$("#datepicker_end").val();
+		var target_id=$("#targetid").val();
+		//DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
+		tabledetail = $('#detail').dataTable({
+			searching: false,
+			'ajax': {
+				'url': '/hellojxc/finadetailbytarget',
+				'type': 'POST'
+			},
+			'fnServerParams':function(aoData){
+			aoData.push(
+					{
+						"name": "startday",
+						"value": startday?startday:null
+					},
+					{
+						"name":"endday",
+						"value": endday?endday:null
+					},
+					{
+						"name":"target_id",
+						"value":target_id
+					}
+			);  
+			},
+			'order': [[1, 'asc']]
+		});  	
+	}
+	refreshdetail();
+
 	var table;
 	var refresh = function() {
 		var startday=$("#datepicker_start").val();
@@ -2438,7 +2494,7 @@ function analysistarget()
 					}
 			);  
 			},
-			'order': [[0, 'asc']]
+			'order': [[1, 'asc']]
 		});  
 
 		//获取DataTable的查询结果json数据
@@ -2511,6 +2567,11 @@ function analysistarget()
 	{
 		table.fnDestroy();
 		refresh();
+	}
+	if(tabledetail)
+	{
+		tabledetail.fnDestroy();
+		refreshdetail();
 	}
 	return false;
 	});	
