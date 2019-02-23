@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author marsday
  */
-@WebServlet(name = "analysisreportServlet", urlPatterns = {"/finabytarget","/finabytotal","/finadetailbytarget","/finabypay","/finadetailbypay"})
+@WebServlet(name = "analysisreportServlet", urlPatterns = {"/finabytarget","/finadetailbytarget","/finabypay","/finadetailbypay"})
 public class analysisreportServlet extends HttpServlet {
     public class FinaPrice {
         public String targetname;       
@@ -131,13 +131,6 @@ public class analysisreportServlet extends HttpServlet {
             finadetailbypayOperation(request,response);
         }else
             processRequest(request, response);
-    }
-
-    //管理对象资金统计:返回excel文件
-    private void finabytargetExcel(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-
     }
     //管理对象资金统计
    private void finabytargetOperation(HttpServletRequest request, HttpServletResponse response)

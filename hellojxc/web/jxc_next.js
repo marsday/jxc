@@ -220,7 +220,7 @@ function listtarget()
 
 	$("#target").html(targetval);
 
-    var table = $('#example').DataTable({
+    var table = $('#example').dataTable({
 	   searching: false,
       'ajax': {
          'url': listaction
@@ -734,7 +734,7 @@ function listcustomer()
 				'</form>';
 	$("#target").html(targetval);
 	
-    var table = $('#example').DataTable({
+    var table = $('#example').dataTable({
 	   searching: false,
       'ajax': {
          'url': listaction
@@ -1060,7 +1060,7 @@ function listpay()
 
 	$("#target").html(targetval);
 
-    var table = $('#example').DataTable({
+    var table = $('#example').dataTable({
 	   searching: false,
       'ajax': {
          'url': listaction
@@ -2398,44 +2398,31 @@ function analysistarget()
 	'     <th>利润总计</th>' + 	
 	'   </tr>' + 
 	'</thead>' + 
-	/*
-	'<tfoot>' + 
-	'   <tr>' + 
-	'     <th>序号</th>' + 
-	'     <th>对象名称</th>' + 
-	'     <th>日常支出总计</th>' + 
-	'     <th>日常收入总计</th>' + 
-	'     <th>销售收入总计</th>' + 
-	'     <th>利润总计</th>' +     
-	'   </tr>' + 
-	'</tfoot>' + 
-	*/
 	 '</table>' + 
-	 /*
+
 	 '<br>' + 
-	 ' <table id="detail" class="display select" width="100%" cellspacing="0">' + 
+	 ' <table id="sum" class="display select" width="100%" cellspacing="0">' + 
 	 ' <thead>' + 
 	 '   <tr>' + 
 	 '     <th>序号</th>' + 
 	 '     <th>对象名称</th>' + 
-	 '     <th>日常支出</th>' + 
-	 '     <th>日常收入</th>' + 
-	 '     <th>销售收入</th>' + 
-	 '     <th>交易日期</th>' + 		
+	 '     <th>日常支出总计</th>' + 
+	 '     <th>日常收入总计</th>' + 
+	 '     <th>销售收入总计</th>' + 
+	 '     <th>利润总计</th>' + 		
 	 '   </tr>' + 
 	 '</thead>' + 
-	 '<tfoot>' + 
-	 '   <tr>' + 
-	 '     <th>序号</th>' + 
-	 '     <th>对象名称</th>' + 
-	 '     <th>日常支出</th>' + 
-	 '     <th>日常收入</th>' + 
-	 '     <th>销售收入</th>' +   
-	 '     <th>交易日期</th>' + 		
-	 '   </tr>' + 
-	 '</tfoot>' + 
+	 '<tbody>' +
+		'<tr>' +
+		'    <td>-</td>' +
+		'    <td>上面所有对象</td>' +
+		'	<td>0</td>' +
+		'	<td>0</td>' +
+		'	<td>0</td>' +
+		'	<td>0</td>' +
+		'</tr>' +
+ 	'</tbody>' +
 	  '</table>' + 	
-	  */ 
 	 '<br>' + 
 	 '<br>' + 
 	 '<br>' + 	 
@@ -2465,47 +2452,14 @@ function analysistarget()
 	$("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
 	$("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
 
-	/*
-	var tabledetail;
-	var refreshdetail = function() {
-		var startday=$("#datepicker_start").val();
-		var endday=$("#datepicker_end").val();
-		var target_id=$("#targetid").val();
-		//DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
-		tabledetail = $('#detail').dataTable({
-			searching: false,
-			'ajax': {
-				'url': '/hellojxc/finadetailbytarget',
-				'type': 'POST'
-			},
-			'fnServerParams':function(aoData){
-			aoData.push(
-					{
-						"name": "startday",
-						"value": startday?startday:null
-					},
-					{
-						"name":"endday",
-						"value": endday?endday:null
-					},
-					{
-						"name":"target_id",
-						"value":target_id
-					}
-			);  
-			},
-			'order': [[1, 'asc']]
-		});  	
-	}
-	refreshdetail();
-	*/
 	var table;
+	var sum_table;
 	var refresh = function() {
 		var startday=$("#datepicker_start").val();
 		var endday=$("#datepicker_end").val();
 		var target_id=$("#targetid").val();
 		//DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
-		table = $('#example').DataTable({
+		table = $('#example').dataTable({
 			dom: 'Bfrtip',
 			buttons:[
 				{
@@ -2545,7 +2499,11 @@ function analysistarget()
 		var daily_out_price=new Array(json.data.length);
 		var daily_int_price=new Array(json.data.length); 
 		var sales_int_price=new Array(json.data.length);
-		var net_price=new Array(json.data.length); 		
+		var net_price=new Array(json.data.length); 
+		var sum_daily_out = 0;
+		var sum_daily_in = 0;
+		var sum_sales_in = 0;
+		var sum_net = 0;
 		for(var i=0;i<json.data.length;i++)
 		{
 			name_array[i] = json.data[i][1];
@@ -2553,7 +2511,29 @@ function analysistarget()
 			daily_int_price[i] = json.data[i][3];
 			sales_int_price[i] = json.data[i][4];
 			net_price[i] = json.data[i][5];
+
+			sum_daily_out += parseInt(json.data[i][2]);
+			sum_daily_in += parseInt(json.data[i][3]);
+			sum_sales_in += parseInt(json.data[i][4]);
+			sum_net += parseInt(json.data[i][5]);
 		}
+
+		//插入总计行
+		sum_table = $('#sum').dataTable({
+			dom: '',
+			searching: false
+		});
+		var api_sum_table =  $('#sum').DataTable();
+		
+		api_sum_table.clear().draw();
+		api_sum_table.row.add([
+			'-',
+			'上面所有对象',
+			sum_daily_out,
+			sum_daily_in,
+			sum_sales_in,
+			sum_net
+		]).draw();			
 
 		$("#charttarget").attr("style","width: 600px;height:400px;");
 
@@ -2607,15 +2587,9 @@ function analysistarget()
 		if(table)
 		{
 			table.fnDestroy();
+			sum_table.fnDestroy();
 			refresh();
 		}
-		/*
-		if(tabledetail)
-		{
-			tabledetail.fnDestroy();
-			refreshdetail();
-		}
-		*/
 		return false;
 	});	
 
@@ -2653,19 +2627,33 @@ function analysispay()
 		'     <th>利润</th>' + 		
 		'   </tr>' + 
 		'</thead>' + 
-		/*
-		'<tfoot>' + 
+		'</table>' + 
+		'<br>' + 		
+		' <table id="sum" class="display select" width="100%" cellspacing="0">' + 
+		' <thead>' + 
 		'   <tr>' + 
 		'     <th>序号</th>' + 
 		'     <th>支付账号</th>' + 
 		'     <th>日常支出</th>' + 
 		'     <th>日常收入</th>' + 
 		'     <th>销售收入</th>' + 
-		'     <th>利润</th>' + 	       
+		'     <th>利润</th>' + 		
 		'   </tr>' + 
-		'</tfoot>' + 
-		*/
+		'</thead>' + 
+		'<tbody>' +
+			'<tr>' +
+			'    <td>-</td>' +
+			'    <td>上面所有账号</td>' +
+			'	<td>0</td>' +
+			'	<td>0</td>' +
+			'	<td>0</td>' +
+			'	<td>0</td>' +
+			'</tr>' +
+		'</tbody>' +		
 		'</table>' + 
+		'<br>' + 	
+		'<br>' + 	
+		'<br>' + 				
 		'</form>'
 	);
 	$("#chartsrow").html(
@@ -2727,6 +2715,7 @@ function analysispay()
 	$("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
 
 	var table;
+	var sum_table;
 	var refresh = function() {
 		var startday=$("#datepicker_start").val();
 		var endday=$("#datepicker_end").val();
@@ -2773,6 +2762,11 @@ function analysispay()
 		var daily_in_array=new Array(json.data.length); 
 		var sales_in_array=new Array(json.data.length); 
 		var net_array=new Array(json.data.length);
+
+		var sum_daily_out = 0;
+		var sum_daily_in = 0;
+		var sum_sales_in = 0;
+		var sum_net = 0;
 		for(var i=0;i<json.data.length;i++)
 		{
 			name_array[i] = json.data[i][1];
@@ -2780,7 +2774,29 @@ function analysispay()
 			daily_in_array[i] = json.data[i][3];
 			sales_in_array[i] = json.data[i][4];
 			net_array[i] = json.data[i][5];
+
+			sum_daily_out += parseInt(json.data[i][2]);
+			sum_daily_in += parseInt(json.data[i][3]);
+			sum_sales_in += parseInt(json.data[i][4]);
+			sum_net += parseInt(json.data[i][5]);			
 		}
+
+		//插入总计行
+		sum_table = $('#sum').dataTable({
+			dom: '',
+			searching: false
+		});
+		var api_sum_table =  $('#sum').DataTable();
+		
+		api_sum_table.clear().draw();
+		api_sum_table.row.add([
+			'-',
+			'上面所有账号',
+			sum_daily_out,
+			sum_daily_in,
+			sum_sales_in,
+			sum_net
+		]).draw();	
 		
 		$("#charttarget1").attr("style","width: 600px;height:400px;");
 		
@@ -2898,6 +2914,7 @@ function analysispay()
 	if(table)
 	{
 		table.fnDestroy();
+		sum_table.fnDestroy();
 		refresh();
 	}
 	return false;
