@@ -1210,7 +1210,15 @@ function listdailyinput()
         var endday=$("#datepicker_end").val();
         //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
         table = $('#example').dataTable({
-              searching: false,
+			  searching: false,
+			  dom: 'Bfrtip',
+			  buttons:[
+				  {
+					  extend: 'excelHtml5',
+					  text: '导出excel',
+					  title: '日常收入一览_' +  startday + '_TO_' + endday
+				  }
+			  ],			  
              'ajax': {
                 'url': '/hellojxc/listdailyinput',
                 'type': 'POST'
@@ -1545,7 +1553,15 @@ function listdailyoutput()
         var endday=$("#datepicker_end").val();
         //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
         table = $('#example').dataTable({
-              searching: false,
+			  searching: false,
+			  dom: 'Bfrtip',
+			  buttons:[
+				  {
+					  extend: 'excelHtml5',
+					  text: '导出excel',
+					  title: '日常支出一览_' +  startday + '_TO_' + endday
+				  }
+			  ],			  
              'ajax': {
                 'url': '/hellojxc/listdailyoutput',
                 'type': 'POST'
@@ -1884,7 +1900,15 @@ function listsalesinput()
         var endday=$("#datepicker_end").val();
         //DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
         table = $('#example').dataTable({
-              searching: false,
+			  searching: false,
+			  dom: 'Bfrtip',
+			  buttons:[
+				  {
+					  extend: 'excelHtml5',
+					  text: '导出excel',
+					  title: '销售收入一览_' +  startday + '_TO_' + endday
+				  }
+			  ],			  
              'ajax': {
                 'url': '/hellojxc/listsalesinput',
                 'type': 'POST'
@@ -2351,7 +2375,8 @@ function analysistarget()
 	);
 		
 	$("#target").html('<form id="frm-example">'+
-	' <button  id="query" role="button" class="btn btn-primary">查询</button>' + 
+	' <button  id="query" role="button" class="btn btn-primary">查询</button>' +
+	//' <button  id="download" role="button" class="btn btn-info">下载</button>' +  
 	'<br>' + 
 	'<br>' + 
 	'<p>开始日期：<input type="text" id="datepicker_start" name="datepicker_start"></p>'+
@@ -2360,30 +2385,7 @@ function analysistarget()
 	'<div class="input-group">' +	
 		'<span class="input-group-addon">对象名称</span>' +
 		'<select id="targetid" name="targetid" class="selectpicker" data-style="btn-info"></select>' +
-	'</div>' + 	
-	'<br>' + 
-	' <table id="detail" class="display select" width="100%" cellspacing="0">' + 
-	' <thead>' + 
-	'   <tr>' + 
-	'     <th>序号</th>' + 
-	'     <th>对象名称</th>' + 
-	'     <th>日常支出</th>' + 
-	'     <th>日常收入</th>' + 
-	'     <th>销售收入</th>' + 
-	'     <th>交易日期</th>' + 		
-	'   </tr>' + 
-	'</thead>' + 
-	'<tfoot>' + 
-	'   <tr>' + 
-	'     <th>序号</th>' + 
-	'     <th>对象名称</th>' + 
-	'     <th>日常支出</th>' + 
-	'     <th>日常收入</th>' + 
-	'     <th>销售收入</th>' +   
-	'     <th>交易日期</th>' + 		
-	'   </tr>' + 
-	'</tfoot>' + 
-	 '</table>' + 		
+	'</div>' + 			
 	'<br>' + 		
 	' <table id="example" class="display select" width="100%" cellspacing="0">' + 
 	' <thead>' + 
@@ -2396,6 +2398,7 @@ function analysistarget()
 	'     <th>利润总计</th>' + 	
 	'   </tr>' + 
 	'</thead>' + 
+	/*
 	'<tfoot>' + 
 	'   <tr>' + 
 	'     <th>序号</th>' + 
@@ -2406,7 +2409,36 @@ function analysistarget()
 	'     <th>利润总计</th>' +     
 	'   </tr>' + 
 	'</tfoot>' + 
+	*/
 	 '</table>' + 
+	 /*
+	 '<br>' + 
+	 ' <table id="detail" class="display select" width="100%" cellspacing="0">' + 
+	 ' <thead>' + 
+	 '   <tr>' + 
+	 '     <th>序号</th>' + 
+	 '     <th>对象名称</th>' + 
+	 '     <th>日常支出</th>' + 
+	 '     <th>日常收入</th>' + 
+	 '     <th>销售收入</th>' + 
+	 '     <th>交易日期</th>' + 		
+	 '   </tr>' + 
+	 '</thead>' + 
+	 '<tfoot>' + 
+	 '   <tr>' + 
+	 '     <th>序号</th>' + 
+	 '     <th>对象名称</th>' + 
+	 '     <th>日常支出</th>' + 
+	 '     <th>日常收入</th>' + 
+	 '     <th>销售收入</th>' +   
+	 '     <th>交易日期</th>' + 		
+	 '   </tr>' + 
+	 '</tfoot>' + 
+	  '</table>' + 	
+	  */ 
+	 '<br>' + 
+	 '<br>' + 
+	 '<br>' + 	 
 	'</form>'
 	);
 
@@ -2433,6 +2465,7 @@ function analysistarget()
 	$("#datepicker_end").datepicker("option", "dateFormat", "yy-mm-dd");
 	$("#datepicker_end").val(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()).datepicker({ dateFormat: 'yy-mm-dd' });
 
+	/*
 	var tabledetail;
 	var refreshdetail = function() {
 		var startday=$("#datepicker_start").val();
@@ -2465,14 +2498,22 @@ function analysistarget()
 		});  	
 	}
 	refreshdetail();
-
+	*/
 	var table;
 	var refresh = function() {
 		var startday=$("#datepicker_start").val();
 		var endday=$("#datepicker_end").val();
 		var target_id=$("#targetid").val();
 		//DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
-		table = $('#example').dataTable({
+		table = $('#example').DataTable({
+			dom: 'Bfrtip',
+			buttons:[
+				{
+					extend: 'excelHtml5',
+					text: '导出excel',
+					title: '对象资金统计入一览_' +  startday + '_TO_' + endday
+				}
+			],
 			searching: false,
 			'ajax': {
 				'url': '/hellojxc/finabytarget',
@@ -2494,7 +2535,7 @@ function analysistarget()
 					}
 			);  
 			},
-			'order': [[1, 'asc']]
+			'order': [[0, 'asc']]
 		});  
 
 		//获取DataTable的查询结果json数据
@@ -2522,7 +2563,7 @@ function analysistarget()
 		// 指定图表的配置项和数据
 		var option = {
 			title: {
-				text: '对象资金出入一览'
+				text: '资金出入一览'
 			},
 			tooltip: {},
 			legend: {
@@ -2563,17 +2604,19 @@ function analysistarget()
 	refresh();	
 	
 	$("#query").on('click', function(){ 
-	if(table)
-	{
-		table.fnDestroy();
-		refresh();
-	}
-	if(tabledetail)
-	{
-		tabledetail.fnDestroy();
-		refreshdetail();
-	}
-	return false;
+		if(table)
+		{
+			table.fnDestroy();
+			refresh();
+		}
+		/*
+		if(tabledetail)
+		{
+			tabledetail.fnDestroy();
+			refreshdetail();
+		}
+		*/
+		return false;
 	});	
 
 }
@@ -2610,6 +2653,7 @@ function analysispay()
 		'     <th>利润</th>' + 		
 		'   </tr>' + 
 		'</thead>' + 
+		/*
 		'<tfoot>' + 
 		'   <tr>' + 
 		'     <th>序号</th>' + 
@@ -2620,6 +2664,7 @@ function analysispay()
 		'     <th>利润</th>' + 	       
 		'   </tr>' + 
 		'</tfoot>' + 
+		*/
 		'</table>' + 
 		'</form>'
 	);
@@ -2689,6 +2734,14 @@ function analysispay()
 		//DataTable seems to be for API calls back into the object and dataTable seems to be the intialisation method.
 		table = $('#example').dataTable({
 			searching: false,
+			dom: 'Bfrtip',
+			buttons:[
+				{
+					extend: 'excelHtml5',
+					text: '导出excel',
+					title: '支付资金统计一览_' +  startday + '_TO_' + endday
+				}
+			],			
 			'ajax': {
 				'url': '/hellojxc/finabypay',
 				'type': 'POST'
